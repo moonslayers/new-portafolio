@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://moonslayers.github.io/new-portafolio/sitemap-index.xml
