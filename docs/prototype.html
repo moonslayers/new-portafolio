@@ -1,1445 +1,2385 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI-Native Tech Lead — Portfolio</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-
-<style>
-  :root {
-    --bg-paper: #F7F5F0;
-    --ink-primary: #1C1B19;
-    --ink-secondary: #6B6862;
-    --ink-light: #E5E3DB;
-    --accent-terracotta: #C75B39;
-    --success-sage: #2E5A44;
-    --warning-mustard: #D9A05B;
-  }
-
-  * { -webkit-font-smoothing: antialiased; }
-  html { scroll-behavior: smooth; overscroll-behavior: none; }
-
-  body {
-    background-color: var(--bg-paper);
-    color: var(--ink-primary);
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-    overflow-x: hidden;
-  }
-  ::selection { background: var(--accent-terracotta); color: var(--bg-paper); }
-
-  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-  .serif { font-family: 'Fraunces', ui-serif, Georgia, serif; }
-
-  .pre-build { opacity: 0.06 !important; filter: blur(2px) grayscale(100%) !important; transition: none !important; }
-  .pre-build-y { opacity: 0.06 !important; filter: blur(2px) grayscale(100%) !important; transform: translateY(15px) !important; transition: none !important; }
-  .no-transition, .no-transition * { transition: none !important; animation: none !important; }
-
-  .reviewed { animation: review-flash 1s ease-out; }
-  @keyframes review-flash {
-    0% { box-shadow: 0 0 0 2px var(--success-sage), 0 0 15px rgba(46,90,68,0.2); }
-    100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
-  }
-
-  .flag-suggestion {
-    text-decoration: underline wavy var(--warning-mustard);
-    text-decoration-thickness: 1.5px;
-    text-underline-offset: 4px;
-    background: rgba(217, 160, 91, 0.1);
-    border-radius: 2px;
-    transition: background-color 0.3s ease;
-  }
-
-  /* ─── EARTHY AGENT PALETTE ─── */
-  .c-orch  { --c: #8C6B4A; }
-  .c-plan  { --c: #C75B39; }
-  .c-code  { --c: #4A6B8C; }
-  .c-des   { --c: #C2A33D; }
-  .c-rev   { --c: #4A8C6B; }
-  .c-test  { --c: #9E5B5B; }
-  .c-arch  { --c: #6B5B8C; }
-  .c-dev   { --c: #4A8C8C; }
-  .c-script{ --c: #A69A3D; }
-  .c-debug { --c: #8C5B3D; }
-  .c-opt   { --c: #7A4A8C; }
-  .c-audit { --c: #5B6B7A; }
-
-  .agent-cursor {
-    position: fixed; top: 0; left: 0;
-    pointer-events: none; opacity: 0;
-    will-change: transform;
-    color: var(--c);
-    z-index: 70;
-  }
-  .agent-inner { display: flex; align-items: flex-start; animation: bob 3s ease-in-out infinite; }
-  .agent-cursor:nth-child(2n) .agent-inner { animation-delay: -1s; }
-  .agent-cursor:nth-child(3n) .agent-inner { animation-delay: -2.1s; animation-duration: 3.7s; }
-  .agent-cursor:nth-child(4n) .agent-inner { animation-delay: -0.6s; animation-duration: 2.6s; }
-  .agent-cursor:nth-child(5n) .agent-inner { animation-delay: -1.7s; animation-duration: 3.2s; }
-
-  @keyframes bob {
-    0%, 100% { transform: translate(0, 0); }
-    50%      { transform: translate(1.5px, -2.5px); }
-  }
-
-  .agent-svg { width: 18px; height: 18px; flex: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
-  .agent-label {
-    margin: 12px 0 0 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px; font-weight: 700; letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    white-space: nowrap;
-    color: var(--bg-paper);
-    background: var(--c);
-    border: 1px solid var(--c);
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-
-  .click-pulse {
-    position: fixed; width: 30px; height: 30px;
-    margin: -15px 0 0 -15px; border-radius: 999px;
-    border: 1.5px solid var(--c);
-    pointer-events: none; z-index: 69;
-  }
-
-  .target-box {
-    position: fixed; pointer-events: none;
-    border-style: dashed; border-width: 1px;
-    border-radius: 4px; opacity: 0; z-index: 68;
-  }
-
-  .editor-frame {
-    position: fixed;
-    border: 1px solid var(--c);
-    border-radius: 4px;
-    pointer-events: none; z-index: 68;
-    background: rgba(255,255,255,0.2);
-    transition: opacity .2s ease;
-  }
-  .editor-badge {
-    position: absolute; top: -9px; left: 12px;
-    padding: 1px 6px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px; font-weight: 700; letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--c);
-    background: var(--bg-paper);
-    border: 1px solid var(--c);
-    border-radius: 3px;
-    line-height: 1.6;
-  }
-
-  .type-caret {
-    display: inline-block;
-    width: 2px; height: 1.1em;
-    background: var(--ink-primary); margin-left: 2px;
-    vertical-align: text-bottom;
-    animation: blink 0.6s steps(1) infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  .is-typing {
-    font-family: 'JetBrains Mono', ui-monospace, monospace !important;
-    font-weight: 400 !important;
-    letter-spacing: 0 !important;
-    line-height: 1.6 !important;
-    white-space: pre-wrap !important;
-    color: var(--ink-primary) !important;
-    -webkit-text-fill-color: var(--ink-primary) !important;
-    background: transparent !important;
-    background-image: none !important;
-    -webkit-background-clip: border-box !important;
-    background-clip: border-box !important;
-    filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  [data-type="tag"].is-typing        { font-size: 0.7rem !important; }
-  [data-type="title"].is-typing      { font-size: 1rem !important; }
-  [data-type="body"].is-typing       { font-size: 0.9rem !important; }
-  [data-type="kpi-label"].is-typing  { font-size: 0.8rem !important; }
-  [data-type="kpi-num"].is-typing    { font-weight: 500 !important; letter-spacing: -0.03em !important; }
-
-  [data-type="badge"].is-typing,
-  [data-type="chip"].is-typing {
-    font-size: 0.7rem !important;
-    line-height: 1.2 !important;
-    padding: .35rem .8rem !important;
-    border: 1px dashed var(--ink-secondary) !important;
-    border-radius: 4px !important;
-    background: transparent !important;
-    color: var(--ink-primary) !important;
-    -webkit-text-fill-color: var(--ink-primary) !important;
-  }
-
-  [data-type="button"].is-typing {
-    background: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    letter-spacing: 0 !important;
-  }
-
-  .hero-bg { opacity: 0; transition: opacity 1s ease; }
-  .hero.s2 .hero-bg { opacity: 1; }
-
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, rgba(28,27,25,.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(28,27,25,.04) 1px, transparent 1px);
-    background-size: 80px 80px;
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 90%);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 90%);
-  }
-
-  .hero-kicker { color: var(--ink-secondary); transition: all .7s cubic-bezier(.16,1,.3,1); }
-  .hero.s2 .hero-kicker { color: var(--accent-terracotta); letter-spacing: .3em; }
-
-  .hero-title {
-    font-family: 'Fraunces', serif;
-    font-size: 2.1rem;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    color: var(--ink-secondary);
-    transition:
-      font-size .8s cubic-bezier(.16,1,.3,1),
-      font-weight .8s cubic-bezier(.16,1,.3,1),
-      letter-spacing .8s cubic-bezier(.16,1,.3,1),
-      line-height .8s cubic-bezier(.16,1,.3,1),
-      color .45s ease;
-  }
-  .hero.s1 .hero-title {
-    font-size: clamp(3.5rem, 10vw, 8rem);
-    font-weight: 500;
-    letter-spacing: -0.04em;
-    line-height: 0.95;
-    color: var(--ink-primary);
-  }
-
-  .btn { 
-    display: inline-flex; align-items: center; gap: .5rem; 
-    padding: .8rem 1.5rem; border-radius: 4px; 
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .8rem; font-weight: 500; letter-spacing: .05em;
-    transition: all .2s ease; 
-  }
-  .btn-primary { background: var(--ink-primary); color: var(--bg-paper); border: 1px solid var(--ink-primary); }
-  .btn-primary:hover { background: var(--accent-terracotta); border-color: var(--accent-terracotta); }
-  .btn-ghost { border: 1px solid var(--ink-light); color: var(--ink-primary); }
-  .btn-ghost:hover { border-color: var(--ink-primary); background: rgba(28,27,25,.03); }
-
-  .chip { 
-    display: inline-flex; align-items: center; 
-    padding: .35rem .8rem; border-radius: 4px; 
-    font-size: .7rem; font-family: 'JetBrains Mono', monospace; 
-    letter-spacing: .02em; color: var(--ink-secondary); 
-    border: 1px solid var(--ink-light); 
-    transition: all .2s ease; 
-  }
-  .chip:hover { color: var(--ink-primary); border-color: var(--ink-primary); background: rgba(255,255,255,0.5); }
-
-  .card { 
-    position: relative; 
-    border-radius: 4px; 
-    border: 1px solid var(--ink-light); 
-    background: transparent; 
-    padding: 1.6rem; 
-    transition: border-color .3s ease, background-color .3s ease; 
-  }
-  .card:hover { border-color: var(--ink-secondary); background: rgba(255,255,255,0.4); }
-
-  .section-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-secondary); }
-  .section-title { font-family: 'Fraunces', serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.1; margin-top: 1rem; color: var(--ink-primary); }
-
-  .timeline-dot { width: 9px; height: 9px; border-radius: 999px; background: var(--accent-terracotta); border: 2px solid var(--bg-paper); box-shadow: 0 0 0 1px var(--ink-light); }
-
-  [data-build] { will-change: opacity, filter, transform; }
-
-  .nav-dot { 
-    width: 6px; height: 6px; border-radius: 999px; 
-    background: var(--ink-light); 
-    transition: all .3s ease; cursor: pointer; border: none; padding: 0; 
-  }
-  .nav-dot:hover { background: var(--ink-secondary); transform: scale(1.3); }
-  .nav-dot.active { background: var(--accent-terracotta); transform: scale(1.4); }
-
-  /* Image styling for editorial look */
-  .editorial-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(100%) contrast(1.1) sepia(10%);
-    mix-blend-mode: multiply;
-    opacity: 0.9;
-    transition: opacity 0.8s ease, filter 0.8s ease;
-  }
-  .editorial-img:hover {
-    opacity: 1;
-    filter: grayscale(0%) contrast(1) sepia(0%);
-  }
-</style>
-</head>
-
-<body>
-<div id="app" class="relative">
-
-  <div class="fixed inset-0 z-[70] pointer-events-none">
-    <div v-for="a in agents" :key="a.id" class="agent-cursor" :class="a.cls">
-      <div class="agent-inner">
-        <svg class="agent-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-          <path d="M4 2.5 20 12l-7.2 1.6L9.4 21 4 2.5Z" />
-        </svg>
-        <span class="agent-label">{{ a.label }}</span>
-      </div>
-    </div>
-  </div>
-  <div id="fx-layer" class="fixed inset-0 z-[69] pointer-events-none"></div>
-
-  <div class="fixed right-6 top-1/2 -translate-y-1/2 z-[60] flex flex-col gap-4">
-    <button v-for="(s, i) in sectionIds" :key="i" class="nav-dot" :class="{ active: activeIdx === i }" @click="goTo(i)" :aria-label="'Ir a sección ' + (i + 1)"></button>
-  </div>
-
-  <!-- HERO -->
-  <section id="hero" class="hero relative min-h-screen flex items-center px-6" :class="heroClasses">
-    <div class="hero-bg pointer-events-none absolute inset-0 overflow-hidden">
-      <div class="absolute inset-0 bg-grid"></div>
-    </div>
-
-    <div class="relative w-full max-w-5xl mx-auto py-20 md:py-28">
-      <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
-        <div class="hero-kicker mono text-[10px] uppercase tracking-[.15em]">// ai-native tech lead</div>
-        <div class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest hidden md:block">EST. 2014</div>
-      </div>
-
-      <h1 id="hero-title" data-type="title" class="hero-title pre-build">AI-Native<br />Tech&nbsp;Lead</h1>
-
-      <p id="hero-sub" data-type="body" class="mt-10 max-w-lg text-[15px] leading-relaxed text-[var(--ink-secondary)] pre-build-y font-serif" style="font-family: 'Fraunces', serif; font-size: 1.1rem; line-height: 1.7;">
-        Diseño, orquesto y despliego sistemas donde <span class="text-[var(--ink-primary)] italic">humanos y agentes</span>
-        construyen software juntos. Menos tickets, más outcomes.
-      </p>
-
-      <div id="hero-cta" class="mt-12 flex flex-wrap items-center gap-4">
-        <a href="#work" class="btn btn-primary pre-build-y" data-type="button">Ver proyectos →</a>
-        <a href="#contact" class="btn btn-ghost pre-build-y" data-type="button">Hablemos</a>
-      </div>
-
-      <div id="hero-badges" class="mt-16 flex flex-wrap gap-2">
-        <span class="chip pre-build-y" data-type="badge">LangGraph</span>
-        <span class="chip pre-build-y" data-type="badge">MCP</span>
-        <span class="chip pre-build-y" data-type="badge">RAG</span>
-        <span class="chip pre-build-y" data-type="badge">Evals</span>
-        <span class="chip pre-build-y" data-type="badge">Multi-agent</span>
-        <span class="chip pre-build-y" data-type="badge">TypeScript</span>
-        <span class="chip pre-build-y" data-type="badge">Python</span>
-      </div>
-    </div>
-
-    <button id="hero-scroll" @click="goTo(1)" class="hero-bg absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-transparent border-0 cursor-pointer group">
-      <span class="mono text-[9px] uppercase tracking-[.2em] text-[var(--ink-secondary)] group-hover:text-[var(--ink-primary)] transition-colors">Scroll</span>
-      <div class="w-[1px] h-8 bg-[var(--ink-light)] group-hover:bg-[var(--ink-secondary)] transition-colors"></div>
-    </button>
-  </section>
-
-  <!-- ABOUT -->
-  <section class="relative min-h-screen flex items-center py-20 md:py-32 px-6 border-t border-[var(--ink-light)]">
-    <div class="max-w-6xl mx-auto w-full">
-      <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
-        <div data-build data-type="tag" class="section-tag">01 — sobre mí</div>
-        <div class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest">METADATA</div>
-      </div>
-      
-      <div class="grid md:grid-cols-[1fr_300px] gap-12 items-start">
-        <div>
-          <h2 data-build data-type="title" class="section-title">Del prompt al producto.</h2>
-          <p data-build data-type="body" class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif" style="font-family: 'Fraunces', serif; font-size: 1.05rem; line-height: 1.7;">
-            Llevo una década construyendo software. Los últimos tres los pasé diseñando sistemas
-            donde los agentes hacen el trabajo pesado y las personas toman las decisiones.
-            Mi trabajo es que esa colaboración sea <span class="text-[var(--ink-primary)] italic">observable, medible y aburrida de mantener</span>.
-          </p>
-        </div>
-        
-        <!-- FOTO EDITORIAL -->
-        <div class="hidden md:block">
-          <div class="w-full aspect-[3/4] overflow-hidden rounded-sm border border-[var(--ink-light)]" data-build data-type="image" style="background-color: var(--ink-light);">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop" class="editorial-img" alt="Portrait" />
-          </div>
-          <div class="mt-3 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider">Fig. 1 — The Architect</div>
-        </div>
-      </div>
-
-      <div class="grid sm:grid-cols-3 gap-0 mt-16 border border-[var(--ink-light)]">
-        <div class="p-6 border-b sm:border-b-0 sm:border-r border-[var(--ink-light)]">
-          <div class="text-4xl font-serif text-[var(--ink-primary)]" data-build data-type="kpi-num">10+</div>
-          <div class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="kpi-label">Años construyendo producto</div>
-        </div>
-        <div class="p-6 border-b sm:border-b-0 sm:border-r border-[var(--ink-light)]">
-          <div class="text-4xl font-serif text-[var(--ink-primary)]" data-build data-type="kpi-num">40+</div>
-          <div class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="kpi-label">Agentes en producción</div>
-        </div>
-        <div class="p-6">
-          <div class="text-4xl font-serif text-[var(--ink-primary)]" data-build data-type="kpi-num">3×</div>
-          <div class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="kpi-label">Velocidad de entrega</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- STACK -->
-  <section class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]">
-    <div class="max-w-6xl mx-auto w-full">
-      <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
-        <div data-build data-type="tag" class="section-tag">02 — stack</div>
-        <div class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest">SYSTEM</div>
-      </div>
-      
-      <h2 data-build data-type="title" class="section-title">Las piezas del sistema.</h2>
-
-      <div class="grid md:grid-cols-2 gap-6 mt-16">
-        <div class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30">
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">Orquestación</div>
-          <div class="mt-6 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">LangGraph</span>
-            <span class="chip" data-build data-type="chip">CrewAI</span>
-            <span class="chip" data-build data-type="chip">Temporal</span>
-            <span class="chip" data-build data-type="chip">MCP</span>
-          </div>
-        </div>
-        <div class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30">
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">Modelos</div>
-          <div class="mt-6 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">GPT</span>
-            <span class="chip" data-build data-type="chip">Claude</span>
-            <span class="chip" data-build data-type="chip">Gemini</span>
-            <span class="chip" data-build data-type="chip">Llama</span>
-          </div>
-        </div>
-        <div class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30">
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">Datos & RAG</div>
-          <div class="mt-6 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">pgvector</span>
-            <span class="chip" data-build data-type="chip">Qdrant</span>
-            <span class="chip" data-build data-type="chip">Redis</span>
-            <span class="chip" data-build data-type="chip">dbt</span>
-          </div>
-        </div>
-        <div class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30">
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">Infra</div>
-          <div class="mt-6 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">AWS</span>
-            <span class="chip" data-build data-type="chip">Kubernetes</span>
-            <span class="chip" data-build data-type="chip">Terraform</span>
-            <span class="chip" data-build data-type="chip">Vercel</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WORK -->
-  <section id="work" class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]">
-    <div class="max-w-6xl mx-auto w-full">
-      <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
-        <div data-build data-type="tag" class="section-tag">03 — proyectos</div>
-        <div class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest">CASES</div>
-      </div>
-      
-      <h2 data-build data-type="title" class="section-title">Cosas que construí.</h2>
-
-      <div class="grid md:grid-cols-3 gap-6 mt-16">
-        <article class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30 flex flex-col hover:border-[var(--ink-secondary)] transition-colors">
-          <!-- Imagen del Proyecto 1 -->
-          <div class="w-full aspect-video overflow-hidden rounded-sm mb-6 border border-[var(--ink-light)] bg-[var(--ink-light)]" data-build data-type="image">
-            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop" class="editorial-img" alt="Code" />
-          </div>
-          <div class="mono text-[9px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">multi-agent</div>
-          <h3 class="mt-4 font-serif text-xl text-[var(--ink-primary)]" data-build data-type="title">Orquestador de ingeniería</h3>
-          <p class="mt-4 text-sm leading-relaxed text-[var(--ink-secondary)] flex-grow font-serif" data-build data-type="body">Un grafo de agentes que convierte issues en PRs revisados. Planner, Coder, Reviewer y Tester trabajando en paralelo.</p>
-          <div class="mt-8 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">LangGraph</span>
-            <span class="chip" data-build data-type="chip">MCP</span>
-          </div>
-        </article>
-        <article class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30 flex flex-col hover:border-[var(--ink-secondary)] transition-colors">
-          <!-- Imagen del Proyecto 2 -->
-          <div class="w-full aspect-video overflow-hidden rounded-sm mb-6 border border-[var(--ink-light)] bg-[var(--ink-light)]" data-build data-type="image">
-            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop" class="editorial-img" alt="Data Network" />
-          </div>
-          <div class="mono text-[9px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">rag</div>
-          <h3 class="mt-4 font-serif text-xl text-[var(--ink-primary)]" data-build data-type="title">Memoria de producto</h3>
-          <p class="mt-4 text-sm leading-relaxed text-[var(--ink-secondary)] flex-grow font-serif" data-build data-type="body">Base de conocimiento viva que indexa decisiones, specs y código para que los agentes dejen de preguntar lo mismo.</p>
-          <div class="mt-8 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">pgvector</span>
-            <span class="chip" data-build data-type="chip">Evals</span>
-          </div>
-        </article>
-        <article class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30 flex flex-col hover:border-[var(--ink-secondary)] transition-colors">
-          <!-- Imagen del Proyecto 3 -->
-          <div class="w-full aspect-video overflow-hidden rounded-sm mb-6 border border-[var(--ink-light)] bg-[var(--ink-light)]" data-build data-type="image">
-            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" class="editorial-img" alt="Hardware" />
-          </div>
-          <div class="mono text-[9px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">observability</div>
-          <h3 class="mt-4 font-serif text-xl text-[var(--ink-primary)]" data-build data-type="title">Trace de agentes</h3>
-          <p class="mt-4 text-sm leading-relaxed text-[var(--ink-secondary)] flex-grow font-serif" data-build data-type="body">Cada paso de cada agente es una traza. Coste, latencia y calidad por turno, con evals automáticas en CI.</p>
-          <div class="mt-8 flex flex-wrap gap-2">
-            <span class="chip" data-build data-type="chip">OpenTelemetry</span>
-            <span class="chip" data-build data-type="chip">Temporal</span>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- EXPERIENCE -->
-  <section class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]">
-    <div class="max-w-4xl mx-auto w-full">
-      <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
-        <div data-build data-type="tag" class="section-tag">04 — trayectoria</div>
-        <div class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest">TIMELINE</div>
-      </div>
-      
-      <h2 data-build data-type="title" class="section-title">Cómo llegué acá.</h2>
-
-      <div class="mt-16 relative pl-8 border-l border-[var(--ink-light)] space-y-12">
-        <div class="relative">
-          <span class="timeline-dot absolute -left-[38.5px] top-1.5"></span>
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">2023 — hoy</div>
-          <h3 class="mt-2 font-serif text-xl text-[var(--ink-primary)]" data-build data-type="title">AI-Native Tech Lead</h3>
-          <p class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif" data-build data-type="body">Lidero la adopción de agentes en el ciclo de producto: arquitectura, guardrails, evals y cultura.</p>
-        </div>
-        <div class="relative">
-          <span class="timeline-dot absolute -left-[38.5px] top-1.5"></span>
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">2020 — 2023</div>
-          <h3 class="mt-2 font-serif text-xl text-[var(--ink-primary)]" data-build data-type="title">Senior Full-Stack Engineer</h3>
-          <p class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif" data-build data-type="body">Plataformas de datos y producto. Primeros experimentos con LLMs en producción y sistemas de evaluación.</p>
-        </div>
-        <div class="relative">
-          <span class="timeline-dot absolute -left-[38.5px] top-1.5"></span>
-          <div class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]" data-build data-type="tag">2014 — 2020</div>
-          <h3 class="mt-2 font-serif text-xl text-[var(--ink-primary)]" data-build data-type="title">Software Engineer</h3>
-          <p class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif" data-build data-type="body">De frontend a infraestructura. Donde aprendí que los sistemas se juzgan por cómo fallan.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT -->
-  <section id="contact" class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]">
-    <div class="max-w-4xl mx-auto w-full text-left">
-      <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
-        <div data-build data-type="tag" class="section-tag">05 — contacto</div>
-        <div class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest">OUTRO</div>
-      </div>
-      
-      <h2 data-build data-type="title" class="section-title">Construyamos algo.</h2>
-      <p data-build data-type="body" class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif" style="font-family: 'Fraunces', serif; font-size: 1.05rem; line-height: 1.7;">
-        Si estás pensando cómo meter agentes en tu equipo sin que se te caiga el mundo, hablemos.
-      </p>
-      
-      <div class="mt-12 flex flex-wrap gap-4">
-        <a href="mailto:hola@tudominio.com" class="btn btn-primary" data-build data-type="button">hola@tudominio.com</a>
-        <a href="#" class="btn btn-ghost" data-build data-type="button">LinkedIn ↗</a>
-        <a href="#" class="btn btn-ghost" data-build data-type="button">GitHub ↗</a>
-      </div>
-      
-      <div class="mt-24 mono text-[10px] uppercase tracking-[.2em] text-[var(--ink-secondary)] border-t border-[var(--ink-light)] pt-6 flex justify-between">
-        <span>construido por agentes (y por mí)</span>
-        <span>© 2025</span>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<script>
-const { createApp } = Vue;
-const wait = (ms) => new Promise(r => setTimeout(r, ms));
-const rand = (min, max) => min + Math.random() * (max - min);
-
-const AGENTS = [
-  { id: 'orchestrator', label: 'Orchestrator', cls: 'c-orch',   home: [0.50, 0.46] },
-  { id: 'planner',      label: 'Planner',      cls: 'c-plan',   home: [0.20, 0.30] },
-  { id: 'coder',        label: 'Coder',        cls: 'c-code',   home: [0.78, 0.62] },
-  { id: 'designer',     label: 'Designer',     cls: 'c-des',    home: [0.70, 0.20] },
-  { id: 'reviewer',     label: 'Reviewer',     cls: 'c-rev',    home: [0.30, 0.76] },
-  { id: 'tester',       label: 'Tester',       cls: 'c-test',   home: [0.86, 0.36] },
-  { id: 'architect',    label: 'Architect',    cls: 'c-arch',   home: [0.40, 0.18] },
-  { id: 'devops',       label: 'DevOps',       cls: 'c-dev',    home: [0.12, 0.55] },
-  { id: 'scripter',     label: 'Scripter',     cls: 'c-script', home: [0.62, 0.80] },
-  { id: 'debugger',     label: 'Debugger',     cls: 'c-debug',  home: [0.90, 0.68] },
-  { id: 'optimizer',    label: 'Optimizer',    cls: 'c-opt',    home: [0.42, 0.60] },
-  { id: 'auditor',      label: 'Auditor',      cls: 'c-audit',  home: [0.08, 0.86] },
-];
-
-const TIMING = {
-  title:       { hold: [280, 520], pre: [240, 460], early: [30, 46], late: [7, 12] },
-  body:        { hold: [200, 380], pre: [200, 380], early: [26, 40], late: [7, 12] },
-  tag:         { hold: [160, 300], pre: [140, 260], early: [22, 34], late: [6, 11] },
-  chip:        { hold: [100, 220], pre: [90, 200],  early: [16, 28], late: [5, 9]  },
-  badge:       { hold: [100, 220], pre: [90, 200],  early: [16, 28], late: [5, 9]  },
-  'kpi-num':   { hold: [160, 320], pre: [140, 280], early: [22, 36], late: [6, 11] },
-  'kpi-label': { hold: [160, 320], pre: [140, 280], early: [22, 36], late: [6, 11] },
-  button:      { hold: [180, 340], pre: [160, 300], early: [24, 38], late: [7, 12] },
-  image:       { hold: [300, 500], pre: [100, 200], early: [10, 20], late: [5, 10] },
-};
-
-const TEXT_UPGRADES = [
-  { find: 'Llevo una década',              to: 'Llevo más de una década' },
-  { find: 'Los últimos tres',              to: 'Los últimos tres años' },
-  { find: 'Mi trabajo es',                 to: 'Mi misión es' },
-  { find: 'Cosas que construí',            to: 'Cosas que he construido' },
-  { find: 'Del prompt al producto',        to: 'Del prompt al producto real' },
-  { find: 'trabajo pesado',                to: 'trabajo estratégico' },
-  { find: 'Las piezas del sistema',        to: 'Las piezas del sistema completo' },
-  { find: 'Cómo llegué acá',               to: 'Cómo llegué hasta acá' },
-  { find: 'Construyamos algo',             to: 'Construyamos algo grande' },
-  { find: 'Orquestador de ingeniería',     to: 'Orquestador de ingeniería autónomo' },
-  { find: 'Memoria de producto',           to: 'Memoria de producto viva' },
-  { find: 'Trace de agentes',              to: 'Trace de agentes en vivo' },
-  { find: 'velocidad de entrega',          to: 'velocidad de entrega real' },
-  { find: 'años construyendo producto',    to: 'años construyendo producto real' },
-  { find: 'agentes en producción',         to: 'agentes en producción real' },
-  { find: 'Ver proyectos',                 to: 'Explorar proyectos' },
-];
-
-let cursors = [];
-const frameTrackers = new Set();
-
-createApp({
-  data() {
-    return {
-      agents: AGENTS,
-      titleRevealed: false,
-      bgRevealed: false,
-      heroDone: false,
-      activeIdx: 0,
-      sectionIds: ['hero', 'about', 'stack', 'work', 'exp', 'contact'],
-      isNavigating: false,
-    };
-  },
-  computed: {
-    heroClasses() { return { s1: this.titleRevealed, s2: this.bgRevealed }; }
-  },
-  mounted() {
-    this.buildToken = 0;
-    this.savedHTML = new WeakMap();
-    this.queues = new Map();
-    this.builtSections = new WeakSet();
-    this.workerRotation = [0, 0, 0, 0];
-    this.workerSpeeds = [rand(0.9, 1.15), rand(0.8, 1.1), rand(1.0, 1.25), rand(0.85, 1.15)];
-
-    this.reviewQueue = [];
-    this.isReviewing = false;
-    this.usedUpgrades = new Set();
-
-    this.initCursors();
-    this.setupNavigation();
-    this.setupQueues();
-    this.runIntro();
-  },
-  methods: {
-    initCursors() {
-      const els = Array.from(document.querySelectorAll('.agent-cursor'));
-      cursors = els.map((el, i) => {
-        const h = AGENTS[i].home;
-        gsap.set(el, { x: window.innerWidth * h[0], y: window.innerHeight * h[1], opacity: 0, scale: 1 });
-        return { el, color: getComputedStyle(el).getPropertyValue('--c').trim() || '#1C1B19' };
-      });
-    },
-
-    getWorkerCursors(workerIdx, count) {
-      const base = (workerIdx % 4) * 3;
-      const rot = this.workerRotation[workerIdx % 4] || 0;
-      const out = [];
-      for (let i = 0; i < count; i++) out.push(cursors[(base + ((rot + i) % 3)) % cursors.length]);
-      this.workerRotation[workerIdx % 4] = (rot + count) % 3;
-      return out;
-    },
-
-    async flyTo(cursor, x, y, dur) {
-      gsap.to(cursor.el, { opacity: 1, duration: 0.22 });
-      await gsap.to(cursor.el, { x, y, duration: dur, ease: 'power3.inOut' });
-    },
-
-    async click(cursor) {
-      await gsap.to(cursor.el, { scale: 0.72, duration: 0.08, yoyo: true, repeat: 1, ease: 'power2.inOut' });
-    },
-
-    pulse(x, y, color) {
-      const p = document.createElement('div');
-      p.className = 'click-pulse';
-      p.style.setProperty('--c', color);
-      p.style.left = x + 'px'; p.style.top = y + 'px';
-      document.getElementById('fx-layer').appendChild(p);
-      gsap.fromTo(p, { scale: 0.15, opacity: 1 }, { scale: 1.5, opacity: 0, duration: 0.65, ease: 'power2.out', onComplete: () => p.remove() });
-    },
-
-    reviewPulse(x, y) {
-      const p = document.createElement('div');
-      p.className = 'click-pulse';
-      p.style.setProperty('--c', '#2E5A44');
-      p.style.left = x + 'px'; p.style.top = y + 'px';
-      document.getElementById('fx-layer').appendChild(p);
-      gsap.fromTo(p, { scale: 0.15, opacity: 1 }, { scale: 1.5, opacity: 0, duration: 0.65, ease: 'power2.out', onComplete: () => p.remove() });
-
-      const check = document.createElement('div');
-      check.innerHTML = '✓';
-      check.style.position = 'fixed';
-      check.style.left = (x + 12) + 'px';
-      check.style.top = (y + 8) + 'px';
-      check.style.color = '#2E5A44';
-      check.style.fontSize = '14px';
-      check.style.fontFamily = 'monospace';
-      check.style.fontWeight = 'bold';
-      check.style.pointerEvents = 'none';
-      check.style.zIndex = 69;
-      document.getElementById('fx-layer').appendChild(check);
-
-      gsap.fromTo(check, { opacity: 0, scale: 0.5, y: 5 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'back.out' });
-      gsap.to(check, { opacity: 0, y: -10, delay: 0.6, duration: 0.4, onComplete: () => check.remove() });
-    },
-
-    flagPulse(x, y) {
-      const p = document.createElement('div');
-      p.className = 'click-pulse';
-      p.style.setProperty('--c', '#D9A05B');
-      p.style.left = x + 'px'; p.style.top = y + 'px';
-      document.getElementById('fx-layer').appendChild(p);
-      gsap.fromTo(p, { scale: 0.15, opacity: 1 }, { scale: 1.5, opacity: 0, duration: 0.7, ease: 'power2.out', onComplete: () => p.remove() });
-
-      const badge = document.createElement('div');
-      badge.textContent = '!';
-      badge.style.position = 'fixed';
-      badge.style.left = (x - 8) + 'px';
-      badge.style.top = Math.max(10, y - 24) + 'px';
-      badge.style.width = '16px';
-      badge.style.height = '16px';
-      badge.style.borderRadius = '50%';
-      badge.style.background = '#D9A05B';
-      badge.style.color = '#1C1B19';
-      badge.style.fontSize = '11px';
-      badge.style.fontWeight = 'bold';
-      badge.style.display = 'flex';
-      badge.style.alignItems = 'center';
-      badge.style.justifyContent = 'center';
-      badge.style.fontFamily = 'monospace';
-      badge.style.pointerEvents = 'none';
-      badge.style.zIndex = 69;
-      document.getElementById('fx-layer').appendChild(badge);
-
-      gsap.fromTo(badge, { scale: 0, y: 6 }, { scale: 1, y: 0, duration: 0.3, ease: 'back.out' });
-      gsap.to(badge, { opacity: 0, y: -14, delay: 1.4, duration: 0.4, onComplete: () => badge.remove() });
-    },
-
-    scatterCursors() {
-      cursors.forEach((c, i) => {
-        const h = AGENTS[i].home;
-        const x = Math.max(40, Math.min(window.innerWidth - 40, window.innerWidth * h[0] + rand(-70, 70)));
-        const y = Math.max(60, Math.min(window.innerHeight - 60, window.innerHeight * h[1] + rand(-60, 60)));
-        gsap.to(c.el, { x, y, duration: rand(0.6, 1.1), ease: 'power2.inOut', delay: rand(0, 0.3) });
-      });
-    },
-
-    setupNavigation() {
-      this.sections = Array.from(document.querySelectorAll('section'));
-      window.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
-      window.addEventListener('keydown', (e) => this.onKey(e));
-      window.addEventListener('touchstart', (e) => { this._touchY = e.touches[0].clientY; }, { passive: true });
-      window.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: true });
-
-      document.querySelectorAll('a[href^="#"]').forEach(a => {
-        a.addEventListener('click', (e) => {
-          const href = a.getAttribute('href');
-          if (!href || href.length < 2) return;
-          const target = document.querySelector(href);
-          if (!target) return;
-          const section = target.closest('section');
-          if (!section) return;
-          const idx = this.sections.indexOf(section);
-          if (idx === -1) return;
-          e.preventDefault();
-          this.goTo(idx);
-        });
-      });
-
-      let scrollTimer;
-      window.addEventListener('scroll', () => {
-        if (this.isNavigating) return;
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-          if (this.isNavigating) return;
-          let best = null, bestDist = Infinity;
-          this.sections.forEach(s => {
-            const d = Math.abs(s.getBoundingClientRect().top);
-            if (d < bestDist) { bestDist = d; best = s; }
-          });
-          if (!best) return;
-          const idx = this.sections.indexOf(best);
-          if (idx === -1) return;
-          this.activeIdx = idx;
-          this.buildSection(best);
-        }, 200);
-      });
-    },
-
-    onWheel(e) {
-      if (e.ctrlKey || e.metaKey) return;
-      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
-      if (this.isNavigating) { e.preventDefault(); return; }
-      const dir = Math.sign(e.deltaY);
-      if (dir === 0) return;
-      const section = this.sections[this.activeIdx];
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      if (rect.height > vh + 20) {
-        const atTop = rect.top >= -5;
-        const atBottom = rect.bottom <= vh + 5;
-        if ((dir > 0 && !atBottom) || (dir < 0 && !atTop)) return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI-Native Tech Lead — Portfolio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+      :root {
+        --bg-paper: #f7f5f0;
+        --ink-primary: #1c1b19;
+        --ink-secondary: #6b6862;
+        --ink-light: #e5e3db;
+        --accent-terracotta: #c75b39;
+        --success-sage: #2e5a44;
+        --warning-mustard: #d9a05b;
       }
-      e.preventDefault();
-      this.goTo(this.activeIdx + dir);
-    },
 
-    onKey(e) {
-      if (this.isNavigating) return;
-      const k = e.key;
-      if (['ArrowDown', 'PageDown', ' '].includes(k)) {
-        if (k === ' ' && ['A', 'BUTTON'].includes(document.activeElement?.tagName)) return;
-        e.preventDefault();
-        this.goTo(this.activeIdx + 1);
-      } else if (['ArrowUp', 'PageUp'].includes(k)) {
-        e.preventDefault();
-        this.goTo(this.activeIdx - 1);
-      } else if (k === 'Home') { e.preventDefault(); this.goTo(0); }
-      else if (k === 'End') { e.preventDefault(); this.goTo(this.sections.length - 1); }
-    },
-
-    onTouchEnd(e) {
-      if (this.isNavigating) return;
-      const dy = this._touchY - e.changedTouches[0].clientY;
-      if (Math.abs(dy) < 50) return;
-      const section = this.sections[this.activeIdx];
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      if (rect.height > vh + 20) {
-        const atTop = rect.top >= -5;
-        const atBottom = rect.bottom <= vh + 5;
-        if ((dy > 0 && !atBottom) || (dy < 0 && !atTop)) return;
+      * {
+        -webkit-font-smoothing: antialiased;
       }
-      this.goTo(this.activeIdx + (dy > 0 ? 1 : -1));
-    },
+      html {
+        scroll-behavior: smooth;
+        overscroll-behavior: none;
+      }
 
-    stopAllFrameTrackers() {
-      frameTrackers.forEach(stop => { try { stop(); } catch (e) {} });
-      frameTrackers.clear();
-    },
+      body {
+        background-color: var(--bg-paper);
+        color: var(--ink-primary);
+        font-family:
+          "Inter",
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        overflow-x: hidden;
+      }
+      ::selection {
+        background: var(--accent-terracotta);
+        color: var(--bg-paper);
+      }
 
-    clearFrames() {
-      this.stopAllFrameTrackers();
-      document.querySelectorAll('.editor-frame, .target-box').forEach(f => f.remove());
-    },
+      .mono {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+      }
+      .serif {
+        font-family: "Fraunces", ui-serif, Georgia, serif;
+      }
 
-    cleanupFlags() {
-      document.querySelectorAll('.flag-suggestion').forEach(span => {
-        span.classList.remove('flag-suggestion');
-        span.style.textDecoration = '';
-        span.style.color = '';
-        span.style.opacity = '';
-        span.style.transition = '';
-      });
-    },
+      .pre-build {
+        opacity: 0.06 !important;
+        filter: blur(2px) grayscale(100%) !important;
+        transition: none !important;
+      }
+      .pre-build-y {
+        opacity: 0.06 !important;
+        filter: blur(2px) grayscale(100%) !important;
+        transform: translateY(15px) !important;
+        transition: none !important;
+      }
+      .no-transition,
+      .no-transition * {
+        transition: none !important;
+        animation: none !important;
+      }
 
-    pinFrameToElement(frame, el, offsetX, offsetY) {
-      let stopped = false;
-      let lastLeft = -1, lastTop = -1;
-      const tick = () => {
-        if (stopped) return;
-        if (!frame.isConnected || !el.isConnected) { stopped = true; frameTrackers.delete(stopFn); return; }
-        const r = el.getBoundingClientRect();
-        const left = Math.round(r.left + offsetX);
-        const top = Math.round(r.top + offsetY);
-        if (left !== lastLeft || top !== lastTop) {
-          frame.style.left = left + 'px';
-          frame.style.top = top + 'px';
-          lastLeft = left; lastTop = top;
+      .reviewed {
+        animation: review-flash 1s ease-out;
+      }
+      @keyframes review-flash {
+        0% {
+          box-shadow:
+            0 0 0 2px var(--success-sage),
+            0 0 15px rgba(46, 90, 68, 0.2);
         }
-        requestAnimationFrame(tick);
-      };
-      const stopFn = () => { stopped = true; };
-      frameTrackers.add(stopFn);
-      requestAnimationFrame(tick);
-      return stopFn;
-    },
-
-    finishHeroInstantly() {
-      this.stopAllFrameTrackers();
-      this.reviewQueue = [];
-      this.isReviewing = false;
-      const heroEls = document.querySelectorAll('#hero [data-type]');
-      heroEls.forEach(el => {
-        const saved = this.savedHTML.get(el);
-        if (saved) { el.innerHTML = saved; this.savedHTML.delete(el); }
-        el.classList.remove('is-typing', 'pre-build', 'pre-build-y');
-        el.style.minHeight = '';
-        gsap.set(el, { opacity: 1, filter: 'none', y: 0 });
-      });
-      this.titleRevealed = true;
-      this.bgRevealed = true;
-      this.heroDone = true;
-      this.clearFrames();
-      this.cleanupFlags();
-    },
-
-    goTo(idx) {
-      if (idx < 0 || idx >= this.sections.length) return;
-      if (this.isNavigating) return;
-      if (idx === this.activeIdx) return;
-      const oldIdx = this.activeIdx;
-      this.isNavigating = true;
-      this.activeIdx = idx;
-      this.buildToken++;
-      this.reviewQueue = [];
-      this.isReviewing = false;
-      this.clearFrames();
-      this.cleanupFlags();
-      if (oldIdx === 0 && idx !== 0 && !this.heroDone) this.finishHeroInstantly();
-      this.sections[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      this.waitForScrollEnd(() => {
-        this.isNavigating = false;
-        this.buildSection(this.sections[idx]);
-      });
-    },
-
-    waitForScrollEnd(cb) {
-      const start = Date.now();
-      const maxWait = 1500;
-      let lastY = window.scrollY;
-      let stable = 0;
-      const check = () => {
-        if (Date.now() - start > maxWait) return cb();
-        const y = window.scrollY;
-        if (Math.abs(y - lastY) < 1.5) {
-          stable++;
-          if (stable >= 2) return cb();
-        } else stable = 0;
-        lastY = y;
-        setTimeout(check, 60);
-      };
-      setTimeout(check, 60);
-    },
-
-    setupQueues() {
-      const items = gsap.utils.toArray('[data-build]');
-      const bySection = new Map();
-
-      items.forEach(el => {
-        gsap.set(el, { opacity: 0.06, filter: 'grayscale(1) blur(2px)', y: 15 });
-        const section = el.closest('section');
-        if (!section) return;
-        if (!bySection.has(section)) bySection.set(section, []);
-        bySection.get(section).push(el);
-      });
-
-      bySection.forEach((els, section) => {
-        const headerItems = [];
-        const cardGroups = new Map();
-        els.forEach(el => {
-          const card = el.closest('.card') || el.closest('.border');
-          if (!card) { headerItems.push(el); return; }
-          if (!cardGroups.has(card)) cardGroups.set(card, []);
-          cardGroups.get(card).push(el);
-        });
-
-        const groupList = Array.from(cardGroups.values());
-        const maxLen = Math.max(0, ...groupList.map(g => g.length));
-        const interleaved = [...headerItems];
-        for (let i = 0; i < maxLen; i++) {
-          groupList.forEach(g => { if (g[i]) interleaved.push(g[i]); });
-        }
-        this.queues.set(section, interleaved);
-      });
-    },
-
-    async buildSection(section) {
-      if (!section) return;
-      if (this.builtSections.has(section)) return;
-      this.builtSections.add(section);
-
-      const myToken = ++this.buildToken;
-      const queue = [...(this.queues.get(section) || [])];
-      if (!queue.length) return;
-
-      const worker = async (workerIdx) => {
-        await wait(workerIdx * 300 + rand(60, 420));
-        if (myToken !== this.buildToken) return;
-
-        while (queue.length > 0) {
-          if (myToken !== this.buildToken) return;
-          const el = queue.shift();
-          if (!el) return;
-
-          await wait(rand(40, 240));
-          if (myToken !== this.buildToken) return;
-
-          try { 
-            if (el.dataset.type === 'image') {
-              await this.buildImage(el, myToken, workerIdx);
-            } else {
-              await this.buildText(el, myToken, workerIdx); 
-            }
-          } catch (e) {}
-          if (myToken !== this.buildToken) return;
-
-          await wait(rand(200, 700));
-        }
-      };
-
-      await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
-
-      if (myToken !== this.buildToken) {
-        queue.forEach(el => this.instantReveal(el));
-        return;
-      }
-
-      this.reviewQueue = [];
-      let waited = 0;
-      while (this.isReviewing && waited < 3000) {
-        await wait(100);
-        waited += 100;
-      }
-
-      this.scatterCursors();
-    },
-
-    instantReveal(el) {
-      const saved = this.savedHTML.get(el);
-      if (saved != null) { el.innerHTML = saved; this.savedHTML.delete(el); }
-      el.classList.remove('is-typing', 'pre-build', 'pre-build-y', 'no-transition');
-      el.style.minHeight = '';
-      el.style.opacity = 1;
-      el.style.filter = 'none';
-      el.style.transform = 'translateY(0)';
-    },
-
-    async processReviewQueue(token) {
-      if (this.isReviewing) return;
-      this.isReviewing = true;
-
-      while (this.reviewQueue.length > 0) {
-        if (token !== this.buildToken) { this.reviewQueue = []; break; }
-        const el = this.reviewQueue.shift();
-        if (!el || !el.isConnected) continue;
-
-        await wait(rand(250, 700));
-        if (token !== this.buildToken) { this.reviewQueue = []; break; }
-
-        const rect = el.getBoundingClientRect();
-        if (rect.bottom < 0 || rect.top > window.innerHeight) continue;
-
-        const upgrade = this.findUpgradeFor(el);
-        const willFlag = upgrade && Math.random() < 0.6;
-
-        const reviewCursor = Math.random() > 0.5 ? cursors[4] : cursors[11];
-
-        if (willFlag) {
-          await this.flagAndFix(el, upgrade, reviewCursor, token);
-        } else {
-          const rx = rect.left + rect.width * rand(0.2, 0.8);
-          const ry = rect.top + rect.height * rand(0.2, 0.8);
-          await this.flyTo(reviewCursor, rx, ry, rand(0.3, 0.5));
-          if (token !== this.buildToken) break;
-          await this.click(reviewCursor);
-          this.reviewPulse(rx, ry);
-          el.classList.add('reviewed');
-          setTimeout(() => el.classList.remove('reviewed'), 800);
-        }
-
-        await wait(rand(180, 400));
-      }
-      this.isReviewing = false;
-      
-      if (this.reviewQueue.length > 0 && token === this.buildToken) {
-        this.processReviewQueue(token);
-      }
-    },
-
-    findUpgradeFor(el) {
-      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-      const textNodes = [];
-      let n;
-      while ((n = walker.nextNode())) textNodes.push(n);
-
-      for (const upgrade of TEXT_UPGRADES) {
-        if (this.usedUpgrades.has(upgrade.find)) continue;
-        for (const node of textNodes) {
-          if (node.textContent.indexOf(upgrade.find) !== -1) {
-            return upgrade;
-          }
+        100% {
+          box-shadow:
+            0 0 0 0 transparent,
+            0 0 0 transparent;
         }
       }
-      return null;
-    },
 
-    highlightPhrase(el, phrase) {
-      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-      let node;
-      while ((node = walker.nextNode())) {
-        const idx = node.textContent.indexOf(phrase);
-        if (idx !== -1) {
-          const range = document.createRange();
-          range.setStart(node, idx);
-          range.setEnd(node, idx + phrase.length);
-          const span = document.createElement('span');
-          span.className = 'flag-suggestion';
-          try {
-            range.surroundContents(span);
-            return span;
-          } catch (e) {
-            return null;
-          }
+      .flag-suggestion {
+        text-decoration: underline wavy var(--warning-mustard);
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 4px;
+        background: rgba(217, 160, 91, 0.1);
+        border-radius: 2px;
+        transition: background-color 0.3s ease;
+      }
+
+      /* ─── EARTHY AGENT PALETTE ─── */
+      .c-orch {
+        --c: #8c6b4a;
+      }
+      .c-plan {
+        --c: #c75b39;
+      }
+      .c-code {
+        --c: #4a6b8c;
+      }
+      .c-des {
+        --c: #c2a33d;
+      }
+      .c-rev {
+        --c: #4a8c6b;
+      }
+      .c-test {
+        --c: #9e5b5b;
+      }
+      .c-arch {
+        --c: #6b5b8c;
+      }
+      .c-dev {
+        --c: #4a8c8c;
+      }
+      .c-script {
+        --c: #a69a3d;
+      }
+      .c-debug {
+        --c: #8c5b3d;
+      }
+      .c-opt {
+        --c: #7a4a8c;
+      }
+      .c-audit {
+        --c: #5b6b7a;
+      }
+
+      .agent-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        opacity: 0;
+        will-change: transform;
+        color: var(--c);
+        z-index: 70;
+      }
+      .agent-inner {
+        display: flex;
+        align-items: flex-start;
+        animation: bob 3s ease-in-out infinite;
+      }
+      .agent-cursor:nth-child(2n) .agent-inner {
+        animation-delay: -1s;
+      }
+      .agent-cursor:nth-child(3n) .agent-inner {
+        animation-delay: -2.1s;
+        animation-duration: 3.7s;
+      }
+      .agent-cursor:nth-child(4n) .agent-inner {
+        animation-delay: -0.6s;
+        animation-duration: 2.6s;
+      }
+      .agent-cursor:nth-child(5n) .agent-inner {
+        animation-delay: -1.7s;
+        animation-duration: 3.2s;
+      }
+
+      @keyframes bob {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(1.5px, -2.5px);
         }
       }
-      return null;
-    },
 
-    async flagAndFix(el, upgrade, flaggingCursor, token) {
-      const span = this.highlightPhrase(el, upgrade.find);
-      if (!span) {
-        const r = el.getBoundingClientRect();
-        this.reviewPulse(r.left + r.width * 0.5, r.top + r.height * 0.5);
-        return;
+      .agent-svg {
+        width: 18px;
+        height: 18px;
+        flex: none;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+      }
+      .agent-label {
+        margin: 12px 0 0 4px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        white-space: nowrap;
+        color: var(--bg-paper);
+        background: var(--c);
+        border: 1px solid var(--c);
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
 
-      this.usedUpgrades.add(upgrade.find);
-
-      const sr = span.getBoundingClientRect();
-      const flagX = sr.left + sr.width * 0.5;
-      const flagY = sr.top + sr.height * 0.5;
-
-      await this.flyTo(flaggingCursor, flagX, flagY, rand(0.34, 0.5));
-      if (token !== this.buildToken) {
-        span.textContent = upgrade.to;
-        span.classList.remove('flag-suggestion');
-        return;
-      }
-      await this.click(flaggingCursor);
-      this.flagPulse(flagX, flagY);
-
-      await wait(rand(550, 850));
-      if (token !== this.buildToken) {
-        span.textContent = upgrade.to;
-        span.classList.remove('flag-suggestion');
-        return;
+      .click-pulse {
+        position: fixed;
+        width: 30px;
+        height: 30px;
+        margin: -15px 0 0 -15px;
+        border-radius: 999px;
+        border: 1.5px solid var(--c);
+        pointer-events: none;
+        z-index: 69;
       }
 
-      const fixCursor = Math.random() > 0.5 ? cursors[10] : cursors[8];
-      const sr2 = span.getBoundingClientRect();
-      const fixX = sr2.left + sr2.width * 0.5;
-      const fixY = sr2.top + sr2.height * 0.5;
-
-      await this.flyTo(fixCursor, fixX, fixY, rand(0.36, 0.52));
-      if (token !== this.buildToken) {
-        span.textContent = upgrade.to;
-        span.classList.remove('flag-suggestion');
-        return;
+      .target-box {
+        position: fixed;
+        pointer-events: none;
+        border-style: dashed;
+        border-width: 1px;
+        border-radius: 4px;
+        opacity: 0;
+        z-index: 68;
       }
-      await this.click(fixCursor);
 
-      await this.upgradeSpan(span, upgrade.to, token);
-
-      const sr3 = span.getBoundingClientRect();
-      this.reviewPulse(sr3.left + sr3.width * 0.5, sr3.top + sr3.height * 0.5);
-      el.classList.add('reviewed');
-      setTimeout(() => el.classList.remove('reviewed'), 800);
-
-      await wait(500);
-      if (span.isConnected) {
-        span.classList.remove('flag-suggestion');
+      .editor-frame {
+        position: fixed;
+        border: 1px solid var(--c);
+        border-radius: 4px;
+        pointer-events: none;
+        z-index: 68;
+        background: rgba(255, 255, 255, 0.2);
+        transition: opacity 0.2s ease;
       }
-    },
+      .editor-badge {
+        position: absolute;
+        top: -9px;
+        left: 12px;
+        padding: 1px 6px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--c);
+        background: var(--bg-paper);
+        border: 1px solid var(--c);
+        border-radius: 3px;
+        line-height: 1.6;
+      }
 
-    async upgradeSpan(span, newText, token) {
-      span.style.transition = 'none';
-      span.style.textDecoration = 'line-through';
-      span.style.color = '#D9A05B';
-      span.style.opacity = '0.7';
-
-      await wait(320);
-
-      span.textContent = '';
-      span.style.textDecoration = 'none';
-      span.style.color = '#2E5A44';
-      span.style.opacity = '1';
-
-      for (let i = 0; i < newText.length; i++) {
-        if (token !== this.buildToken) {
-          span.textContent = newText;
-          span.style.transition = 'color 0.6s ease';
-          span.style.color = '';
-          return;
+      .type-caret {
+        display: inline-block;
+        width: 2px;
+        height: 1.1em;
+        background: var(--ink-primary);
+        margin-left: 2px;
+        vertical-align: text-bottom;
+        animation: blink 0.6s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
         }
-        span.textContent = newText.slice(0, i + 1);
-        await wait(rand(18, 34));
       }
 
-      span.style.transition = 'color 0.6s ease';
-      span.style.color = '';
-      await wait(600);
-      span.style.transition = '';
-    },
+      .is-typing {
+        font-family: "JetBrains Mono", ui-monospace, monospace !important;
+        font-weight: 400 !important;
+        letter-spacing: 0 !important;
+        line-height: 1.6 !important;
+        white-space: pre-wrap !important;
+        color: var(--ink-primary) !important;
+        -webkit-text-fill-color: var(--ink-primary) !important;
+        background: transparent !important;
+        background-image: none !important;
+        -webkit-background-clip: border-box !important;
+        background-clip: border-box !important;
+        filter: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
 
-    async buildImage(el, token, workerIdx) {
-      const [openC, confirmC] = this.getWorkerCursors(workerIdx, 2);
-      
-      let rect = el.getBoundingClientRect();
-      let tx = rect.left + rect.width * 0.5;
-      let ty = rect.top + rect.height * 0.5;
+      [data-type="tag"].is-typing {
+        font-size: 0.7rem !important;
+      }
+      [data-type="title"].is-typing {
+        font-size: 1rem !important;
+      }
+      [data-type="body"].is-typing {
+        font-size: 0.9rem !important;
+      }
+      [data-type="kpi-label"].is-typing {
+        font-size: 0.8rem !important;
+      }
+      [data-type="kpi-num"].is-typing {
+        font-weight: 500 !important;
+        letter-spacing: -0.03em !important;
+      }
 
-      // 1. Cursor viaja al contenedor de la imagen
-      await this.flyTo(openC, tx, ty, rand(0.4, 0.6));
-      if (token !== this.buildToken) return;
-      
-      // 2. Click inicial (simula "solicitar" la imagen)
-      await this.click(openC);
-      this.pulse(tx, ty, openC.color);
+      [data-type="badge"].is-typing,
+      [data-type="chip"].is-typing {
+        font-size: 0.7rem !important;
+        line-height: 1.2 !important;
+        padding: 0.35rem 0.8rem !important;
+        border: 1px dashed var(--ink-secondary) !important;
+        border-radius: 4px !important;
+        background: transparent !important;
+        color: var(--ink-primary) !important;
+        -webkit-text-fill-color: var(--ink-primary) !important;
+      }
 
-      // 3. Cursor de confirmación hace el reveal
-      await this.flyTo(confirmC, tx + rand(-20, 20), ty + rand(-20, 20), rand(0.3, 0.5));
-      if (token !== this.buildToken) return;
-      
-      await this.click(confirmC);
-      this.pulse(tx, ty, confirmC.color);
+      [data-type="button"].is-typing {
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        letter-spacing: 0 !important;
+      }
 
-      // 4. Efecto visual: removemos el filtro blur y opacidad baja
-      el.classList.remove('pre-build', 'pre-build-y');
-      el.style.opacity = 1;
-      el.style.filter = 'none';
-      
-      // Animamos la imagen interna
-      const img = el.querySelector('img');
-      if (img) {
-        gsap.fromTo(img, 
-          { opacity: 0, scale: 1.05 }, 
-          { opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out' }
+      .hero-bg {
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+      .hero.s2 .hero-bg {
+        opacity: 1;
+      }
+
+      .bg-grid {
+        background-image:
+          linear-gradient(
+            to right,
+            rgba(28, 27, 25, 0.04) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(28, 27, 25, 0.04) 1px,
+            transparent 1px
+          );
+        background-size: 80px 80px;
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 1) 20%,
+          rgba(0, 0, 0, 0) 90%
+        );
+        mask-image: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 1) 20%,
+          rgba(0, 0, 0, 0) 90%
         );
       }
 
-      await wait(rand(200, 400));
-    },
-
-    async buildText(el, token, workerIdx) {
-      const speed = this.workerSpeeds[workerIdx % 4];
-      const type = el.dataset.type || 'body';
-      const profile = TIMING[type] || TIMING.body;
-
-      const frameHold  = rand(profile.hold[0], profile.hold[1]) * speed;
-      const preConfirm = rand(profile.pre[0], profile.pre[1]) * speed;
-      const earlySpeed = rand(profile.early[0], profile.early[1]) * speed;
-      const lateSpeed  = rand(profile.late[0], profile.late[1]);
-      const flyOpen    = rand(0.32, 0.58) * speed;
-      const flyType    = rand(0.28, 0.5) * speed;
-      const flyConfirm = rand(0.26, 0.48) * speed;
-
-      const originalHTML = el.innerHTML;
-      this.savedHTML.set(el, originalHTML);
-
-      const fullText = el.id === 'hero-title'
-        ? 'AI-Native\nTech Lead'
-        : el.innerText.replace(/\s+/g, ' ').trim();
-
-      const [openC, typeC, confirmC] = this.getWorkerCursors(workerIdx, 3);
-
-      let rect = el.getBoundingClientRect();
-      let tx = rect.left + rect.width * 0.5;
-      let ty = rect.top + rect.height * 0.5;
-      if (rect.height > window.innerHeight * 0.5) ty = rect.top + Math.min(rect.height * 0.3, 120);
-      if (rect.width > window.innerWidth * 0.85) tx = rect.left + Math.min(rect.width * 0.35, window.innerWidth * 0.4);
-      tx = Math.max(28, Math.min(tx, window.innerWidth - 28));
-      ty = Math.max(40, Math.min(ty, window.innerHeight - 40));
-
-      await this.flyTo(openC, tx, ty, flyOpen);
-      if (token !== this.buildToken) return;
-      await this.click(openC);
-      this.pulse(tx, ty, openC.color);
-
-      el.classList.remove('pre-build', 'pre-build-y');
-      gsap.set(el, { opacity: 1, filter: 'none', y: 0 });
-
-      const origH = el.offsetHeight;
-      el.style.minHeight = origH + 'px';
-      el.classList.add('is-typing');
-      el.innerHTML = '';
-
-      const txtSpan = document.createElement('span');
-      const caret = document.createElement('span');
-      caret.className = 'type-caret';
-      el.appendChild(txtSpan);
-      el.appendChild(caret);
-
-      el.classList.add('no-transition');
-      el.classList.remove('is-typing');
-      txtSpan.textContent = fullText;
-      void txtSpan.offsetHeight;
-      const probeRect = txtSpan.getBoundingClientRect();
-      const probeElRect = el.getBoundingClientRect();
-      txtSpan.textContent = '';
-      el.classList.add('is-typing');
-      el.classList.remove('no-transition');
-
-      const padLeft = probeRect.left - probeElRect.left;
-      const padTop  = probeRect.top - probeElRect.top;
-      const offsetX = padLeft - 12;
-      const offsetY = padTop - 11;
-      const frameW  = probeRect.width + 24;
-      const frameH  = probeRect.height + 22;
-
-      const curElRect = el.getBoundingClientRect();
-      const frame = document.createElement('div');
-      frame.className = 'editor-frame';
-      frame.style.setProperty('--c', openC.color);
-      frame.style.left = (curElRect.left + offsetX) + 'px';
-      frame.style.top  = (curElRect.top + offsetY) + 'px';
-      frame.style.width  = frameW + 'px';
-      frame.style.height = frameH + 'px';
-      frame.innerHTML = '<span class="editor-badge">editing</span>';
-      document.getElementById('fx-layer').appendChild(frame);
-
-      gsap.fromTo(frame, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' });
-
-      const stopTrack = this.pinFrameToElement(frame, el, offsetX, offsetY);
-
-      await wait(frameHold);
-      if (token !== this.buildToken) { stopTrack(); frame.remove(); this.instantReveal(el); return; }
-
-      await this.flyTo(typeC, tx + rand(20, 60), ty + rand(-8, 18), flyType);
-      if (token !== this.buildToken) { stopTrack(); frame.remove(); this.instantReveal(el); return; }
-      await wait(rand(40, 140));
-
-      let breathIn = Math.floor(rand(7, 14));
-      let charCounter = 0;
-      for (let i = 0; i < fullText.length; i++) {
-        if (token !== this.buildToken) { stopTrack(); frame.remove(); this.instantReveal(el); return; }
-        txtSpan.textContent = fullText.slice(0, i + 1);
-        const delay = i < 25 ? earlySpeed : lateSpeed;
-        await wait(delay + rand(0, 8));
-
-        charCounter++;
-        if (charCounter >= breathIn) {
-          await wait(rand(30, 130));
-          charCounter = 0;
-          breathIn = Math.floor(rand(7, 14));
-        }
+      .hero-kicker {
+        color: var(--ink-secondary);
+        transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .hero.s2 .hero-kicker {
+        color: var(--accent-terracotta);
+        letter-spacing: 0.3em;
       }
 
-      await wait(preConfirm);
-      if (token !== this.buildToken) { stopTrack(); frame.remove(); this.instantReveal(el); return; }
+      .hero-title {
+        font-family: "Fraunces", serif;
+        font-size: 2.1rem;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        color: var(--ink-secondary);
+        transition:
+          font-size 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          font-weight 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          letter-spacing 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          line-height 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          color 0.45s ease;
+      }
+      .hero.s1 .hero-title {
+        font-size: clamp(3.5rem, 10vw, 8rem);
+        font-weight: 500;
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+        color: var(--ink-primary);
+      }
 
-      const rect2 = el.getBoundingClientRect();
-      const cx = rect2.left + rect2.width * rand(0.4, 0.6);
-      const cy = rect2.top + rect2.height * rand(0.4, 0.6);
-      await this.flyTo(confirmC, cx, cy, flyConfirm);
-      if (token !== this.buildToken) { stopTrack(); frame.remove(); this.instantReveal(el); return; }
-      await this.click(confirmC);
-      this.pulse(cx, cy, confirmC.color);
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        border-radius: 4px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        transition: all 0.2s ease;
+      }
+      .btn-primary {
+        background: var(--ink-primary);
+        color: var(--bg-paper);
+        border: 1px solid var(--ink-primary);
+      }
+      .btn-primary:hover {
+        background: var(--accent-terracotta);
+        border-color: var(--accent-terracotta);
+      }
+      .btn-ghost {
+        border: 1px solid var(--ink-light);
+        color: var(--ink-primary);
+      }
+      .btn-ghost:hover {
+        border-color: var(--ink-primary);
+        background: rgba(28, 27, 25, 0.03);
+      }
 
-      el.classList.remove('is-typing');
-      el.style.minHeight = '';
-      el.innerHTML = originalHTML;
-      this.savedHTML.delete(el);
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.02em;
+        color: var(--ink-secondary);
+        border: 1px solid var(--ink-light);
+        transition: all 0.2s ease;
+      }
+      .chip:hover {
+        color: var(--ink-primary);
+        border-color: var(--ink-primary);
+        background: rgba(255, 255, 255, 0.5);
+      }
 
-      if (el.id === 'hero-title') this.titleRevealed = true;
+      .card {
+        position: relative;
+        border-radius: 4px;
+        border: 1px solid var(--ink-light);
+        background: transparent;
+        padding: 1.6rem;
+        transition:
+          border-color 0.3s ease,
+          background-color 0.3s ease;
+      }
+      .card:hover {
+        border-color: var(--ink-secondary);
+        background: rgba(255, 255, 255, 0.4);
+      }
 
-      this.reviewQueue.push(el);
-      this.processReviewQueue(token);
+      .section-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+      }
+      .section-title {
+        font-family: "Fraunces", serif;
+        font-size: clamp(2rem, 4.5vw, 3.2rem);
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        margin-top: 1rem;
+        color: var(--ink-primary);
+      }
 
-      await wait(rand(180, 320));
-      stopTrack();
-      gsap.to(frame, { opacity: 0, scale: 1.03, duration: 0.3, ease: 'power2.in', onComplete: () => frame.remove() });
-      await wait(rand(120, 260));
-    },
+      .timeline-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: var(--accent-terracotta);
+        border: 2px solid var(--bg-paper);
+        box-shadow: 0 0 0 1px var(--ink-light);
+      }
 
-    async heroBgClick(workerIdx) {
-      const cursor = this.getWorkerCursors(workerIdx, 1)[0];
-      const x = window.innerWidth * rand(0.12, 0.24);
-      const y = window.innerHeight * rand(0.14, 0.26);
-      await this.flyTo(cursor, x, y, rand(0.3, 0.5));
-      await this.click(cursor);
-      this.pulse(x, y, cursor.color);
-      this.bgRevealed = true;
-    },
+      [data-build] {
+        will-change: opacity, filter, transform;
+      }
 
-    async runIntro() {
-      await wait(250);
+      .nav-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--ink-light);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        padding: 0;
+      }
+      .nav-dot:hover {
+        background: var(--ink-secondary);
+        transform: scale(1.3);
+      }
+      .nav-dot.active {
+        background: var(--accent-terracotta);
+        transform: scale(1.4);
+      }
 
-      cursors.forEach((c, i) => {
-        gsap.to(c.el, { opacity: 1, duration: rand(0.35, 0.6), delay: i * 0.05 + rand(0, 0.35) });
-      });
+      /* Image styling for editorial look */
+      .editorial-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(100%) contrast(1.1) sepia(10%);
+        mix-blend-mode: multiply;
+        opacity: 0.9;
+        transition:
+          opacity 0.8s ease,
+          filter 0.8s ease;
+      }
+      .editorial-img:hover {
+        opacity: 1;
+        filter: grayscale(0%) contrast(1) sepia(0%);
+      }
+    </style>
+  </head>
 
-      await wait(650);
+  <body>
+    <div id="app" class="relative">
+      <div class="fixed inset-0 z-[70] pointer-events-none">
+        <div
+          v-for="a in agents"
+          :key="a.id"
+          class="agent-cursor"
+          :class="a.cls"
+        >
+          <div class="agent-inner">
+            <svg
+              class="agent-svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="none"
+            >
+              <path d="M4 2.5 20 12l-7.2 1.6L9.4 21 4 2.5Z" />
+            </svg>
+            <span class="agent-label">{{ a.label }}</span>
+          </div>
+        </div>
+      </div>
+      <div id="fx-layer" class="fixed inset-0 z-[69] pointer-events-none"></div>
 
-      const btnWork = document.querySelector('#hero-cta a[href="#work"]');
-      const btnContact = document.querySelector('#hero-cta a[href="#contact"]');
-      const badges = Array.from(document.querySelectorAll('#hero-badges [data-type="badge"]'));
+      <div
+        class="fixed right-6 top-1/2 -translate-y-1/2 z-[60] flex flex-col gap-4"
+      >
+        <button
+          v-for="(s, i) in sectionIds"
+          :key="i"
+          class="nav-dot"
+          :class="{ active: activeIdx === i }"
+          @click="goTo(i)"
+          :aria-label="'Ir a sección ' + (i + 1)"
+        ></button>
+      </div>
 
-      const queue = [
-        { kind: 'bg' },
-        { kind: 'text', el: document.querySelector('#hero-title') },
-        { kind: 'text', el: document.querySelector('#hero-sub') },
-        { kind: 'text', el: btnWork },
-        { kind: 'text', el: btnContact },
-        ...badges.map(el => ({ kind: 'text', el })),
+      <!-- HERO -->
+      <section
+        id="hero"
+        class="hero relative min-h-screen flex items-center px-6"
+        :class="heroClasses"
+      >
+        <div
+          class="hero-bg pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div class="absolute inset-0 bg-grid"></div>
+        </div>
+
+        <div class="relative w-full max-w-5xl mx-auto py-20 md:py-28">
+          <div
+            class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4"
+          >
+            <div
+              class="hero-kicker mono text-[10px] uppercase tracking-[.15em]"
+            >
+              // ai-native tech lead
+            </div>
+            <div
+              class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest hidden md:block"
+            >
+              EST. 2014
+            </div>
+          </div>
+
+          <h1 id="hero-title" data-type="title" class="hero-title pre-build">
+            AI-Native<br />Tech&nbsp;Lead
+          </h1>
+
+          <p
+            id="hero-sub"
+            data-type="body"
+            class="mt-10 max-w-lg text-[15px] leading-relaxed text-[var(--ink-secondary)] pre-build-y font-serif"
+            style="
+              font-family: &quot;Fraunces&quot;, serif;
+              font-size: 1.1rem;
+              line-height: 1.7;
+            "
+          >
+            Diseño, orquesto y despliego sistemas donde
+            <span class="text-[var(--ink-primary)] italic"
+              >humanos y agentes</span
+            >
+            construyen software juntos. Menos tickets, más outcomes.
+          </p>
+
+          <div id="hero-cta" class="mt-12 flex flex-wrap items-center gap-4">
+            <a
+              href="#work"
+              class="btn btn-primary pre-build-y"
+              data-type="button"
+              >Ver proyectos →</a
+            >
+            <a
+              href="#contact"
+              class="btn btn-ghost pre-build-y"
+              data-type="button"
+              >Hablemos</a
+            >
+          </div>
+
+          <div id="hero-badges" class="mt-16 flex flex-wrap gap-2">
+            <span class="chip pre-build-y" data-type="badge">LangGraph</span>
+            <span class="chip pre-build-y" data-type="badge">MCP</span>
+            <span class="chip pre-build-y" data-type="badge">RAG</span>
+            <span class="chip pre-build-y" data-type="badge">Evals</span>
+            <span class="chip pre-build-y" data-type="badge">Multi-agent</span>
+            <span class="chip pre-build-y" data-type="badge">TypeScript</span>
+            <span class="chip pre-build-y" data-type="badge">Python</span>
+          </div>
+        </div>
+
+        <button
+          id="hero-scroll"
+          @click="goTo(1)"
+          class="hero-bg absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-transparent border-0 cursor-pointer group"
+        >
+          <span
+            class="mono text-[9px] uppercase tracking-[.2em] text-[var(--ink-secondary)] group-hover:text-[var(--ink-primary)] transition-colors"
+            >Scroll</span
+          >
+          <div
+            class="w-[1px] h-8 bg-[var(--ink-light)] group-hover:bg-[var(--ink-secondary)] transition-colors"
+          ></div>
+        </button>
+      </section>
+
+      <!-- ABOUT -->
+      <section
+        class="relative min-h-screen flex items-center py-20 md:py-32 px-6 border-t border-[var(--ink-light)]"
+      >
+        <div class="max-w-6xl mx-auto w-full">
+          <div
+            class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4"
+          >
+            <div data-build data-type="tag" class="section-tag">
+              01 — sobre mí
+            </div>
+            <div
+              class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest"
+            >
+              METADATA
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-[1fr_300px] gap-12 items-start">
+            <div>
+              <h2 data-build data-type="title" class="section-title">
+                Del prompt al producto.
+              </h2>
+              <p
+                data-build
+                data-type="body"
+                class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+                style="
+                  font-family: &quot;Fraunces&quot;, serif;
+                  font-size: 1.05rem;
+                  line-height: 1.7;
+                "
+              >
+                Llevo una década construyendo software. Los últimos tres los
+                pasé diseñando sistemas donde los agentes hacen el trabajo
+                pesado y las personas toman las decisiones. Mi trabajo es que
+                esa colaboración sea
+                <span class="text-[var(--ink-primary)] italic"
+                  >observable, medible y aburrida de mantener</span
+                >.
+              </p>
+            </div>
+
+            <!-- FOTO EDITORIAL -->
+            <div class="hidden md:block">
+              <div
+                class="w-full aspect-[3/4] overflow-hidden rounded-sm border border-[var(--ink-light)]"
+                data-build
+                data-type="image"
+                style="background-color: var(--ink-light)"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop"
+                  class="editorial-img"
+                  alt="Portrait"
+                />
+              </div>
+              <div
+                class="mt-3 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider"
+              >
+                Fig. 1 — The Architect
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="grid sm:grid-cols-3 gap-0 mt-16 border border-[var(--ink-light)]"
+          >
+            <div
+              class="p-6 border-b sm:border-b-0 sm:border-r border-[var(--ink-light)]"
+            >
+              <div
+                class="text-4xl font-serif text-[var(--ink-primary)]"
+                data-build
+                data-type="kpi-num"
+              >
+                10+
+              </div>
+              <div
+                class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="kpi-label"
+              >
+                Años construyendo producto
+              </div>
+            </div>
+            <div
+              class="p-6 border-b sm:border-b-0 sm:border-r border-[var(--ink-light)]"
+            >
+              <div
+                class="text-4xl font-serif text-[var(--ink-primary)]"
+                data-build
+                data-type="kpi-num"
+              >
+                40+
+              </div>
+              <div
+                class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="kpi-label"
+              >
+                Agentes en producción
+              </div>
+            </div>
+            <div class="p-6">
+              <div
+                class="text-4xl font-serif text-[var(--ink-primary)]"
+                data-build
+                data-type="kpi-num"
+              >
+                3×
+              </div>
+              <div
+                class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="kpi-label"
+              >
+                Velocidad de entrega
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STACK -->
+      <section
+        class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]"
+      >
+        <div class="max-w-6xl mx-auto w-full">
+          <div
+            class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4"
+          >
+            <div data-build data-type="tag" class="section-tag">02 — stack</div>
+            <div
+              class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest"
+            >
+              SYSTEM
+            </div>
+          </div>
+
+          <h2 data-build data-type="title" class="section-title">
+            Las piezas del sistema.
+          </h2>
+
+          <div class="grid md:grid-cols-2 gap-6 mt-16">
+            <div
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30"
+            >
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                Orquestación
+              </div>
+              <div class="mt-6 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip">LangGraph</span>
+                <span class="chip" data-build data-type="chip">CrewAI</span>
+                <span class="chip" data-build data-type="chip">Temporal</span>
+                <span class="chip" data-build data-type="chip">MCP</span>
+              </div>
+            </div>
+            <div
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30"
+            >
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                Modelos
+              </div>
+              <div class="mt-6 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip">GPT</span>
+                <span class="chip" data-build data-type="chip">Claude</span>
+                <span class="chip" data-build data-type="chip">Gemini</span>
+                <span class="chip" data-build data-type="chip">Llama</span>
+              </div>
+            </div>
+            <div
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30"
+            >
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                Datos & RAG
+              </div>
+              <div class="mt-6 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip">pgvector</span>
+                <span class="chip" data-build data-type="chip">Qdrant</span>
+                <span class="chip" data-build data-type="chip">Redis</span>
+                <span class="chip" data-build data-type="chip">dbt</span>
+              </div>
+            </div>
+            <div
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30"
+            >
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                Infra
+              </div>
+              <div class="mt-6 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip">AWS</span>
+                <span class="chip" data-build data-type="chip">Kubernetes</span>
+                <span class="chip" data-build data-type="chip">Terraform</span>
+                <span class="chip" data-build data-type="chip">Vercel</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WORK -->
+      <section
+        id="work"
+        class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]"
+      >
+        <div class="max-w-6xl mx-auto w-full">
+          <div
+            class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4"
+          >
+            <div data-build data-type="tag" class="section-tag">
+              03 — proyectos
+            </div>
+            <div
+              class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest"
+            >
+              CASES
+            </div>
+          </div>
+
+          <h2 data-build data-type="title" class="section-title">
+            Cosas que construí.
+          </h2>
+
+          <div class="grid md:grid-cols-3 gap-6 mt-16">
+            <article
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30 flex flex-col hover:border-[var(--ink-secondary)] transition-colors"
+            >
+              <!-- Imagen del Proyecto 1 -->
+              <div
+                class="w-full aspect-video overflow-hidden rounded-sm mb-6 border border-[var(--ink-light)] bg-[var(--ink-light)]"
+                data-build
+                data-type="image"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop"
+                  class="editorial-img"
+                  alt="Code"
+                />
+              </div>
+              <div
+                class="mono text-[9px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                multi-agent
+              </div>
+              <h3
+                class="mt-4 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                Orquestador de ingeniería
+              </h3>
+              <p
+                class="mt-4 text-sm leading-relaxed text-[var(--ink-secondary)] flex-grow font-serif"
+                data-build
+                data-type="body"
+              >
+                Un grafo de agentes que convierte issues en PRs revisados.
+                Planner, Coder, Reviewer y Tester trabajando en paralelo.
+              </p>
+              <div class="mt-8 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip">LangGraph</span>
+                <span class="chip" data-build data-type="chip">MCP</span>
+              </div>
+            </article>
+            <article
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30 flex flex-col hover:border-[var(--ink-secondary)] transition-colors"
+            >
+              <!-- Imagen del Proyecto 2 -->
+              <div
+                class="w-full aspect-video overflow-hidden rounded-sm mb-6 border border-[var(--ink-light)] bg-[var(--ink-light)]"
+                data-build
+                data-type="image"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
+                  class="editorial-img"
+                  alt="Data Network"
+                />
+              </div>
+              <div
+                class="mono text-[9px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                rag
+              </div>
+              <h3
+                class="mt-4 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                Memoria de producto
+              </h3>
+              <p
+                class="mt-4 text-sm leading-relaxed text-[var(--ink-secondary)] flex-grow font-serif"
+                data-build
+                data-type="body"
+              >
+                Base de conocimiento viva que indexa decisiones, specs y código
+                para que los agentes dejen de preguntar lo mismo.
+              </p>
+              <div class="mt-8 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip">pgvector</span>
+                <span class="chip" data-build data-type="chip">Evals</span>
+              </div>
+            </article>
+            <article
+              class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30 flex flex-col hover:border-[var(--ink-secondary)] transition-colors"
+            >
+              <!-- Imagen del Proyecto 3 -->
+              <div
+                class="w-full aspect-video overflow-hidden rounded-sm mb-6 border border-[var(--ink-light)] bg-[var(--ink-light)]"
+                data-build
+                data-type="image"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop"
+                  class="editorial-img"
+                  alt="Hardware"
+                />
+              </div>
+              <div
+                class="mono text-[9px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                observability
+              </div>
+              <h3
+                class="mt-4 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                Trace de agentes
+              </h3>
+              <p
+                class="mt-4 text-sm leading-relaxed text-[var(--ink-secondary)] flex-grow font-serif"
+                data-build
+                data-type="body"
+              >
+                Cada paso de cada agente es una traza. Coste, latencia y calidad
+                por turno, con evals automáticas en CI.
+              </p>
+              <div class="mt-8 flex flex-wrap gap-2">
+                <span class="chip" data-build data-type="chip"
+                  >OpenTelemetry</span
+                >
+                <span class="chip" data-build data-type="chip">Temporal</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPERIENCE -->
+      <section
+        class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]"
+      >
+        <div class="max-w-4xl mx-auto w-full">
+          <div
+            class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4"
+          >
+            <div data-build data-type="tag" class="section-tag">
+              04 — trayectoria
+            </div>
+            <div
+              class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest"
+            >
+              TIMELINE
+            </div>
+          </div>
+
+          <h2 data-build data-type="title" class="section-title">
+            Cómo llegué acá.
+          </h2>
+
+          <div
+            class="mt-16 relative pl-8 border-l border-[var(--ink-light)] space-y-12"
+          >
+            <div class="relative">
+              <span class="timeline-dot absolute -left-[38.5px] top-1.5"></span>
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                2023 — hoy
+              </div>
+              <h3
+                class="mt-2 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                AI-Native Tech Lead
+              </h3>
+              <p
+                class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
+                data-build
+                data-type="body"
+              >
+                Lidero la adopción de agentes en el ciclo de producto:
+                arquitectura, guardrails, evals y cultura.
+              </p>
+            </div>
+            <div class="relative">
+              <span class="timeline-dot absolute -left-[38.5px] top-1.5"></span>
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                2020 — 2023
+              </div>
+              <h3
+                class="mt-2 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                Senior Full-Stack Engineer
+              </h3>
+              <p
+                class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
+                data-build
+                data-type="body"
+              >
+                Plataformas de datos y producto. Primeros experimentos con LLMs
+                en producción y sistemas de evaluación.
+              </p>
+            </div>
+            <div class="relative">
+              <span class="timeline-dot absolute -left-[38.5px] top-1.5"></span>
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                2014 — 2020
+              </div>
+              <h3
+                class="mt-2 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                Software Engineer
+              </h3>
+              <p
+                class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
+                data-build
+                data-type="body"
+              >
+                De frontend a infraestructura. Donde aprendí que los sistemas se
+                juzgan por cómo fallan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section
+        id="contact"
+        class="relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)]"
+      >
+        <div class="max-w-4xl mx-auto w-full text-left">
+          <div
+            class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4"
+          >
+            <div data-build data-type="tag" class="section-tag">
+              05 — contacto
+            </div>
+            <div
+              class="mono text-[10px] text-[var(--ink-secondary)] tracking-widest"
+            >
+              OUTRO
+            </div>
+          </div>
+
+          <h2 data-build data-type="title" class="section-title">
+            Construyamos algo.
+          </h2>
+          <p
+            data-build
+            data-type="body"
+            class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+            style="
+              font-family: &quot;Fraunces&quot;, serif;
+              font-size: 1.05rem;
+              line-height: 1.7;
+            "
+          >
+            Si estás pensando cómo meter agentes en tu equipo sin que se te
+            caiga el mundo, hablemos.
+          </p>
+
+          <div class="mt-12 flex flex-wrap gap-4">
+            <a
+              href="mailto:hola@tudominio.com"
+              class="btn btn-primary"
+              data-build
+              data-type="button"
+              >hola@tudominio.com</a
+            >
+            <a href="#" class="btn btn-ghost" data-build data-type="button"
+              >LinkedIn ↗</a
+            >
+            <a href="#" class="btn btn-ghost" data-build data-type="button"
+              >GitHub ↗</a
+            >
+          </div>
+
+          <div
+            class="mt-24 mono text-[10px] uppercase tracking-[.2em] text-[var(--ink-secondary)] border-t border-[var(--ink-light)] pt-6 flex justify-between"
+          >
+            <span>construido por agentes (y por mí)</span>
+            <span>© 2025</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      const rand = (min, max) => min + Math.random() * (max - min);
+
+      const AGENTS = [
+        {
+          id: "orchestrator",
+          label: "Orchestrator",
+          cls: "c-orch",
+          home: [0.5, 0.46],
+        },
+        { id: "planner", label: "Planner", cls: "c-plan", home: [0.2, 0.3] },
+        { id: "coder", label: "Coder", cls: "c-code", home: [0.78, 0.62] },
+        { id: "designer", label: "Designer", cls: "c-des", home: [0.7, 0.2] },
+        { id: "reviewer", label: "Reviewer", cls: "c-rev", home: [0.3, 0.76] },
+        { id: "tester", label: "Tester", cls: "c-test", home: [0.86, 0.36] },
+        {
+          id: "architect",
+          label: "Architect",
+          cls: "c-arch",
+          home: [0.4, 0.18],
+        },
+        { id: "devops", label: "DevOps", cls: "c-dev", home: [0.12, 0.55] },
+        {
+          id: "scripter",
+          label: "Scripter",
+          cls: "c-script",
+          home: [0.62, 0.8],
+        },
+        {
+          id: "debugger",
+          label: "Debugger",
+          cls: "c-debug",
+          home: [0.9, 0.68],
+        },
+        {
+          id: "optimizer",
+          label: "Optimizer",
+          cls: "c-opt",
+          home: [0.42, 0.6],
+        },
+        { id: "auditor", label: "Auditor", cls: "c-audit", home: [0.08, 0.86] },
       ];
 
-      const myToken = ++this.buildToken;
-
-      const worker = async (workerIdx) => {
-        await wait(workerIdx * 340 + rand(50, 420));
-        if (myToken !== this.buildToken) return;
-
-        while (queue.length > 0) {
-          if (myToken !== this.buildToken) return;
-          const item = queue.shift();
-          if (!item) return;
-
-          await wait(rand(40, 240));
-          if (myToken !== this.buildToken) return;
-
-          try {
-            if (item.kind === 'bg') await this.heroBgClick(workerIdx);
-            else await this.buildText(item.el, myToken, workerIdx);
-          } catch (e) {}
-          if (myToken !== this.buildToken) return;
-
-          await wait(rand(180, 700));
-        }
+      const TIMING = {
+        title: {
+          hold: [280, 520],
+          pre: [240, 460],
+          early: [30, 46],
+          late: [7, 12],
+        },
+        body: {
+          hold: [200, 380],
+          pre: [200, 380],
+          early: [26, 40],
+          late: [7, 12],
+        },
+        tag: {
+          hold: [160, 300],
+          pre: [140, 260],
+          early: [22, 34],
+          late: [6, 11],
+        },
+        chip: {
+          hold: [100, 220],
+          pre: [90, 200],
+          early: [16, 28],
+          late: [5, 9],
+        },
+        badge: {
+          hold: [100, 220],
+          pre: [90, 200],
+          early: [16, 28],
+          late: [5, 9],
+        },
+        "kpi-num": {
+          hold: [160, 320],
+          pre: [140, 280],
+          early: [22, 36],
+          late: [6, 11],
+        },
+        "kpi-label": {
+          hold: [160, 320],
+          pre: [140, 280],
+          early: [22, 36],
+          late: [6, 11],
+        },
+        button: {
+          hold: [180, 340],
+          pre: [160, 300],
+          early: [24, 38],
+          late: [7, 12],
+        },
+        image: {
+          hold: [300, 500],
+          pre: [100, 200],
+          early: [10, 20],
+          late: [5, 10],
+        },
       };
 
-      await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
+      const TEXT_UPGRADES = [
+        { find: "Llevo una década", to: "Llevo más de una década" },
+        { find: "Los últimos tres", to: "Los últimos tres años" },
+        { find: "Mi trabajo es", to: "Mi misión es" },
+        { find: "Cosas que construí", to: "Cosas que he construido" },
+        { find: "Del prompt al producto", to: "Del prompt al producto real" },
+        { find: "trabajo pesado", to: "trabajo estratégico" },
+        {
+          find: "Las piezas del sistema",
+          to: "Las piezas del sistema completo",
+        },
+        { find: "Cómo llegué acá", to: "Cómo llegué hasta acá" },
+        { find: "Construyamos algo", to: "Construyamos algo grande" },
+        {
+          find: "Orquestador de ingeniería",
+          to: "Orquestador de ingeniería autónomo",
+        },
+        { find: "Memoria de producto", to: "Memoria de producto viva" },
+        { find: "Trace de agentes", to: "Trace de agentes en vivo" },
+        { find: "velocidad de entrega", to: "velocidad de entrega real" },
+        {
+          find: "años construyendo producto",
+          to: "años construyendo producto real",
+        },
+        { find: "agentes en producción", to: "agentes en producción real" },
+        { find: "Ver proyectos", to: "Explorar proyectos" },
+      ];
 
-      if (myToken !== this.buildToken) { this.finishHeroInstantly(); return; }
+      let cursors = [];
+      const frameTrackers = new Set();
 
-      this.reviewQueue = [];
-      let waited = 0;
-      while (this.isReviewing && waited < 3000) {
-        await wait(100);
-        waited += 100;
-      }
+      createApp({
+        data() {
+          return {
+            agents: AGENTS,
+            titleRevealed: false,
+            bgRevealed: false,
+            heroDone: false,
+            activeIdx: 0,
+            sectionIds: ["hero", "about", "stack", "work", "exp", "contact"],
+            isNavigating: false,
+          };
+        },
+        computed: {
+          heroClasses() {
+            return { s1: this.titleRevealed, s2: this.bgRevealed };
+          },
+        },
+        mounted() {
+          this.buildToken = 0;
+          this.savedHTML = new WeakMap();
+          this.queues = new Map();
+          this.builtSections = new WeakSet();
+          this.workerRotation = [0, 0, 0, 0];
+          this.workerSpeeds = [
+            rand(0.9, 1.15),
+            rand(0.8, 1.1),
+            rand(1.0, 1.25),
+            rand(0.85, 1.15),
+          ];
 
-      this.heroDone = true;
-    },
-  }
-}).mount('#app');
-</script>
-</body>
+          this.reviewQueue = [];
+          this.isReviewing = false;
+          this.usedUpgrades = new Set();
+
+          this.initCursors();
+          this.setupNavigation();
+          this.setupQueues();
+          this.runIntro();
+        },
+        methods: {
+          initCursors() {
+            const els = Array.from(document.querySelectorAll(".agent-cursor"));
+            cursors = els.map((el, i) => {
+              const h = AGENTS[i].home;
+              gsap.set(el, {
+                x: window.innerWidth * h[0],
+                y: window.innerHeight * h[1],
+                opacity: 0,
+                scale: 1,
+              });
+              return {
+                el,
+                color:
+                  getComputedStyle(el).getPropertyValue("--c").trim() ||
+                  "#1C1B19",
+              };
+            });
+          },
+
+          getWorkerCursors(workerIdx, count) {
+            const base = (workerIdx % 4) * 3;
+            const rot = this.workerRotation[workerIdx % 4] || 0;
+            const out = [];
+            for (let i = 0; i < count; i++)
+              out.push(cursors[(base + ((rot + i) % 3)) % cursors.length]);
+            this.workerRotation[workerIdx % 4] = (rot + count) % 3;
+            return out;
+          },
+
+          async flyTo(cursor, x, y, dur) {
+            gsap.to(cursor.el, { opacity: 1, duration: 0.22 });
+            await gsap.to(cursor.el, {
+              x,
+              y,
+              duration: dur,
+              ease: "power3.inOut",
+            });
+          },
+
+          async click(cursor) {
+            await gsap.to(cursor.el, {
+              scale: 0.72,
+              duration: 0.08,
+              yoyo: true,
+              repeat: 1,
+              ease: "power2.inOut",
+            });
+          },
+
+          pulse(x, y, color) {
+            const p = document.createElement("div");
+            p.className = "click-pulse";
+            p.style.setProperty("--c", color);
+            p.style.left = x + "px";
+            p.style.top = y + "px";
+            document.getElementById("fx-layer").appendChild(p);
+            gsap.fromTo(
+              p,
+              { scale: 0.15, opacity: 1 },
+              {
+                scale: 1.5,
+                opacity: 0,
+                duration: 0.65,
+                ease: "power2.out",
+                onComplete: () => p.remove(),
+              },
+            );
+          },
+
+          reviewPulse(x, y) {
+            const p = document.createElement("div");
+            p.className = "click-pulse";
+            p.style.setProperty("--c", "#2E5A44");
+            p.style.left = x + "px";
+            p.style.top = y + "px";
+            document.getElementById("fx-layer").appendChild(p);
+            gsap.fromTo(
+              p,
+              { scale: 0.15, opacity: 1 },
+              {
+                scale: 1.5,
+                opacity: 0,
+                duration: 0.65,
+                ease: "power2.out",
+                onComplete: () => p.remove(),
+              },
+            );
+
+            const check = document.createElement("div");
+            check.innerHTML = "✓";
+            check.style.position = "fixed";
+            check.style.left = x + 12 + "px";
+            check.style.top = y + 8 + "px";
+            check.style.color = "#2E5A44";
+            check.style.fontSize = "14px";
+            check.style.fontFamily = "monospace";
+            check.style.fontWeight = "bold";
+            check.style.pointerEvents = "none";
+            check.style.zIndex = 69;
+            document.getElementById("fx-layer").appendChild(check);
+
+            gsap.fromTo(
+              check,
+              { opacity: 0, scale: 0.5, y: 5 },
+              { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out" },
+            );
+            gsap.to(check, {
+              opacity: 0,
+              y: -10,
+              delay: 0.6,
+              duration: 0.4,
+              onComplete: () => check.remove(),
+            });
+          },
+
+          flagPulse(x, y) {
+            const p = document.createElement("div");
+            p.className = "click-pulse";
+            p.style.setProperty("--c", "#D9A05B");
+            p.style.left = x + "px";
+            p.style.top = y + "px";
+            document.getElementById("fx-layer").appendChild(p);
+            gsap.fromTo(
+              p,
+              { scale: 0.15, opacity: 1 },
+              {
+                scale: 1.5,
+                opacity: 0,
+                duration: 0.7,
+                ease: "power2.out",
+                onComplete: () => p.remove(),
+              },
+            );
+
+            const badge = document.createElement("div");
+            badge.textContent = "!";
+            badge.style.position = "fixed";
+            badge.style.left = x - 8 + "px";
+            badge.style.top = Math.max(10, y - 24) + "px";
+            badge.style.width = "16px";
+            badge.style.height = "16px";
+            badge.style.borderRadius = "50%";
+            badge.style.background = "#D9A05B";
+            badge.style.color = "#1C1B19";
+            badge.style.fontSize = "11px";
+            badge.style.fontWeight = "bold";
+            badge.style.display = "flex";
+            badge.style.alignItems = "center";
+            badge.style.justifyContent = "center";
+            badge.style.fontFamily = "monospace";
+            badge.style.pointerEvents = "none";
+            badge.style.zIndex = 69;
+            document.getElementById("fx-layer").appendChild(badge);
+
+            gsap.fromTo(
+              badge,
+              { scale: 0, y: 6 },
+              { scale: 1, y: 0, duration: 0.3, ease: "back.out" },
+            );
+            gsap.to(badge, {
+              opacity: 0,
+              y: -14,
+              delay: 1.4,
+              duration: 0.4,
+              onComplete: () => badge.remove(),
+            });
+          },
+
+          scatterCursors() {
+            cursors.forEach((c, i) => {
+              const h = AGENTS[i].home;
+              const x = Math.max(
+                40,
+                Math.min(
+                  window.innerWidth - 40,
+                  window.innerWidth * h[0] + rand(-70, 70),
+                ),
+              );
+              const y = Math.max(
+                60,
+                Math.min(
+                  window.innerHeight - 60,
+                  window.innerHeight * h[1] + rand(-60, 60),
+                ),
+              );
+              gsap.to(c.el, {
+                x,
+                y,
+                duration: rand(0.6, 1.1),
+                ease: "power2.inOut",
+                delay: rand(0, 0.3),
+              });
+            });
+          },
+
+          setupNavigation() {
+            this.sections = Array.from(document.querySelectorAll("section"));
+            window.addEventListener("wheel", (e) => this.onWheel(e), {
+              passive: false,
+            });
+            window.addEventListener("keydown", (e) => this.onKey(e));
+            window.addEventListener(
+              "touchstart",
+              (e) => {
+                this._touchY = e.touches[0].clientY;
+              },
+              { passive: true },
+            );
+            window.addEventListener("touchend", (e) => this.onTouchEnd(e), {
+              passive: true,
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach((a) => {
+              a.addEventListener("click", (e) => {
+                const href = a.getAttribute("href");
+                if (!href || href.length < 2) return;
+                const target = document.querySelector(href);
+                if (!target) return;
+                const section = target.closest("section");
+                if (!section) return;
+                const idx = this.sections.indexOf(section);
+                if (idx === -1) return;
+                e.preventDefault();
+                this.goTo(idx);
+              });
+            });
+
+            let scrollTimer;
+            window.addEventListener("scroll", () => {
+              if (this.isNavigating) return;
+              clearTimeout(scrollTimer);
+              scrollTimer = setTimeout(() => {
+                if (this.isNavigating) return;
+                let best = null,
+                  bestDist = Infinity;
+                this.sections.forEach((s) => {
+                  const d = Math.abs(s.getBoundingClientRect().top);
+                  if (d < bestDist) {
+                    bestDist = d;
+                    best = s;
+                  }
+                });
+                if (!best) return;
+                const idx = this.sections.indexOf(best);
+                if (idx === -1) return;
+                this.activeIdx = idx;
+                this.buildSection(best);
+              }, 200);
+            });
+          },
+
+          onWheel(e) {
+            if (e.ctrlKey || e.metaKey) return;
+            if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+            if (this.isNavigating) {
+              e.preventDefault();
+              return;
+            }
+            const dir = Math.sign(e.deltaY);
+            if (dir === 0) return;
+            const section = this.sections[this.activeIdx];
+            if (!section) return;
+            const rect = section.getBoundingClientRect();
+            const vh = window.innerHeight;
+            if (rect.height > vh + 20) {
+              const atTop = rect.top >= -5;
+              const atBottom = rect.bottom <= vh + 5;
+              if ((dir > 0 && !atBottom) || (dir < 0 && !atTop)) return;
+            }
+            e.preventDefault();
+            this.goTo(this.activeIdx + dir);
+          },
+
+          onKey(e) {
+            if (this.isNavigating) return;
+            const k = e.key;
+            if (["ArrowDown", "PageDown", " "].includes(k)) {
+              if (
+                k === " " &&
+                ["A", "BUTTON"].includes(document.activeElement?.tagName)
+              )
+                return;
+              e.preventDefault();
+              this.goTo(this.activeIdx + 1);
+            } else if (["ArrowUp", "PageUp"].includes(k)) {
+              e.preventDefault();
+              this.goTo(this.activeIdx - 1);
+            } else if (k === "Home") {
+              e.preventDefault();
+              this.goTo(0);
+            } else if (k === "End") {
+              e.preventDefault();
+              this.goTo(this.sections.length - 1);
+            }
+          },
+
+          onTouchEnd(e) {
+            if (this.isNavigating) return;
+            const dy = this._touchY - e.changedTouches[0].clientY;
+            if (Math.abs(dy) < 50) return;
+            const section = this.sections[this.activeIdx];
+            if (!section) return;
+            const rect = section.getBoundingClientRect();
+            const vh = window.innerHeight;
+            if (rect.height > vh + 20) {
+              const atTop = rect.top >= -5;
+              const atBottom = rect.bottom <= vh + 5;
+              if ((dy > 0 && !atBottom) || (dy < 0 && !atTop)) return;
+            }
+            this.goTo(this.activeIdx + (dy > 0 ? 1 : -1));
+          },
+
+          stopAllFrameTrackers() {
+            frameTrackers.forEach((stop) => {
+              try {
+                stop();
+              } catch (e) {}
+            });
+            frameTrackers.clear();
+          },
+
+          clearFrames() {
+            this.stopAllFrameTrackers();
+            document
+              .querySelectorAll(".editor-frame, .target-box")
+              .forEach((f) => f.remove());
+          },
+
+          cleanupFlags() {
+            document.querySelectorAll(".flag-suggestion").forEach((span) => {
+              span.classList.remove("flag-suggestion");
+              span.style.textDecoration = "";
+              span.style.color = "";
+              span.style.opacity = "";
+              span.style.transition = "";
+            });
+          },
+
+          pinFrameToElement(frame, el, offsetX, offsetY) {
+            let stopped = false;
+            let lastLeft = -1,
+              lastTop = -1;
+            const tick = () => {
+              if (stopped) return;
+              if (!frame.isConnected || !el.isConnected) {
+                stopped = true;
+                frameTrackers.delete(stopFn);
+                return;
+              }
+              const r = el.getBoundingClientRect();
+              const left = Math.round(r.left + offsetX);
+              const top = Math.round(r.top + offsetY);
+              if (left !== lastLeft || top !== lastTop) {
+                frame.style.left = left + "px";
+                frame.style.top = top + "px";
+                lastLeft = left;
+                lastTop = top;
+              }
+              requestAnimationFrame(tick);
+            };
+            const stopFn = () => {
+              stopped = true;
+            };
+            frameTrackers.add(stopFn);
+            requestAnimationFrame(tick);
+            return stopFn;
+          },
+
+          finishHeroInstantly() {
+            this.stopAllFrameTrackers();
+            this.reviewQueue = [];
+            this.isReviewing = false;
+            const heroEls = document.querySelectorAll("#hero [data-type]");
+            heroEls.forEach((el) => {
+              const saved = this.savedHTML.get(el);
+              if (saved) {
+                el.innerHTML = saved;
+                this.savedHTML.delete(el);
+              }
+              el.classList.remove("is-typing", "pre-build", "pre-build-y");
+              el.style.minHeight = "";
+              gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+            });
+            this.titleRevealed = true;
+            this.bgRevealed = true;
+            this.heroDone = true;
+            this.clearFrames();
+            this.cleanupFlags();
+          },
+
+          goTo(idx) {
+            if (idx < 0 || idx >= this.sections.length) return;
+            if (this.isNavigating) return;
+            if (idx === this.activeIdx) return;
+            const oldIdx = this.activeIdx;
+            this.isNavigating = true;
+            this.activeIdx = idx;
+            this.buildToken++;
+            this.reviewQueue = [];
+            this.isReviewing = false;
+            this.clearFrames();
+            this.cleanupFlags();
+            if (oldIdx === 0 && idx !== 0 && !this.heroDone)
+              this.finishHeroInstantly();
+            this.sections[idx].scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+            this.waitForScrollEnd(() => {
+              this.isNavigating = false;
+              this.buildSection(this.sections[idx]);
+            });
+          },
+
+          waitForScrollEnd(cb) {
+            const start = Date.now();
+            const maxWait = 1500;
+            let lastY = window.scrollY;
+            let stable = 0;
+            const check = () => {
+              if (Date.now() - start > maxWait) return cb();
+              const y = window.scrollY;
+              if (Math.abs(y - lastY) < 1.5) {
+                stable++;
+                if (stable >= 2) return cb();
+              } else stable = 0;
+              lastY = y;
+              setTimeout(check, 60);
+            };
+            setTimeout(check, 60);
+          },
+
+          setupQueues() {
+            const items = gsap.utils.toArray("[data-build]");
+            const bySection = new Map();
+
+            items.forEach((el) => {
+              gsap.set(el, {
+                opacity: 0.06,
+                filter: "grayscale(1) blur(2px)",
+                y: 15,
+              });
+              const section = el.closest("section");
+              if (!section) return;
+              if (!bySection.has(section)) bySection.set(section, []);
+              bySection.get(section).push(el);
+            });
+
+            bySection.forEach((els, section) => {
+              const headerItems = [];
+              const cardGroups = new Map();
+              els.forEach((el) => {
+                const card = el.closest(".card") || el.closest(".border");
+                if (!card) {
+                  headerItems.push(el);
+                  return;
+                }
+                if (!cardGroups.has(card)) cardGroups.set(card, []);
+                cardGroups.get(card).push(el);
+              });
+
+              const groupList = Array.from(cardGroups.values());
+              const maxLen = Math.max(0, ...groupList.map((g) => g.length));
+              const interleaved = [...headerItems];
+              for (let i = 0; i < maxLen; i++) {
+                groupList.forEach((g) => {
+                  if (g[i]) interleaved.push(g[i]);
+                });
+              }
+              this.queues.set(section, interleaved);
+            });
+          },
+
+          async buildSection(section) {
+            if (!section) return;
+            if (this.builtSections.has(section)) return;
+            this.builtSections.add(section);
+
+            const myToken = ++this.buildToken;
+            const queue = [...(this.queues.get(section) || [])];
+            if (!queue.length) return;
+
+            const worker = async (workerIdx) => {
+              await wait(workerIdx * 300 + rand(60, 420));
+              if (myToken !== this.buildToken) return;
+
+              while (queue.length > 0) {
+                if (myToken !== this.buildToken) return;
+                const el = queue.shift();
+                if (!el) return;
+
+                await wait(rand(40, 240));
+                if (myToken !== this.buildToken) return;
+
+                try {
+                  if (el.dataset.type === "image") {
+                    await this.buildImage(el, myToken, workerIdx);
+                  } else {
+                    await this.buildText(el, myToken, workerIdx);
+                  }
+                } catch (e) {}
+                if (myToken !== this.buildToken) return;
+
+                await wait(rand(200, 700));
+              }
+            };
+
+            await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
+
+            if (myToken !== this.buildToken) {
+              queue.forEach((el) => this.instantReveal(el));
+              return;
+            }
+
+            this.reviewQueue = [];
+            let waited = 0;
+            while (this.isReviewing && waited < 3000) {
+              await wait(100);
+              waited += 100;
+            }
+
+            this.scatterCursors();
+          },
+
+          instantReveal(el) {
+            const saved = this.savedHTML.get(el);
+            if (saved != null) {
+              el.innerHTML = saved;
+              this.savedHTML.delete(el);
+            }
+            el.classList.remove(
+              "is-typing",
+              "pre-build",
+              "pre-build-y",
+              "no-transition",
+            );
+            el.style.minHeight = "";
+            el.style.opacity = 1;
+            el.style.filter = "none";
+            el.style.transform = "translateY(0)";
+          },
+
+          async processReviewQueue(token) {
+            if (this.isReviewing) return;
+            this.isReviewing = true;
+
+            while (this.reviewQueue.length > 0) {
+              if (token !== this.buildToken) {
+                this.reviewQueue = [];
+                break;
+              }
+              const el = this.reviewQueue.shift();
+              if (!el || !el.isConnected) continue;
+
+              await wait(rand(250, 700));
+              if (token !== this.buildToken) {
+                this.reviewQueue = [];
+                break;
+              }
+
+              const rect = el.getBoundingClientRect();
+              if (rect.bottom < 0 || rect.top > window.innerHeight) continue;
+
+              const upgrade = this.findUpgradeFor(el);
+              const willFlag = upgrade && Math.random() < 0.6;
+
+              const reviewCursor =
+                Math.random() > 0.5 ? cursors[4] : cursors[11];
+
+              if (willFlag) {
+                await this.flagAndFix(el, upgrade, reviewCursor, token);
+              } else {
+                const rx = rect.left + rect.width * rand(0.2, 0.8);
+                const ry = rect.top + rect.height * rand(0.2, 0.8);
+                await this.flyTo(reviewCursor, rx, ry, rand(0.3, 0.5));
+                if (token !== this.buildToken) break;
+                await this.click(reviewCursor);
+                this.reviewPulse(rx, ry);
+                el.classList.add("reviewed");
+                setTimeout(() => el.classList.remove("reviewed"), 800);
+              }
+
+              await wait(rand(180, 400));
+            }
+            this.isReviewing = false;
+
+            if (this.reviewQueue.length > 0 && token === this.buildToken) {
+              this.processReviewQueue(token);
+            }
+          },
+
+          findUpgradeFor(el) {
+            const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+            let n;
+            while ((n = walker.nextNode())) textNodes.push(n);
+
+            for (const upgrade of TEXT_UPGRADES) {
+              if (this.usedUpgrades.has(upgrade.find)) continue;
+              for (const node of textNodes) {
+                if (node.textContent.indexOf(upgrade.find) !== -1) {
+                  return upgrade;
+                }
+              }
+            }
+            return null;
+          },
+
+          highlightPhrase(el, phrase) {
+            const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+              const idx = node.textContent.indexOf(phrase);
+              if (idx !== -1) {
+                const range = document.createRange();
+                range.setStart(node, idx);
+                range.setEnd(node, idx + phrase.length);
+                const span = document.createElement("span");
+                span.className = "flag-suggestion";
+                try {
+                  range.surroundContents(span);
+                  return span;
+                } catch (e) {
+                  return null;
+                }
+              }
+            }
+            return null;
+          },
+
+          async flagAndFix(el, upgrade, flaggingCursor, token) {
+            const span = this.highlightPhrase(el, upgrade.find);
+            if (!span) {
+              const r = el.getBoundingClientRect();
+              this.reviewPulse(r.left + r.width * 0.5, r.top + r.height * 0.5);
+              return;
+            }
+
+            this.usedUpgrades.add(upgrade.find);
+
+            const sr = span.getBoundingClientRect();
+            const flagX = sr.left + sr.width * 0.5;
+            const flagY = sr.top + sr.height * 0.5;
+
+            await this.flyTo(flaggingCursor, flagX, flagY, rand(0.34, 0.5));
+            if (token !== this.buildToken) {
+              span.textContent = upgrade.to;
+              span.classList.remove("flag-suggestion");
+              return;
+            }
+            await this.click(flaggingCursor);
+            this.flagPulse(flagX, flagY);
+
+            await wait(rand(550, 850));
+            if (token !== this.buildToken) {
+              span.textContent = upgrade.to;
+              span.classList.remove("flag-suggestion");
+              return;
+            }
+
+            const fixCursor = Math.random() > 0.5 ? cursors[10] : cursors[8];
+            const sr2 = span.getBoundingClientRect();
+            const fixX = sr2.left + sr2.width * 0.5;
+            const fixY = sr2.top + sr2.height * 0.5;
+
+            await this.flyTo(fixCursor, fixX, fixY, rand(0.36, 0.52));
+            if (token !== this.buildToken) {
+              span.textContent = upgrade.to;
+              span.classList.remove("flag-suggestion");
+              return;
+            }
+            await this.click(fixCursor);
+
+            await this.upgradeSpan(span, upgrade.to, token);
+
+            const sr3 = span.getBoundingClientRect();
+            this.reviewPulse(
+              sr3.left + sr3.width * 0.5,
+              sr3.top + sr3.height * 0.5,
+            );
+            el.classList.add("reviewed");
+            setTimeout(() => el.classList.remove("reviewed"), 800);
+
+            await wait(500);
+            if (span.isConnected) {
+              span.classList.remove("flag-suggestion");
+            }
+          },
+
+          async upgradeSpan(span, newText, token) {
+            span.style.transition = "none";
+            span.style.textDecoration = "line-through";
+            span.style.color = "#D9A05B";
+            span.style.opacity = "0.7";
+
+            await wait(320);
+
+            span.textContent = "";
+            span.style.textDecoration = "none";
+            span.style.color = "#2E5A44";
+            span.style.opacity = "1";
+
+            for (let i = 0; i < newText.length; i++) {
+              if (token !== this.buildToken) {
+                span.textContent = newText;
+                span.style.transition = "color 0.6s ease";
+                span.style.color = "";
+                return;
+              }
+              span.textContent = newText.slice(0, i + 1);
+              await wait(rand(18, 34));
+            }
+
+            span.style.transition = "color 0.6s ease";
+            span.style.color = "";
+            await wait(600);
+            span.style.transition = "";
+          },
+
+          async buildImage(el, token, workerIdx) {
+            const [openC, confirmC] = this.getWorkerCursors(workerIdx, 2);
+
+            let rect = el.getBoundingClientRect();
+            let tx = rect.left + rect.width * 0.5;
+            let ty = rect.top + rect.height * 0.5;
+
+            // 1. Cursor viaja al contenedor de la imagen
+            await this.flyTo(openC, tx, ty, rand(0.4, 0.6));
+            if (token !== this.buildToken) return;
+
+            // 2. Click inicial (simula "solicitar" la imagen)
+            await this.click(openC);
+            this.pulse(tx, ty, openC.color);
+
+            // 3. Cursor de confirmación hace el reveal
+            await this.flyTo(
+              confirmC,
+              tx + rand(-20, 20),
+              ty + rand(-20, 20),
+              rand(0.3, 0.5),
+            );
+            if (token !== this.buildToken) return;
+
+            await this.click(confirmC);
+            this.pulse(tx, ty, confirmC.color);
+
+            // 4. Efecto visual: removemos el filtro blur y opacidad baja
+            el.classList.remove("pre-build", "pre-build-y");
+            el.style.opacity = 1;
+            el.style.filter = "none";
+
+            // Animamos la imagen interna
+            const img = el.querySelector("img");
+            if (img) {
+              gsap.fromTo(
+                img,
+                { opacity: 0, scale: 1.05 },
+                { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" },
+              );
+            }
+
+            await wait(rand(200, 400));
+          },
+
+          async buildText(el, token, workerIdx) {
+            const speed = this.workerSpeeds[workerIdx % 4];
+            const type = el.dataset.type || "body";
+            const profile = TIMING[type] || TIMING.body;
+
+            const frameHold = rand(profile.hold[0], profile.hold[1]) * speed;
+            const preConfirm = rand(profile.pre[0], profile.pre[1]) * speed;
+            const earlySpeed = rand(profile.early[0], profile.early[1]) * speed;
+            const lateSpeed = rand(profile.late[0], profile.late[1]);
+            const flyOpen = rand(0.32, 0.58) * speed;
+            const flyType = rand(0.28, 0.5) * speed;
+            const flyConfirm = rand(0.26, 0.48) * speed;
+
+            const originalHTML = el.innerHTML;
+            this.savedHTML.set(el, originalHTML);
+
+            const fullText =
+              el.id === "hero-title"
+                ? "AI-Native\nTech Lead"
+                : el.innerText.replace(/\s+/g, " ").trim();
+
+            const [openC, typeC, confirmC] = this.getWorkerCursors(
+              workerIdx,
+              3,
+            );
+
+            let rect = el.getBoundingClientRect();
+            let tx = rect.left + rect.width * 0.5;
+            let ty = rect.top + rect.height * 0.5;
+            if (rect.height > window.innerHeight * 0.5)
+              ty = rect.top + Math.min(rect.height * 0.3, 120);
+            if (rect.width > window.innerWidth * 0.85)
+              tx =
+                rect.left +
+                Math.min(rect.width * 0.35, window.innerWidth * 0.4);
+            tx = Math.max(28, Math.min(tx, window.innerWidth - 28));
+            ty = Math.max(40, Math.min(ty, window.innerHeight - 40));
+
+            await this.flyTo(openC, tx, ty, flyOpen);
+            if (token !== this.buildToken) return;
+            await this.click(openC);
+            this.pulse(tx, ty, openC.color);
+
+            el.classList.remove("pre-build", "pre-build-y");
+            gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+
+            const origH = el.offsetHeight;
+            el.style.minHeight = origH + "px";
+            el.classList.add("is-typing");
+            el.innerHTML = "";
+
+            const txtSpan = document.createElement("span");
+            const caret = document.createElement("span");
+            caret.className = "type-caret";
+            el.appendChild(txtSpan);
+            el.appendChild(caret);
+
+            el.classList.add("no-transition");
+            el.classList.remove("is-typing");
+            txtSpan.textContent = fullText;
+            void txtSpan.offsetHeight;
+            const probeRect = txtSpan.getBoundingClientRect();
+            const probeElRect = el.getBoundingClientRect();
+            txtSpan.textContent = "";
+            el.classList.add("is-typing");
+            el.classList.remove("no-transition");
+
+            const padLeft = probeRect.left - probeElRect.left;
+            const padTop = probeRect.top - probeElRect.top;
+            const offsetX = padLeft - 12;
+            const offsetY = padTop - 11;
+            const frameW = probeRect.width + 24;
+            const frameH = probeRect.height + 22;
+
+            const curElRect = el.getBoundingClientRect();
+            const frame = document.createElement("div");
+            frame.className = "editor-frame";
+            frame.style.setProperty("--c", openC.color);
+            frame.style.left = curElRect.left + offsetX + "px";
+            frame.style.top = curElRect.top + offsetY + "px";
+            frame.style.width = frameW + "px";
+            frame.style.height = frameH + "px";
+            frame.innerHTML = '<span class="editor-badge">editing</span>';
+            document.getElementById("fx-layer").appendChild(frame);
+
+            gsap.fromTo(
+              frame,
+              { opacity: 0, scale: 0.98 },
+              { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" },
+            );
+
+            const stopTrack = this.pinFrameToElement(
+              frame,
+              el,
+              offsetX,
+              offsetY,
+            );
+
+            await wait(frameHold);
+            if (token !== this.buildToken) {
+              stopTrack();
+              frame.remove();
+              this.instantReveal(el);
+              return;
+            }
+
+            await this.flyTo(
+              typeC,
+              tx + rand(20, 60),
+              ty + rand(-8, 18),
+              flyType,
+            );
+            if (token !== this.buildToken) {
+              stopTrack();
+              frame.remove();
+              this.instantReveal(el);
+              return;
+            }
+            await wait(rand(40, 140));
+
+            let breathIn = Math.floor(rand(7, 14));
+            let charCounter = 0;
+            for (let i = 0; i < fullText.length; i++) {
+              if (token !== this.buildToken) {
+                stopTrack();
+                frame.remove();
+                this.instantReveal(el);
+                return;
+              }
+              txtSpan.textContent = fullText.slice(0, i + 1);
+              const delay = i < 25 ? earlySpeed : lateSpeed;
+              await wait(delay + rand(0, 8));
+
+              charCounter++;
+              if (charCounter >= breathIn) {
+                await wait(rand(30, 130));
+                charCounter = 0;
+                breathIn = Math.floor(rand(7, 14));
+              }
+            }
+
+            await wait(preConfirm);
+            if (token !== this.buildToken) {
+              stopTrack();
+              frame.remove();
+              this.instantReveal(el);
+              return;
+            }
+
+            const rect2 = el.getBoundingClientRect();
+            const cx = rect2.left + rect2.width * rand(0.4, 0.6);
+            const cy = rect2.top + rect2.height * rand(0.4, 0.6);
+            await this.flyTo(confirmC, cx, cy, flyConfirm);
+            if (token !== this.buildToken) {
+              stopTrack();
+              frame.remove();
+              this.instantReveal(el);
+              return;
+            }
+            await this.click(confirmC);
+            this.pulse(cx, cy, confirmC.color);
+
+            el.classList.remove("is-typing");
+            el.style.minHeight = "";
+            el.innerHTML = originalHTML;
+            this.savedHTML.delete(el);
+
+            if (el.id === "hero-title") this.titleRevealed = true;
+
+            this.reviewQueue.push(el);
+            this.processReviewQueue(token);
+
+            await wait(rand(180, 320));
+            stopTrack();
+            gsap.to(frame, {
+              opacity: 0,
+              scale: 1.03,
+              duration: 0.3,
+              ease: "power2.in",
+              onComplete: () => frame.remove(),
+            });
+            await wait(rand(120, 260));
+          },
+
+          async heroBgClick(workerIdx) {
+            const cursor = this.getWorkerCursors(workerIdx, 1)[0];
+            const x = window.innerWidth * rand(0.12, 0.24);
+            const y = window.innerHeight * rand(0.14, 0.26);
+            await this.flyTo(cursor, x, y, rand(0.3, 0.5));
+            await this.click(cursor);
+            this.pulse(x, y, cursor.color);
+            this.bgRevealed = true;
+          },
+
+          async runIntro() {
+            await wait(250);
+
+            cursors.forEach((c, i) => {
+              gsap.to(c.el, {
+                opacity: 1,
+                duration: rand(0.35, 0.6),
+                delay: i * 0.05 + rand(0, 0.35),
+              });
+            });
+
+            await wait(650);
+
+            const btnWork = document.querySelector('#hero-cta a[href="#work"]');
+            const btnContact = document.querySelector(
+              '#hero-cta a[href="#contact"]',
+            );
+            const badges = Array.from(
+              document.querySelectorAll('#hero-badges [data-type="badge"]'),
+            );
+
+            const queue = [
+              { kind: "bg" },
+              { kind: "text", el: document.querySelector("#hero-title") },
+              { kind: "text", el: document.querySelector("#hero-sub") },
+              { kind: "text", el: btnWork },
+              { kind: "text", el: btnContact },
+              ...badges.map((el) => ({ kind: "text", el })),
+            ];
+
+            const myToken = ++this.buildToken;
+
+            const worker = async (workerIdx) => {
+              await wait(workerIdx * 340 + rand(50, 420));
+              if (myToken !== this.buildToken) return;
+
+              while (queue.length > 0) {
+                if (myToken !== this.buildToken) return;
+                const item = queue.shift();
+                if (!item) return;
+
+                await wait(rand(40, 240));
+                if (myToken !== this.buildToken) return;
+
+                try {
+                  if (item.kind === "bg") await this.heroBgClick(workerIdx);
+                  else await this.buildText(item.el, myToken, workerIdx);
+                } catch (e) {}
+                if (myToken !== this.buildToken) return;
+
+                await wait(rand(180, 700));
+              }
+            };
+
+            await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
+
+            if (myToken !== this.buildToken) {
+              this.finishHeroInstantly();
+              return;
+            }
+
+            this.reviewQueue = [];
+            let waited = 0;
+            while (this.isReviewing && waited < 3000) {
+              await wait(100);
+              waited += 100;
+            }
+
+            this.heroDone = true;
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
 </html>

@@ -1,22 +1,84 @@
-## Development
+# AGENTS.md — new-portfolio
 
-When starting the dev server, use background mode:
+## Proyecto
 
-```
-astro dev --background
-```
+Portafolio personal bilingüe (ES/EN) de Jorge Márquez Luna, publicado como GitHub Pages project page en `https://moonslayers.github.io/new-portafolio/`. Astro 6, output estático, sin backend ni CMS.
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+## Convenciones
 
-## Documentation
+- Node 22 (`.nvmrc`, `engines.node >=22`). Usar `npm ci` en CI, `npm install` local.
+- Indentación: 2 espacios (`.editorconfig`). Formato con Prettier + `prettier-plugin-astro`.
+- TypeScript estricto (`tsconfig.json`). Ejecutar `npm run check` antes de publicar.
+- Commits en español o inglés, estilo convencional (`chore:`, `feat:`, etc.).
+- No agregar comentarios en código salvo que se pida.
+- No cambiar diseño ni contenido editorial fuera de la tarea asignada.
 
-Full documentation: https://docs.astro.build
+## Fuente de verdad del contenido
 
-Consult these guides before working on related tasks:
+- Reglas editoriales, datos canónicos, inventario de proyectos y trampas conocidas: skill `cv-content-model` (`.agents/skills/cv-content-model/SKILL.md` en el workspace padre).
+- Contenido publicado del sitio: `src/data/site.es.ts` y `src/data/site.en.ts`, tipados por `src/data/types.ts`.
+- Etiquetas de UI: `src/i18n/ui.ts`.
+- Antes de editar cifras, fechas, stacks o roles, verificar contra el skill y los repos fuente (ver comandos de verificación del skill). No copiar de `99-fuentes/background.md` ni de la plantilla LaTeX histórica.
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+## Arquitectura de datos
+
+- `src/data/types.ts` define `SiteContent` y todas las interfaces de sección.
+- `src/pages/index.astro` (ES) y `src/pages/en/index.astro` (EN) cargan su `site*.ts` y renderizan `LandingPage`.
+- `src/layouts/LandingPage.astro` compone secciones en orden fijo: Hero, About, Method, Stack, Projects, Experience, Writing, Contact. NavDots y Header derivan de `content`.
+- Paridad obligatoria: cualquier cambio editorial se aplica en `site.es.ts` y `site.en.ts` simultáneamente.
+
+## Secciones
+
+Componentes en `src/components/sections/`. Cada uno recibe `content` (o props derivadas) y usa `data-build` / `data-type` para el motor de animación. No eliminar estos atributos sin actualizar el motor.
+
+## Motor de animación
+
+- Código en `src/scripts/agents/` (`index.ts`, `motion.ts`, `typing.ts`, `sections.ts`, `intro.ts`, `review.ts`, `navigation.ts`, `fx.ts`, `context.ts`, `agents.ts`).
+- Se inicializa en el cliente vía `initAgents()` (importado desde `LandingPage`/layout). Solo corre en browser (`typeof window`).
+- Fallbacks que NO deben romperse:
+  - `prefers-reduced-motion: reduce` → revelado estático, oculta capa de agentes y fx.
+  - Mobile (`max-width: 768px`) → `instantReveal` por sección.
+  - Botón "Saltar intro" / tecla `Escape` → `finishHeroInstantly`.
+  - `sessionStorage.skipIntro === '1'` → salta intro.
+  - `visibilitychange` → pausa/reanuda.
+- Timings en `TIMING` (agents.ts) y `COPY_UPGRADES` (revisión automática de copy). No modificar sin validación visual.
+- Navegación por secciones: wheel/teclado/touch con scroll snap lógico; `base` path no afecta anchors (`#about`, etc.).
+
+## Reglas para no romper
+
+### i18n
+
+- Mantener `src/data/site.es.ts` y `src/data/site.en.ts` sincronizados (misma estructura, mismos ids de proyecto).
+- `src/i18n/ui.ts` debe tener claves idénticas en ambos locales.
+- Rutas: ES en `/`, EN en `/en/`. No cambiar `prefixDefaultLocale`.
+
+### base path
+
+- `astro.config.mjs`: `site: 'https://moonslayers.github.io'`, `base: '/new-portafolio/'`. No modificar.
+- En componentes usar `import.meta.env.BASE_URL` para assets (como en `BaseLayout`). No hardcodear `/new-portafolio/` ni rutas absolutas a raíz.
+- Sitemap y robots usan la URL completa con base.
+
+### Accesibilidad
+
+- Mantener skip link (`skipLinkText`), `lang` en `<html>`, landmarks (`main`, `header`, `footer`), `aria-label` en nav dots y botones.
+- No remover `prefers-reduced-motion` fallback.
+- Contraste y foco visible no deben degradarse.
+
+### Fidelidad de animación
+
+- Conservar atributos `data-build`, `data-type`, clases `pre-build`/`pre-build-y`, `is-typing`, `editorial-img`.
+- No cambiar el orden de secciones ni los ids de sección (`hero`, `about`, `method`, `stack`, `work`, `experience`, `writing`, `contact`) sin actualizar `navSections` y `setupNavigation`.
+- No introducir frameworks de UI adicionales.
+
+## Checklist antes de publicar
+
+1. `npm ci && npm run build` pasa sin errores.
+2. `npm run check` sin errores de tipos.
+3. `npm run format` aplicado (o diff revisado).
+4. Paridad ES/EN verificada (contenido y UI labels).
+5. `base: '/new-portafolio'` intacto.
+6. Assets (retrato, portadas, og-image) actualizados si aplica.
+7. Workflow `.github/workflows/deploy.yml` válido.
+8. Estado de GitHub Pages reportado (activado con `build_type: workflow`).
+9. No se expusieron tokens ni credenciales.
+10. Preview local (`npm run preview`) revisado.
