@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Portada editorial (placeholder)">
+  <rect width="800" height="450" fill="#F7F5F0" />
+  <rect x="40" y="40" width="720" height="370" fill="none" stroke="#1C1B19" stroke-width="1" />
+  <g stroke="#8C6B4A" stroke-width="1.5" fill="none">
+    <rect x="120" y="100" width="160" height="100" />
+    <rect x="320" y="100" width="160" height="100" />
+    <rect x="520" y="100" width="160" height="100" />
+    <rect x="220" y="240" width="160" height="100" />
+    <rect x="420" y="240" width="160" height="100" />
+  </g>
+  <text x="400" y="400" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="3" fill="#6B6862">COVER / FIG. 6</text>
+</svg>

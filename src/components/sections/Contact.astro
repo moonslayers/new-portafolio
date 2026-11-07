@@ -1,0 +1,102 @@
+---
+import type { Contact, ContactLink, Locale } from "../../data/types";
+import { getUi } from "../../i18n/ui";
+import SectionHeader from "../ui/SectionHeader.astro";
+
+interface Props {
+  content?: Contact;
+  data?: Contact;
+  section?: Contact;
+  tag?: string;
+  title?: string;
+  body?: string;
+  email?: string;
+  links?: ContactLink[];
+  locale?: Locale;
+  lang?: Locale;
+  id?: string;
+  class?: string;
+}
+
+const {
+  content,
+  data: dataProp,
+  section: sectionProp,
+  tag: tagProp,
+  title: titleProp,
+  body: bodyProp,
+  email: emailProp,
+  links: linksProp,
+  locale: localeProp,
+  lang: langProp,
+  id = "contact",
+  class: className = "",
+} = Astro.props;
+
+const locale = (localeProp ??
+  langProp ??
+  (Astro.currentLocale as Locale) ??
+  "es") as Locale;
+getUi(locale);
+
+const resolvedContent = content ?? dataProp ?? sectionProp;
+
+const tag = tagProp ?? resolvedContent?.tag;
+const title = titleProp ?? resolvedContent?.title ?? "";
+const body = bodyProp ?? resolvedContent?.body;
+const email = emailProp ?? resolvedContent?.email ?? "";
+const links = linksProp ?? resolvedContent?.links ?? [];
+
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+---
+
+<section
+  id={id}
+  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-4xl mx-auto w-full text-left">
+    <SectionHeader tag={tag} title={title} meta="OUTRO" />
+
+    {body && (
+      <p
+        class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        data-build
+        data-type="body"
+        style="font-size: 1.05rem; line-height: 1.7;"
+      >
+        {body}
+      </p>
+    )}
+
+    <div class="mt-12 flex flex-wrap gap-4">
+      {links && links.length > 0
+        ? links.map((link) => {
+            const external = isExternal(link.href);
+            const isMail = link.href.startsWith("mailto:");
+            return (
+              <a
+                href={link.href}
+                class={isMail ? "btn btn-primary" : "btn btn-ghost"}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                data-build
+                data-type="button"
+              >
+                {link.label}
+                {external ? " ↗" : ""}
+              </a>
+            );
+          })
+        : email && (
+            <a
+              href={`mailto:${email}`}
+              class="btn btn-primary"
+              data-build
+              data-type="button"
+            >
+              {email}
+            </a>
+          )}
+    </div>
+  </div>
+</section>

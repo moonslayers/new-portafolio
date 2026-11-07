@@ -1,0 +1,9 @@
+---
+import LandingPage from "../../layouts/LandingPage.astro";
+import { siteEn } from "../../data/site.en";
+
+const locale = "en";
+const content = siteEn;
+---
+
+<LandingPage content={content} locale={locale} />

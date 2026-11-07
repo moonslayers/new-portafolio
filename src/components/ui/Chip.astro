@@ -1,0 +1,12 @@
+---
+interface Props {
+  class?: string;
+  type?: string;
+}
+
+const { class: className = "", type = "chip" } = Astro.props;
+---
+
+<span class={`chip ${className}`.trim()} data-build data-type={type}>
+  <slot />
+</span>

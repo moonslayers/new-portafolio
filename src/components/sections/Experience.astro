@@ -1,0 +1,171 @@
+---
+import type {
+  Experience,
+  ExperienceItem,
+  EducationItem,
+  Locale,
+} from "../../data/types";
+import { getUi } from "../../i18n/ui";
+import SectionHeader from "../ui/SectionHeader.astro";
+
+interface Props {
+  content?: Experience;
+  data?: Experience;
+  section?: Experience;
+  items?: ExperienceItem[];
+  tag?: string;
+  title?: string;
+  intro?: string;
+  education?: EducationItem[];
+  locale?: Locale;
+  lang?: Locale;
+  id?: string;
+  class?: string;
+}
+
+const {
+  content,
+  data: dataProp,
+  section: sectionProp,
+  items: itemsProp,
+  tag: tagProp,
+  title: titleProp,
+  intro: introProp,
+  education: educationProp,
+  locale: localeProp,
+  lang: langProp,
+  id = "experience",
+  class: className = "",
+} = Astro.props;
+
+const locale = (localeProp ??
+  langProp ??
+  (Astro.currentLocale as Locale) ??
+  "es") as Locale;
+getUi(locale);
+
+const resolvedContent = content ?? dataProp ?? sectionProp;
+
+const tag = tagProp ?? resolvedContent?.tag;
+const title = titleProp ?? resolvedContent?.title ?? "";
+const intro = introProp ?? resolvedContent?.intro;
+const items = itemsProp ?? resolvedContent?.items ?? [];
+const education = educationProp ?? resolvedContent?.education;
+
+const eduHeading = locale === "en" ? "Education" : "Educación";
+---
+
+<section
+  id={id}
+  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-4xl mx-auto w-full">
+    <SectionHeader tag={tag} title={title} meta="TIMELINE" />
+
+    {intro && (
+      <p
+        class="mt-2 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        data-build
+        data-type="body"
+      >
+        {intro}
+      </p>
+    )}
+
+    <div class="mt-16 relative pl-8 border-l border-[var(--ink-light)] space-y-12">
+      {items.map((item) => (
+        <article class="relative">
+          <span
+            class="timeline-dot absolute -left-[38.5px] top-1.5"
+            aria-hidden="true"
+          ></span>
+          <div
+            class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+            data-build
+            data-type="tag"
+          >
+            {item.period}
+          </div>
+          <h3
+            class="mt-2 font-serif text-xl text-[var(--ink-primary)]"
+            data-build
+            data-type="title"
+          >
+            {item.role}
+          </h3>
+          <p
+            class="mt-1 text-sm text-[var(--ink-secondary)] mono"
+            data-build
+            data-type="body"
+          >
+            {item.company}
+            {item.location ? ` · ${item.location}` : ""}
+          </p>
+          {item.description && (
+            <p
+              class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
+              data-build
+              data-type="body"
+            >
+              {item.description}
+            </p>
+          )}
+          {item.highlights && item.highlights.length > 0 && (
+            <ul class="mt-3 space-y-1.5 list-disc list-inside text-sm text-[var(--ink-secondary)] font-serif">
+              {item.highlights.map((h) => (
+                <li data-build data-type="body">
+                  {h}
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+
+    {education && education.length > 0 && (
+      <div class="mt-16">
+        <h3
+          class="font-serif text-xl text-[var(--ink-primary)] mb-6"
+          data-build
+          data-type="title"
+        >
+          {eduHeading}
+        </h3>
+        <ul class="space-y-6">
+          {education.map((e) => (
+            <li class="border border-[var(--ink-light)] p-5 rounded-sm">
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                {e.period}
+              </div>
+              <div
+                class="mt-1 font-serif text-lg text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                {e.degree}
+              </div>
+              <div class="mt-1 text-sm text-[var(--ink-secondary)] mono">
+                {e.institution}
+                {e.location ? ` · ${e.location}` : ""}
+              </div>
+              {e.details && e.details.length > 0 && (
+                <ul class="mt-2 space-y-1 text-sm text-[var(--ink-secondary)] font-serif">
+                  {e.details.map((d) => (
+                    <li data-build data-type="body">
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</section>

@@ -1,0 +1,114 @@
+---
+import type { About as AboutContent, AboutImage, Kpi } from "../../data/types";
+import SectionHeader from "../ui/SectionHeader.astro";
+import portraitAsset from "../../assets/placeholders/portrait.svg";
+
+interface Props {
+  tag?: string;
+  title?: string;
+  body?: string;
+  image?: AboutImage;
+  kpis?: Kpi[];
+  about?: AboutContent;
+  content?: AboutContent;
+  data?: AboutContent;
+  class?: string;
+}
+
+const {
+  about: aboutProp,
+  content: contentProp,
+  data: dataProp,
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const source = (aboutProp ?? contentProp ?? dataProp ?? {}) as AboutContent;
+
+const tag = rest.tag ?? source.tag;
+const title = rest.title ?? source.title ?? "";
+const body = rest.body ?? source.body ?? "";
+const image = rest.image ?? source.image;
+const kpis = rest.kpis ?? source.kpis ?? [];
+
+const portraitSrc =
+  typeof image?.src === "string" && image.src.length > 0
+    ? image.src
+    : typeof portraitAsset === "string"
+      ? portraitAsset
+      : (portraitAsset as { src: string }).src;
+const resolvedLocale = (Astro.currentLocale as "es" | "en") ?? "es";
+const portraitAlt =
+  image?.alt ??
+  (resolvedLocale === "en"
+    ? "Editorial portrait (placeholder)"
+    : "Retrato editorial (placeholder)");
+const portraitCaption =
+  image?.caption ??
+  (resolvedLocale === "en"
+    ? "Fig. 1 — The Architect"
+    : "Fig. 1 — El arquitecto");
+---
+
+<section
+  id="about"
+  class={`relative min-h-screen flex items-center py-20 md:py-32 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-6xl mx-auto w-full">
+    <SectionHeader tag={tag} title={title} />
+
+    <div class="grid md:grid-cols-[1fr_300px] gap-12 items-start">
+      <div>
+        <p
+          data-build
+          data-type="body"
+          class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+          style="font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.7; white-space: pre-line;"
+        >
+          {body}
+        </p>
+      </div>
+
+      <div class="hidden md:block">
+        <div
+          class="w-full aspect-[3/4] overflow-hidden rounded-sm border border-[var(--ink-light)]"
+          data-build
+          data-type="image"
+          style="background-color: var(--ink-light);"
+        >
+          <img src={portraitSrc} class="editorial-img" alt={portraitAlt} />
+        </div>
+        {portraitCaption && (
+          <div class="mt-3 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider">
+            {portraitCaption}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {kpis.length > 0 && (
+      <div class="grid sm:grid-cols-3 gap-0 mt-16 border border-[var(--ink-light)]">
+        {kpis.map((kpi, index) => (
+          <div
+            class={`p-6 ${index < kpis.length - 1 ? "border-b sm:border-b-0 sm:border-r border-[var(--ink-light)]" : ""}`}
+          >
+            <div
+              class="text-4xl font-serif text-[var(--ink-primary)]"
+              data-build
+              data-type="kpi-num"
+            >
+              {kpi.value}
+            </div>
+            <div
+              class="mt-3 mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+              data-build
+              data-type="kpi-label"
+            >
+              {kpi.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

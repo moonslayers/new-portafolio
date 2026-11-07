@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Portada editorial (placeholder)">
+  <rect width="800" height="450" fill="#F7F5F0" />
+  <rect x="40" y="40" width="720" height="370" fill="none" stroke="#1C1B19" stroke-width="1" />
+  <polygon points="400,90 620,360 180,360" fill="none" stroke="#C2A33D" stroke-width="2" />
+  <rect x="340" y="200" width="120" height="120" fill="none" stroke="#4A6B8C" stroke-width="2" />
+  <text x="400" y="400" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="3" fill="#6B6862">COVER / FIG. 5</text>
+</svg>

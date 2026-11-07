@@ -1,0 +1,19 @@
+---
+interface Props {
+  class?: string;
+  hover?: boolean;
+}
+
+const { class: className = "", hover = true } = Astro.props;
+---
+
+<article class={`card ${hover ? "" : "card--static"} ${className}`.trim()}>
+  <slot />
+</article>
+
+<style>
+  .card--static:hover {
+    border-color: var(--ink-light);
+    background: transparent;
+  }
+</style>

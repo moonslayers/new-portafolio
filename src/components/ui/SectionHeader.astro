@@ -1,0 +1,44 @@
+---
+interface Props {
+  tag?: string;
+  title?: string;
+  meta?: string;
+  class?: string;
+}
+
+const { tag, title, meta, class: className = "" } = Astro.props;
+---
+
+<div class={`section-header ${className}`.trim()}>
+  <div class="section-header__bar">
+    {tag && (
+      <span class="section-tag" data-build data-type="tag">
+        {tag}
+      </span>
+    )}
+    {meta && <span class="section-header__meta mono">{meta}</span>}
+  </div>
+  {title && (
+    <h2 class="section-title" data-build data-type="title">
+      {title}
+    </h2>
+  )}
+  <slot />
+</div>
+
+<style>
+  .section-header__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3rem;
+    border-bottom: var(--border-thin);
+    padding-bottom: 1rem;
+  }
+  .section-header__meta {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+  }
+</style>

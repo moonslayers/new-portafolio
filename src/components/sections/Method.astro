@@ -1,0 +1,83 @@
+---
+import type { Method as MethodContent, MethodItem } from "../../data/types";
+import SectionHeader from "../ui/SectionHeader.astro";
+import Card from "../ui/Card.astro";
+
+interface Props {
+  tag?: string;
+  title?: string;
+  intro?: string;
+  items?: MethodItem[];
+  method?: MethodContent;
+  content?: MethodContent;
+  data?: MethodContent;
+  class?: string;
+}
+
+const {
+  method: methodProp,
+  content: contentProp,
+  data: dataProp,
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const source = (methodProp ?? contentProp ?? dataProp ?? {}) as MethodContent;
+
+const tag = rest.tag ?? source.tag;
+const title = rest.title ?? source.title ?? "";
+const intro = rest.intro ?? source.intro;
+const items = rest.items ?? source.items ?? [];
+---
+
+<section
+  id="method"
+  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-6xl mx-auto w-full">
+    <SectionHeader tag={tag} title={title} />
+
+    {intro && (
+      <p
+        data-build
+        data-type="body"
+        class="mt-6 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        style="font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.7;"
+      >
+        {intro}
+      </p>
+    )}
+
+    {items.length > 0 && (
+      <ul class="mt-16 grid md:grid-cols-2 gap-6 list-none p-0 m-0">
+        {items.map((item, index) => (
+          <li>
+            <Card class="h-full">
+              <div
+                class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+                data-build
+                data-type="tag"
+              >
+                {String(index + 1).padStart(2, "0")}
+              </div>
+              <h3
+                class="mt-3 font-serif text-xl text-[var(--ink-primary)]"
+                data-build
+                data-type="title"
+              >
+                {item.title}
+              </h3>
+              <p
+                class="mt-3 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
+                data-build
+                data-type="body"
+              >
+                {item.description}
+              </p>
+            </Card>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>

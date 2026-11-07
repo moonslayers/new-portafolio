@@ -1,0 +1,123 @@
+---
+import type { Hero as HeroContent, HeroCta } from "../../data/types";
+import Button from "../ui/Button.astro";
+import Chip from "../ui/Chip.astro";
+
+interface Props {
+  kicker?: string;
+  title?: string;
+  subtitle?: string;
+  ctaPrimary?: HeroCta;
+  ctaSecondary?: HeroCta;
+  badges?: string[];
+  scrollLabel?: string;
+  hero?: HeroContent;
+  content?: HeroContent;
+  data?: HeroContent;
+  class?: string;
+}
+
+const {
+  hero: heroProp,
+  content: contentProp,
+  data: dataProp,
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const source = (heroProp ?? contentProp ?? dataProp ?? {}) as HeroContent;
+
+const kicker = rest.kicker ?? source.kicker;
+const title = rest.title ?? source.title ?? "";
+const subtitle = rest.subtitle ?? source.subtitle;
+const ctaPrimary = rest.ctaPrimary ?? source.ctaPrimary;
+const ctaSecondary = rest.ctaSecondary ?? source.ctaSecondary;
+const badges = rest.badges ?? source.badges ?? [];
+const scrollLabel = rest.scrollLabel ?? source.scrollLabel;
+
+const titleLines = title.split("\n");
+---
+
+<section
+  id="hero"
+  class={`hero relative min-h-screen flex items-center px-6 ${className}`.trim()}
+>
+  <div class="hero-bg pointer-events-none absolute inset-0 overflow-hidden">
+    <div class="absolute inset-0 bg-grid"></div>
+  </div>
+
+  <div class="relative w-full max-w-5xl mx-auto py-20 md:py-28">
+    <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
+      {kicker && (
+        <div class="hero-kicker mono text-[10px] uppercase tracking-[.15em]">
+          {kicker}
+        </div>
+      )}
+    </div>
+
+    <h1
+      id="hero-title"
+      data-build
+      data-type="title"
+      data-fulltext={title}
+      class="hero-title pre-build"
+    >
+      {titleLines.map((line, i) => (
+        <>
+          {i > 0 && <br />}
+          {line}
+        </>
+      ))}
+    </h1>
+
+    {subtitle && (
+      <p
+        id="hero-sub"
+        data-build
+        data-type="body"
+        class="mt-10 max-w-lg text-[15px] leading-relaxed text-[var(--ink-secondary)] pre-build-y font-serif"
+        style="font-family: var(--font-serif); font-size: 1.1rem; line-height: 1.7;"
+      >
+        {subtitle}
+      </p>
+    )}
+
+    {(ctaPrimary || ctaSecondary) && (
+      <div id="hero-cta" class="mt-12 flex flex-wrap items-center gap-4">
+        {ctaPrimary && (
+          <Button href={ctaPrimary.href} class="pre-build-y">
+            {ctaPrimary.label}
+          </Button>
+        )}
+        {ctaSecondary && (
+          <Button href={ctaSecondary.href} variant="ghost" class="pre-build-y">
+            {ctaSecondary.label}
+          </Button>
+        )}
+      </div>
+    )}
+
+    {badges.length > 0 && (
+      <div id="hero-badges" class="mt-16 flex flex-wrap gap-2">
+        {badges.map((badge) => (
+          <Chip type="badge" class="pre-build-y">
+            {badge}
+          </Chip>
+        ))}
+      </div>
+    )}
+  </div>
+
+  {scrollLabel && (
+    <a
+      id="hero-scroll"
+      href="#about"
+      class="hero-bg absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-transparent border-0 cursor-pointer group"
+    >
+      <span class="mono text-[9px] uppercase tracking-[.2em] text-[var(--ink-secondary)] group-hover:text-[var(--ink-primary)] transition-colors">
+        {scrollLabel}
+      </span>
+      <div class="w-[1px] h-8 bg-[var(--ink-light)] group-hover:bg-[var(--ink-secondary)] transition-colors"></div>
+    </a>
+  )}
+</section>

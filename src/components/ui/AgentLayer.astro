@@ -1,0 +1,47 @@
+---
+import { AGENTS } from "../../scripts/agents/agents.ts";
+import "../../styles/agents.css";
+
+interface Props {
+  skipLabel?: string;
+}
+
+const { skipLabel = "Saltar intro" } = Astro.props;
+---
+
+<div
+  id="agent-layer"
+  class="fixed inset-0 z-[70] pointer-events-none"
+  aria-hidden="true"
+>
+  {AGENTS.map((a) => (
+    <div class={`agent-cursor ${a.cls}`} data-agent={a.id}>
+      <div class="agent-inner">
+        <svg
+          class="agent-svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="none"
+          aria-hidden="true"
+        >
+          <path d="M4 2.5 20 12l-7.2 1.6L9.4 21 4 2.5Z" />
+        </svg>
+        <span class="agent-label">{a.label}</span>
+      </div>
+    </div>
+  ))}
+</div>
+<div id="fx-layer" class="fixed inset-0 z-[69] pointer-events-none"></div>
+
+<button
+  id="skip-intro"
+  type="button"
+  class="fixed bottom-6 left-6 z-[71] mono text-[10px] uppercase tracking-widest px-3 py-2 border border-[var(--ink-light)] bg-[var(--bg-paper)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:border-[var(--ink-primary)] transition-colors"
+>
+  {skipLabel}
+</button>
+
+<script>
+  import { initAgents } from "../../scripts/agents/index.ts";
+  initAgents();
+</script>

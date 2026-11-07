@@ -1,0 +1,97 @@
+---
+import type { Writing, Locale } from "../../data/types";
+import { getUi } from "../../i18n/ui";
+import SectionHeader from "../ui/SectionHeader.astro";
+
+interface Props {
+  content?: Writing;
+  data?: Writing;
+  section?: Writing;
+  tag?: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  href?: string;
+  cta?: string;
+  locale?: Locale;
+  lang?: Locale;
+  id?: string;
+  class?: string;
+}
+
+const {
+  content,
+  data: dataProp,
+  section: sectionProp,
+  tag: tagProp,
+  title: titleProp,
+  name: nameProp,
+  description: descriptionProp,
+  href: hrefProp,
+  cta: ctaProp,
+  locale: localeProp,
+  lang: langProp,
+  id = "writing",
+  class: className = "",
+} = Astro.props;
+
+const locale = (localeProp ??
+  langProp ??
+  (Astro.currentLocale as Locale) ??
+  "es") as Locale;
+getUi(locale);
+
+const resolvedContent = content ?? dataProp ?? sectionProp;
+
+const tag = tagProp ?? resolvedContent?.tag;
+const title = titleProp ?? resolvedContent?.title ?? "";
+const name = nameProp ?? resolvedContent?.name ?? "";
+const description = descriptionProp ?? resolvedContent?.description ?? "";
+const href = hrefProp ?? resolvedContent?.href ?? "#";
+const cta =
+  ctaProp ??
+  resolvedContent?.cta ??
+  (locale === "en" ? "Read on Substack" : "Leer en Substack");
+
+const isExternal = /^https?:\/\//.test(href);
+---
+
+<section
+  id={id}
+  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-4xl mx-auto w-full">
+    <SectionHeader tag={tag} title={title} meta="ESSAY" />
+
+    <div class="mt-16 border border-[var(--ink-light)] p-8 md:p-10 rounded-sm bg-white/30">
+      <h3
+        class="font-serif text-2xl text-[var(--ink-primary)]"
+        data-build
+        data-type="title"
+      >
+        {name}
+      </h3>
+      <p
+        class="mt-4 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        data-build
+        data-type="body"
+        style="font-size: 1.05rem; line-height: 1.7;"
+      >
+        {description}
+      </p>
+      <div class="mt-8">
+        <a
+          href={href}
+          class="btn btn-primary"
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          data-build
+          data-type="button"
+        >
+          {cta}
+          {isExternal ? " ↗" : ""}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

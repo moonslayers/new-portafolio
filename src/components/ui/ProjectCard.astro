@@ -1,0 +1,281 @@
+---
+import type { Project, Locale } from "../../data/types";
+import { getUi } from "../../i18n/ui";
+import Card from "./Card.astro";
+import Chip from "./Chip.astro";
+import p1 from "../../assets/placeholders/project-1.svg";
+import p2 from "../../assets/placeholders/project-2.svg";
+import p3 from "../../assets/placeholders/project-3.svg";
+import p4 from "../../assets/placeholders/project-4.svg";
+import p5 from "../../assets/placeholders/project-5.svg";
+import p6 from "../../assets/placeholders/project-6.svg";
+
+interface Props {
+  project?: Project;
+  data?: Project;
+  item?: Project;
+  index?: number;
+  locale?: Locale;
+  lang?: Locale;
+  privateLabel?: string;
+  class?: string;
+}
+
+const {
+  project: projectProp,
+  data: dataProp,
+  item: itemProp,
+  index: indexProp,
+  locale: localeProp,
+  lang: langProp,
+  privateLabel,
+  class: className = "",
+} = Astro.props;
+const project = (projectProp ?? dataProp ?? itemProp)!;
+const locale =
+  localeProp ?? langProp ?? (Astro.currentLocale as Locale) ?? ("es" as Locale);
+getUi(locale);
+
+const placeholders = [p1, p2, p3, p4, p5, p6];
+const idx = typeof indexProp === "number" ? indexProp : 0;
+const coverAsset = project.image?.src
+  ? project.image
+  : {
+      src:
+        typeof placeholders[idx % placeholders.length] === "string"
+          ? placeholders[idx % placeholders.length]
+          : (placeholders[idx % placeholders.length] as { src: string }).src,
+      alt: project.image?.alt ?? `${project.title} cover`,
+    };
+const coverSrc =
+  typeof coverAsset.src === "string"
+    ? coverAsset.src
+    : (coverAsset as { src: string }).src;
+const coverAlt = project.image?.alt ?? `${project.title} — cover`;
+
+const isPrivate = !project.links || project.links.length === 0;
+const privateText = privateLabel ?? (locale === "en" ? "Private" : "Privado");
+
+const fieldLabels =
+  locale === "en"
+    ? { problem: "Problem", decision: "Decision", result: "Result" }
+    : { problem: "Problema", decision: "Decisión", result: "Resultado" };
+
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+---
+
+<Card class={`project-card ${className}`.trim()}>
+  <div class="project-card__cover" data-build data-type="image">
+    <img
+      src={coverSrc}
+      alt={coverAlt}
+      class="editorial-img w-full h-full object-cover"
+      loading="lazy"
+    />
+    <span class="project-card__cover-label mono">{project.id}</span>
+  </div>
+
+  <div class="project-card__meta">
+    {project.tag && (
+      <span class="project-card__tag mono" data-build data-type="tag">
+        {project.tag}
+      </span>
+    )}
+    {project.category && (
+      <span class="project-card__category mono">{project.category}</span>
+    )}
+  </div>
+
+  <h3 class="project-card__title" data-build data-type="title">
+    {project.title}
+  </h3>
+
+  {project.role && (
+    <p class="project-card__role mono">
+      {project.role}
+      {project.period ? ` · ${project.period}` : ""}
+    </p>
+  )}
+
+  <dl class="project-card__fields">
+    <div>
+      <dt class="project-card__field-label mono">{fieldLabels.problem}</dt>
+      <dd data-build data-type="body">
+        {project.problem}
+      </dd>
+    </div>
+    <div>
+      <dt class="project-card__field-label mono">{fieldLabels.decision}</dt>
+      <dd data-build data-type="body">
+        {project.decision}
+      </dd>
+    </div>
+    <div>
+      <dt class="project-card__field-label mono">{fieldLabels.result}</dt>
+      <dd data-build data-type="body">
+        {project.result}
+      </dd>
+    </div>
+  </dl>
+
+  {project.stack && project.stack.length > 0 && (
+    <div class="project-card__stack">
+      {project.stack.map((item) => (
+        <Chip>{item}</Chip>
+      ))}
+    </div>
+  )}
+
+  <div class="project-card__links">
+    {isPrivate ? (
+      <span class="project-card__private mono">{privateText}</span>
+    ) : (
+      project.links!.map((link) => (
+        <a
+          href={link.href}
+          class="project-card__link"
+          target={isExternal(link.href) ? "_blank" : undefined}
+          rel={isExternal(link.href) ? "noopener noreferrer" : undefined}
+          data-build
+          data-type="button"
+        >
+          {link.label}
+          {isExternal(link.href) ? " ↗" : ""}
+        </a>
+      ))
+    )}
+  </div>
+</Card>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .project-card__cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--ink-light);
+    border-radius: var(--radius-sm);
+    background: var(--ink-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+  }
+  .project-card__cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .project-card__cover-label {
+    position: relative;
+    z-index: 1;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+    background: var(--bg-paper);
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--ink-light);
+  }
+  .project-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .project-card__tag {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-terracotta);
+  }
+  .project-card__category {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+  }
+  .project-card__title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1.15;
+    color: var(--ink-primary);
+    margin: 0;
+  }
+  .project-card__role {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-secondary);
+    margin: 0;
+  }
+  .project-card__fields {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .project-card__fields div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .project-card__field-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+  }
+  .project-card__fields dd {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+  }
+  .project-card__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+  }
+  .project-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
+  .project-card__link {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-primary);
+    text-decoration: none;
+    border: 1px solid var(--ink-light);
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+  .project-card__link:hover {
+    border-color: var(--ink-primary);
+    background: rgba(28, 27, 25, 0.03);
+  }
+  .project-card__private {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+    border: 1px dashed var(--ink-light);
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-sm);
+  }
+</style>

@@ -1,0 +1,161 @@
+import { gsapRef as gsap } from "./context";
+import type { Engine } from "./context";
+
+export function initCursors(eng: Engine): void {
+  const els = Array.from(
+    document.querySelectorAll<HTMLElement>(".agent-cursor"),
+  );
+  eng.cursors = els.map((el, i) => {
+    const h = eng.agents[i].home;
+    gsap.set(el, {
+      x: window.innerWidth * h[0],
+      y: window.innerHeight * h[1],
+      opacity: 0,
+      scale: 1,
+    });
+    const color =
+      getComputedStyle(el).getPropertyValue("--c").trim() || "#1C1B19";
+    return { el, color };
+  });
+}
+
+export async function flyTo(
+  _eng: Engine,
+  cursor: { el: HTMLElement; color: string },
+  x: number,
+  y: number,
+  dur: number,
+): Promise<void> {
+  gsap.to(cursor.el, { opacity: 1, duration: 0.22 });
+  await gsap.to(cursor.el, { x, y, duration: dur, ease: "power3.inOut" });
+}
+
+export async function click(
+  _eng: Engine,
+  cursor: { el: HTMLElement; color: string },
+): Promise<void> {
+  await gsap.to(cursor.el, {
+    scale: 0.72,
+    duration: 0.08,
+    yoyo: true,
+    repeat: 1,
+    ease: "power2.inOut",
+  });
+}
+
+export function scatterCursors(eng: Engine): void {
+  eng.cursors.forEach((c, i) => {
+    const h = eng.agents[i].home;
+    const x = Math.max(
+      40,
+      Math.min(
+        window.innerWidth - 40,
+        window.innerWidth * h[0] + eng.rand(-70, 70),
+      ),
+    );
+    const y = Math.max(
+      60,
+      Math.min(
+        window.innerHeight - 60,
+        window.innerHeight * h[1] + eng.rand(-60, 60),
+      ),
+    );
+    gsap.to(c.el, {
+      x,
+      y,
+      duration: eng.rand(0.6, 1.1),
+      ease: "power2.inOut",
+      delay: eng.rand(0, 0.3),
+    });
+  });
+}
+
+export function getWorkerCursors(
+  eng: Engine,
+  workerIdx: number,
+  count: number,
+): { el: HTMLElement; color: string }[] {
+  const base = (workerIdx % 4) * 3;
+  const rot = eng.workerRotation[workerIdx % 4] || 0;
+  const out: { el: HTMLElement; color: string }[] = [];
+  for (let i = 0; i < count; i++)
+    out.push(eng.cursors[(base + ((rot + i) % 3)) % eng.cursors.length]);
+  eng.workerRotation[workerIdx % 4] = (rot + count) % 3;
+  return out;
+}
+
+export function stopAllFrameTrackers(eng: Engine): void {
+  eng.frameTrackers.forEach((stop) => {
+    try {
+      stop();
+    } catch (e) {}
+  });
+  eng.frameTrackers.clear();
+}
+
+export function clearFrames(eng: Engine): void {
+  stopAllFrameTrackers(eng);
+  document
+    .querySelectorAll(".editor-frame, .target-box")
+    .forEach((f) => f.remove());
+}
+
+export function cleanupFlags(): void {
+  document.querySelectorAll(".flag-suggestion").forEach((span) => {
+    const s = span as HTMLElement;
+    s.classList.remove("flag-suggestion");
+    s.style.textDecoration = "";
+    s.style.color = "";
+    s.style.opacity = "";
+    s.style.transition = "";
+  });
+}
+
+export function pinFrameToElement(
+  eng: Engine,
+  frame: HTMLElement,
+  el: HTMLElement,
+  offsetX: number,
+  offsetY: number,
+): () => void {
+  let stopped = false;
+  let lastLeft = -1;
+  let lastTop = -1;
+  const tick = () => {
+    if (stopped) return;
+    if (!frame.isConnected || !el.isConnected) {
+      stopped = true;
+      eng.frameTrackers.delete(stopFn);
+      return;
+    }
+    const r = el.getBoundingClientRect();
+    const left = Math.round(r.left + offsetX);
+    const top = Math.round(r.top + offsetY);
+    if (left !== lastLeft || top !== lastTop) {
+      frame.style.left = left + "px";
+      frame.style.top = top + "px";
+      lastLeft = left;
+      lastTop = top;
+    }
+    requestAnimationFrame(tick);
+  };
+  const stopFn = () => {
+    stopped = true;
+  };
+  eng.frameTrackers.add(stopFn);
+  requestAnimationFrame(tick);
+  return stopFn;
+}
+
+export function instantReveal(eng: Engine, el: HTMLElement): void {
+  const saved = eng.savedHTML.get(el);
+  if (saved != null) {
+    el.innerHTML = saved;
+    eng.savedHTML.delete(el);
+  }
+  el.classList.remove("is-typing", "pre-build", "pre-build-y", "no-transition");
+  el.style.minHeight = "";
+  el.style.opacity = "1";
+  el.style.filter = "none";
+  el.style.transform = "translateY(0)";
+}

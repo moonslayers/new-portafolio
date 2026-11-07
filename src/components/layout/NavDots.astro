@@ -1,0 +1,86 @@
+---
+interface Section {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  sections?: Section[];
+  items?: Section[];
+  activeIndex?: number;
+  label?: string;
+  class?: string;
+}
+
+const {
+  sections,
+  items,
+  activeIndex = 0,
+  label,
+  class: className = "",
+} = Astro.props;
+const resolvedSections = sections ?? items ?? [];
+---
+
+<nav
+  id="nav-dots"
+  class={`nav-dots ${className}`}
+  aria-label={label}
+  data-nav-dots
+>
+  <ul>
+    {resolvedSections.map((section, index) => (
+      <li>
+        <button
+          type="button"
+          class={`nav-dot ${index === activeIndex ? "active" : ""}`}
+          data-section={section.id}
+          data-index={index}
+          aria-label={section.label}
+          aria-current={index === activeIndex ? "true" : undefined}
+        ></button>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<script>
+  const nav = document.querySelector("[data-nav-dots]");
+  if (nav) {
+    const dots = Array.from(nav.querySelectorAll(".nav-dot"));
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        const id = dot.getAttribute("data-section");
+        const target = id ? document.getElementById(id) : null;
+        if (target) {
+          target.setAttribute("tabindex", "-1");
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          try {
+            (target as HTMLElement).focus({ preventScroll: true });
+          } catch (e) {}
+        }
+      });
+    });
+
+    // Active state is driven by the engine's single source (navigation.ts).
+  }
+</script>
+
+<style>
+  .nav-dots {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+  }
+  .nav-dots ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+</style>

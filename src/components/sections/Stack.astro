@@ -1,0 +1,72 @@
+---
+import type { Stack as StackContent, StackGroup } from "../../data/types";
+import SectionHeader from "../ui/SectionHeader.astro";
+import Chip from "../ui/Chip.astro";
+
+interface Props {
+  tag?: string;
+  title?: string;
+  intro?: string;
+  groups?: StackGroup[];
+  stack?: StackContent;
+  content?: StackContent;
+  data?: StackContent;
+  class?: string;
+}
+
+const {
+  stack: stackProp,
+  content: contentProp,
+  data: dataProp,
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const source = (stackProp ?? contentProp ?? dataProp ?? {}) as StackContent;
+
+const tag = rest.tag ?? source.tag;
+const title = rest.title ?? source.title ?? "";
+const intro = rest.intro ?? source.intro;
+const groups = rest.groups ?? source.groups ?? [];
+---
+
+<section
+  id="stack"
+  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-6xl mx-auto w-full">
+    <SectionHeader tag={tag} title={title} />
+
+    {intro && (
+      <p
+        data-build
+        data-type="body"
+        class="mt-6 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        style="font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.7;"
+      >
+        {intro}
+      </p>
+    )}
+
+    {groups.length > 0 && (
+      <div class="grid md:grid-cols-2 gap-6 mt-16">
+        {groups.map((group) => (
+          <div class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30">
+            <div
+              class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
+              data-build
+              data-type="tag"
+            >
+              {group.title}
+            </div>
+            <div class="mt-6 flex flex-wrap gap-2">
+              {group.items.map((item) => (
+                <Chip class="pre-build-y">{item}</Chip>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

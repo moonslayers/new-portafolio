@@ -1,0 +1,104 @@
+---
+interface FooterLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  left?: string;
+  right?: string;
+  text?: string;
+  copyright?: string;
+  builtBy?: string;
+  links?: FooterLink[];
+  items?: FooterLink[];
+  class?: string;
+}
+
+const {
+  left,
+  right,
+  text,
+  copyright,
+  builtBy,
+  links,
+  items,
+  class: className = "",
+} = Astro.props;
+const resolvedLinks = links ?? items ?? [];
+const resolvedLeft = left ?? builtBy ?? text;
+const resolvedRight = right ?? copyright;
+---
+
+<footer class={`site-footer ${className}`}>
+  <div class="site-footer__inner">
+    <div class="site-footer__left">
+      {resolvedLeft && <span class="mono">{resolvedLeft}</span>}
+      {resolvedLinks.length > 0 && (
+        <ul class="site-footer__links">
+          {resolvedLinks.map((link) => (
+            <li>
+              <a href={link.href} class="site-footer__link">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      <slot name="left" />
+    </div>
+    <div class="site-footer__right">
+      {resolvedRight && <span class="mono">{resolvedRight}</span>}
+      <slot name="right" />
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: var(--border-thin);
+    padding: 2rem 1.5rem;
+    margin-top: 4rem;
+  }
+  .site-footer__inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .site-footer__left,
+  .site-footer__right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .site-footer__left .mono,
+  .site-footer__right .mono {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+  }
+  .site-footer__links {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-footer__link {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+    text-decoration: none;
+  }
+  .site-footer__link:hover {
+    color: var(--ink-primary);
+  }
+</style>

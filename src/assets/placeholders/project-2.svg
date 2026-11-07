@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Portada de proyecto (placeholder)">
+  <rect width="800" height="450" fill="#F7F5F0" />
+  <g stroke="#E5E3DB" stroke-width="1" opacity="0.5">
+    <line x1="0" y1="75" x2="800" y2="75" />
+    <line x1="0" y1="150" x2="800" y2="150" />
+    <line x1="0" y1="225" x2="800" y2="225" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="375" x2="800" y2="375" />
+  </g>
+  <rect x="40" y="40" width="720" height="370" fill="none" stroke="#1C1B19" stroke-width="1" />
+  <rect x="560" y="90" width="160" height="160" fill="none" stroke="#D9A05B" stroke-width="1.5" />
+  <rect x="580" y="110" width="120" height="120" fill="#D9A05B" opacity="0.15" />
+  <g fill="#1C1B19">
+    <rect x="80" y="100" width="12" height="12" />
+    <rect x="100" y="100" width="12" height="12" opacity="0.6" />
+    <rect x="120" y="100" width="12" height="12" opacity="0.3" />
+    <rect x="80" y="120" width="12" height="12" opacity="0.6" />
+    <rect x="100" y="120" width="12" height="12" />
+    <rect x="120" y="120" width="12" height="12" opacity="0.6" />
+  </g>
+  <line x1="80" y1="220" x2="480" y2="220" stroke="#1C1B19" stroke-width="1" />
+  <line x1="80" y1="240" x2="420" y2="240" stroke="#6B6862" stroke-width="1" opacity="0.5" />
+  <line x1="80" y1="260" x2="460" y2="260" stroke="#6B6862" stroke-width="1" opacity="0.5" />
+  <line x1="80" y1="280" x2="380" y2="280" stroke="#6B6862" stroke-width="1" opacity="0.5" />
+  <text x="80" y="385" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="3" fill="#6B6862">PROJECT / CASE 02</text>
+</svg>

@@ -1,0 +1,80 @@
+---
+import type { ProjectsSection, Project, Locale } from "../../data/types";
+import { getUi } from "../../i18n/ui";
+import SectionHeader from "../ui/SectionHeader.astro";
+import ProjectCard from "../ui/ProjectCard.astro";
+
+interface Props {
+  content?: ProjectsSection;
+  data?: ProjectsSection;
+  section?: ProjectsSection;
+  projects?: Project[];
+  tag?: string;
+  title?: string;
+  intro?: string;
+  locale?: Locale;
+  lang?: Locale;
+  id?: string;
+  class?: string;
+}
+
+const {
+  content,
+  data: dataProp,
+  section: sectionProp,
+  projects: projectsProp,
+  tag: tagProp,
+  title: titleProp,
+  intro: introProp,
+  locale: localeProp,
+  lang: langProp,
+  id = "work",
+  class: className = "",
+} = Astro.props;
+
+const locale = (localeProp ??
+  langProp ??
+  (Astro.currentLocale as Locale) ??
+  "es") as Locale;
+getUi(locale);
+
+const resolvedContent = content ?? dataProp ?? sectionProp;
+
+const tag = tagProp ?? resolvedContent?.tag;
+const title = titleProp ?? resolvedContent?.title ?? "";
+const intro = introProp ?? resolvedContent?.intro;
+const items = projectsProp ?? resolvedContent?.items ?? [];
+
+const isGov = (p: Project) =>
+  /gobierno|government/i.test(p.category ?? "") ||
+  /gobierno|government/i.test(p.tag ?? "");
+
+const ordered = [...items].sort(
+  (a, b) => (isGov(a) ? 1 : 0) - (isGov(b) ? 1 : 0),
+);
+---
+
+<section
+  id={id}
+  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+>
+  <div class="max-w-6xl mx-auto w-full">
+    <SectionHeader tag={tag} title={title} meta="CASES" />
+
+    {intro && (
+      <p
+        class="mt-2 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        data-build
+        data-type="body"
+      >
+        {intro}
+      </p>
+    )}
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+      {ordered.map((project, index) => (
+        <ProjectCard project={project} locale={locale} index={index} />
+      ))}
+    </div>
+  </div>
+</section>

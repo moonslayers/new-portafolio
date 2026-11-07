@@ -1,0 +1,110 @@
+---
+interface Props {
+  label?: string;
+  esLabel?: string;
+  enLabel?: string;
+  class?: string;
+}
+
+const {
+  label,
+  esLabel = "ES",
+  enLabel = "EN",
+  class: className = "",
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const locale = Astro.currentLocale ?? "es";
+
+const normalizeBase = base.endsWith("/") ? base : `${base}/`;
+
+const pathname = Astro.url.pathname;
+let relative = pathname.startsWith(normalizeBase)
+  ? pathname.slice(normalizeBase.length)
+  : pathname.replace(/^\//, "");
+
+if (relative.startsWith("en/")) relative = relative.slice(3);
+else if (relative === "en") relative = "";
+
+const esPath = relative ? `${normalizeBase}${relative}` : normalizeBase;
+const enPath = relative
+  ? `${normalizeBase}en/${relative}`
+  : `${normalizeBase}en/`;
+
+const esHref = esPath;
+const enHref = enPath;
+---
+
+<nav class={`lang-switch ${className}`} aria-label={label}>
+  <a
+    href={esHref}
+    class={`lang-switch__link ${locale === "es" ? "is-active" : ""}`}
+    hreflang="es"
+    aria-current={locale === "es" ? "true" : undefined}
+  >
+    {esLabel}
+  </a>
+  <span class="lang-switch__sep" aria-hidden="true">
+    /
+  </span>
+  <a
+    href={enHref}
+    class={`lang-switch__link ${locale === "en" ? "is-active" : ""}`}
+    hreflang="en"
+    aria-current={locale === "en" ? "true" : undefined}
+  >
+    {enLabel}
+  </a>
+</nav>
+
+<script>
+  const syncHash = () => {
+    const hash = window.location.hash;
+    document.querySelectorAll(".lang-switch__link").forEach((a) => {
+      try {
+        const url = new URL(
+          a.getAttribute("href") || "",
+          window.location.origin,
+        );
+        url.hash = hash;
+        a.setAttribute("href", url.pathname + url.search + url.hash);
+      } catch (e) {}
+    });
+  };
+  syncHash();
+  const onHashChange = syncHash;
+  window.addEventListener("hashchange", onHashChange);
+  const cleanup = () => window.removeEventListener("hashchange", onHashChange);
+  window.addEventListener("pagehide", cleanup, { once: true });
+  window.addEventListener("beforeunload", cleanup, { once: true });
+</script>
+
+<style>
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+  }
+  .lang-switch__link {
+    color: var(--ink-secondary);
+    text-decoration: none;
+    padding: 0.2rem 0.35rem;
+    border-radius: var(--radius-sm);
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+  .lang-switch__link:hover {
+    color: var(--ink-primary);
+  }
+  .lang-switch__link.is-active {
+    color: var(--ink-primary);
+    font-weight: 700;
+  }
+  .lang-switch__sep {
+    color: var(--ink-light);
+  }
+</style>

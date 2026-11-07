@@ -1,0 +1,142 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Header from "../components/layout/Header.astro";
+import NavDots from "../components/layout/NavDots.astro";
+import Footer from "../components/layout/Footer.astro";
+import LanguageSwitch from "../components/layout/LanguageSwitch.astro";
+import AgentLayer from "../components/ui/AgentLayer.astro";
+import Hero from "../components/sections/Hero.astro";
+import About from "../components/sections/About.astro";
+import Method from "../components/sections/Method.astro";
+import Stack from "../components/sections/Stack.astro";
+import Projects from "../components/sections/Projects.astro";
+import Experience from "../components/sections/Experience.astro";
+import Writing from "../components/sections/Writing.astro";
+import Contact from "../components/sections/Contact.astro";
+import { getUi } from "../i18n/ui";
+import type { SiteContent, Locale } from "../data/types";
+
+interface Props {
+  content: SiteContent;
+  locale: Locale;
+  title?: string;
+  description?: string;
+  canonical?: string;
+  alternate?: { es?: string; en?: string };
+}
+
+const { content, locale } = Astro.props;
+const labels = getUi(locale);
+
+const title = Astro.props.title ?? content.seo.title;
+const description = Astro.props.description ?? content.seo.description;
+
+const siteOrigin = Astro.site ?? new URL("https://moonslayers.github.io");
+const base = import.meta.env.BASE_URL;
+const normalizeBase = base.endsWith("/") ? base : `${base}/`;
+const esPath = normalizeBase;
+const enPath = `${normalizeBase}en/`;
+
+const canonical =
+  Astro.props.canonical ??
+  new URL(locale === "en" ? enPath : esPath, siteOrigin).toString();
+
+const alternate = Astro.props.alternate ?? {
+  es: new URL(esPath, siteOrigin).toString(),
+  en: new URL(enPath, siteOrigin).toString(),
+};
+
+const sameAs = (content.contact?.links ?? [])
+  .map((l) => l.href)
+  .filter((h) => /^https?:\/\//.test(h));
+
+const [namePart, rolePart] = (content.seo.title ?? "").split(" — ");
+const personName = (namePart ?? "").trim() || "Jorge Márquez Luna";
+const personRole = (rolePart ?? "").trim() || "AI-Native Tech Lead";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: personName,
+  jobTitle: personRole,
+  url: canonical,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality:
+      (content.experience?.items?.[0]?.location ?? "").split(",")[0].trim() ||
+      undefined,
+    addressRegion: "Baja California",
+    addressCountry: "MX",
+  },
+  sameAs,
+};
+
+const navSections = [
+  { id: "hero", label: labels.nav.home },
+  { id: "about", label: labels.nav.about },
+  { id: "method", label: labels.nav.method },
+  { id: "stack", label: labels.nav.stack },
+  { id: "work", label: labels.nav.projects },
+  { id: "experience", label: labels.nav.experience },
+  { id: "writing", label: labels.nav.writing },
+  { id: "contact", label: labels.nav.contact },
+];
+---
+
+<BaseLayout
+  lang={locale}
+  locale={locale}
+  title={title}
+  description={description}
+  canonical={canonical}
+  alternate={alternate}
+  skipLinkText={labels.aria.skipToContent}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <AgentLayer skipLabel={labels.buttons.skipIntro} />
+
+  <Header
+    kicker={content.hero.kicker}
+    brand={personName}
+    nav={content.nav.items}
+    navLabel={labels.aria.mainNav}
+  >
+    <LanguageSwitch
+      slot="actions"
+      label={labels.languageSwitch.label}
+      esLabel={labels.languageSwitch.es}
+      enLabel={labels.languageSwitch.en}
+    />
+  </Header>
+
+  <NavDots sections={navSections} label={labels.aria.sectionNav} />
+
+  <main id="main">
+    <Hero
+      kicker={content.hero.kicker}
+      title={content.hero.title}
+      subtitle={content.hero.subtitle}
+      ctaPrimary={content.hero.ctaPrimary}
+      ctaSecondary={content.hero.ctaSecondary}
+      badges={content.hero.badges}
+      scrollLabel={content.hero.scrollLabel}
+      hero={content.hero}
+    />
+    <About about={content.about} />
+    <Method method={content.method} />
+    <Stack stack={content.stack} />
+    <Projects content={content.projects} locale={locale} />
+    <Experience content={content.experience} locale={locale} />
+    <Writing content={content.writing} locale={locale} />
+    <Contact content={content.contact} locale={locale} />
+  </main>
+
+  <Footer
+    builtBy={content.footer.builtBy ?? content.footer.text}
+    copyright={content.footer.copyright}
+    text={content.footer.text}
+  />
+</BaseLayout>
