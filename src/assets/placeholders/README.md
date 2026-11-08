@@ -4,8 +4,8 @@ SVGs abstractos con la paleta del sitio. Sustituir por assets reales manteniendo
 
 ## Slots
 
-- `portrait.svg` (600x800, 3:4) — retrato editorial de la sección About. Sustituir por foto real; aplicar clase `.editorial-img` para el tratamiento grayscale/sepia.
-- `project-1.svg`, `project-2.svg`, `project-3.svg` (800x450, 16:9) — portadas de proyectos. Sustituir por screenshots reales; mantener `aspect-video` y clase `.editorial-img`.
+- `portrait.svg` (600×800, 3:4) — retrato editorial de la sección About. Sustituir por foto real; aplicar clase `.editorial-img` para el tratamiento grayscale/sepia.
+- `project-1.svg` … `project-6.svg` (800×450, 16:9) — portadas de proyectos (6 slots). Sustituir por screenshots reales; mantener `aspect-video` y clase `.editorial-img`.
 
 ## Convención
 

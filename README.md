@@ -1,6 +1,12 @@
-# Portafolio — Jorge Márquez Luna
+# Portafolio — Jorge Marquez
 
 Portafolio personal bilingüe (español/inglés) construido con Astro. Se publica como GitHub Pages project page en `https://moonslayers.github.io/new-portafolio/`.
+
+## Nombres y rutas
+
+- Carpeta local del proyecto: `new-portfolio` (con guion simple).
+- Repositorio y URL publicada: `new-portafolio` (con doble `o`): `https://moonslayers.github.io/new-portafolio/`.
+- `astro.config.mjs` mantiene `base: '/new-portafolio/'`. No cambiar.
 
 ## Stack
 
@@ -53,6 +59,29 @@ La fuente de verdad del contenido es `src/data/site.es.ts` y `src/data/site.en.t
 - Portadas: `project-1.svg`, `project-2.svg`, `project-3.svg` (800×450, 16:9). Mantener `aspect-video` y `.editorial-img`.
 - OG image: `public/og-image.png` (1200×630) y su fuente `public/og-image.svg`. Actualizar ambos.
 - Formato preferido: SVG o WebP/PNG optimizado. Self-host; no usar imágenes externas en producción.
+
+## Scroll snap
+
+- Desktop: secciones de `100svh` con snap mandatory; el motor construye cada sección al entrar en viewport (threshold ~0.5).
+- Móvil: revelado instantáneo por sección (`instantReveal`), sin choreography de cursores.
+
+## Revisión visual
+
+El motor revisa el copy recién construido: cursor viaja, marca una frase (flag), tacha y reescribe (retype) y cierra con check. Si no hay un par curado seguro, retipea exactamente el mismo texto de una frase existente en el DOM, sin cambiar el significado. Los pares curados (`COPY_UPGRADES`) son opcionales y seguros.
+
+## Densidad de contenido
+
+- Cada sección debe caber en un viewport (100svh): párrafos cortos y escaneables.
+- Hero: subtítulo 1–2 líneas (~160 caracteres), 5 chips.
+- About: máximo 2 párrafos (~300–400 caracteres) + 3 KPIs; sin repetir el hero.
+- Method: 4 pasos, una línea por paso; sin duplicar “gates humanos”.
+- Projects: 6 tarjetas; cada una problema/decisión/resultado en frases cortas (~200–240 caracteres por tarjeta).
+- Stack: solo grupos y chips, sin párrafos.
+- Experience: 3 entradas, máximo 2 bullets cortos por entrada.
+- Writing: 1–2 frases. Contact: 1–2 frases + botones.
+- Orden y tags: 01 Sobre/About, 02 Método/Method, 03 Proyectos/Projects, 04 Stack, 05 Experiencia/Experience, 06 Writing, 07 Contacto/Contact.
+- Paridad ES/EN obligatoria en estructura y cantidad de bloques.
+- Los atributos `data-build`/`data-type` deben permanecer para el motor.
 
 ## Animación y fallbacks
 

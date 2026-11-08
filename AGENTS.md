@@ -1,8 +1,12 @@
 # AGENTS.md — new-portfolio
 
+## Nombres
+
+- Carpeta local: `new-portfolio`. Repo/URL: `new-portafolio` (`base: /new-portafolio/`). No confundir.
+
 ## Proyecto
 
-Portafolio personal bilingüe (ES/EN) de Jorge Márquez Luna, publicado como GitHub Pages project page en `https://moonslayers.github.io/new-portafolio/`. Astro 6, output estático, sin backend ni CMS.
+Portafolio personal bilingüe (ES/EN) de Jorge Marquez, publicado como GitHub Pages project page en `https://moonslayers.github.io/new-portafolio/`. Astro 6, output estático, sin backend ni CMS. Nombre público: **Jorge Marquez** (sin acento, sin “Luna”).
 
 ## Convenciones
 
@@ -43,6 +47,29 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
   - `visibilitychange` → pausa/reanuda.
 - Timings en `TIMING` (agents.ts) y `COPY_UPGRADES` (revisión automática de copy). No modificar sin validación visual.
 - Navegación por secciones: wheel/teclado/touch con scroll snap lógico; `base` path no afecta anchors (`#about`, etc.).
+
+## Scroll snap y observer
+
+- Secciones de `100svh` con snap mandatory (desktop). Observer con threshold ~0.5 y rootMargin negativo para no construir antes de centrar.
+- Móvil: `instantReveal` por sección.
+
+## Revisión visual
+
+- Gestos: flag, strike-through, retype, check. Si no hay par curado seguro, retipea el mismo texto de una frase existente del DOM.
+- `COPY_UPGRADES` es opcional; pares deben ser seguros y no cambiar significado.
+
+## Densidad de contenido
+
+- Cada sección debe caber en un viewport (100svh): copy breve y escaneable.
+- Hero: subtítulo 1–2 líneas (~160 caracteres), 5 chips.
+- About: máximo 2 párrafos (~300–400 caracteres) + 3 KPIs; sin repetir el hero.
+- Method: 4 pasos, una línea por paso; sin duplicar “gates humanos”.
+- Projects: 6 tarjetas; cada una problema/decisión/resultado en frases cortas (~200–240 caracteres por tarjeta). Mantener los 6 proyectos y enlaces/estado privado.
+- Stack: solo grupos y chips, sin párrafos.
+- Experience: 3 entradas, máximo 2 bullets cortos por entrada.
+- Writing: 1–2 frases. Contact: 1–2 frases + botones.
+- Orden y tags: 01 Sobre/About, 02 Método/Method, 03 Proyectos/Projects, 04 Stack, 05 Experiencia/Experience, 06 Writing, 07 Contacto/Contact.
+- Paridad ES/EN en estructura y cantidad.
 
 ## Reglas para no romper
 
