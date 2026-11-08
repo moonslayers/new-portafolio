@@ -13,7 +13,8 @@ export interface Engine {
   savedHTML: WeakMap<HTMLElement, string>;
   queues: Map<HTMLElement, HTMLElement[]>;
   builtSections: WeakSet<HTMLElement>;
-  workerRotation: number[];
+  cursorBusyCounts: number[];
+  cursorWaiters: (() => void)[];
   workerSpeeds: number[];
   reviewQueue: HTMLElement[];
   isReviewing: boolean;
@@ -33,6 +34,10 @@ export interface Engine {
   fastRevealing: boolean;
   skipIntro: boolean;
   frameTrackers: Set<() => void>;
+  sectionBuildQueue: HTMLElement[];
+  sectionBuildProcessing: boolean;
+  sectionBuildPending: Map<HTMLElement, Promise<void>>;
+  sectionBuildResolvers: Map<HTMLElement, (() => void)[]>;
 
   wait(ms: number): Promise<void>;
   rand(min: number, max: number): number;
@@ -72,9 +77,10 @@ export interface Engine {
     token: number,
   ): Promise<void>;
   upgradeSpan(span: HTMLElement, newText: string, token: number): Promise<void>;
-  heroBgClick(workerIdx: number): Promise<void>;
+  heroBgClick(workerIdx: number, token?: number): Promise<void>;
   runIntro(): Promise<void>;
-  getWorkerCursors(workerIdx: number, count: number): Cursor[];
+  acquireCursor(exclude?: Cursor[], token?: number): Promise<Cursor>;
+  releaseCursor(cursor: Cursor): void;
   initCursors(): void;
 }
 

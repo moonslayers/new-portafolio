@@ -1,4 +1,4 @@
-import type { Engine } from "./context";
+import type { Engine, Cursor } from "./context";
 import { gsapRef as gsap } from "./context";
 import * as motion from "./motion";
 import * as typing from "./typing";
@@ -7,25 +7,35 @@ import * as fx from "./fx";
 
 export async function heroBgClick(
   eng: Engine,
-  workerIdx: number,
+  _workerIdx: number,
+  token?: number,
 ): Promise<void> {
-  const cursor = motion.getWorkerCursors(eng, workerIdx, 1)[0];
-  const kicker = document.querySelector<HTMLElement>(".hero-kicker");
-  let x: number;
-  let y: number;
-  if (kicker) {
-    const r = kicker.getBoundingClientRect();
-    x = r.left + r.width / 2;
-    y = r.top + r.height / 2;
-  } else {
-    x = window.innerWidth * eng.rand(0.12, 0.24);
-    y = window.innerHeight * eng.rand(0.14, 0.26);
+  let cursor: Cursor;
+  try {
+    cursor = await eng.acquireCursor([], token);
+  } catch (e) {
+    return;
   }
-  await motion.flyTo(eng, cursor, x, y, eng.rand(0.2, 0.35));
-  await motion.click(eng, cursor);
-  fx.pulse(eng, x, y, cursor.color);
-  eng.bgRevealed = true;
-  motion.syncHeroState(eng);
+  try {
+    const kicker = document.querySelector<HTMLElement>(".hero-kicker");
+    let x: number;
+    let y: number;
+    if (kicker) {
+      const r = kicker.getBoundingClientRect();
+      x = r.left + r.width / 2;
+      y = r.top + r.height / 2;
+    } else {
+      x = window.innerWidth * eng.rand(0.12, 0.24);
+      y = window.innerHeight * eng.rand(0.14, 0.26);
+    }
+    await motion.flyTo(eng, cursor, x, y, eng.rand(0.2, 0.35));
+    await motion.click(eng, cursor);
+    fx.pulse(eng, x, y, cursor.color);
+    eng.bgRevealed = true;
+    motion.syncHeroState(eng);
+  } finally {
+    eng.releaseCursor(cursor);
+  }
 }
 
 export async function runIntro(eng: Engine): Promise<void> {
@@ -74,7 +84,7 @@ export async function runIntro(eng: Engine): Promise<void> {
   eng.fastRevealing = false;
 
   const worker = async (workerIdx: number) => {
-    await eng.wait(workerIdx * 120 + eng.rand(20, 100));
+    await eng.wait(workerIdx * 30 + eng.rand(10, 40));
     if (myToken !== eng.buildToken) return;
 
     while (queue.length > 0) {
@@ -86,7 +96,7 @@ export async function runIntro(eng: Engine): Promise<void> {
       if (myToken !== eng.buildToken) return;
 
       try {
-        if (item.kind === "bg") await heroBgClick(eng, workerIdx);
+        if (item.kind === "bg") await heroBgClick(eng, workerIdx, myToken);
         else if (item.el)
           await typing.buildText(eng, item.el, myToken, workerIdx);
       } catch (e) {
@@ -102,7 +112,8 @@ export async function runIntro(eng: Engine): Promise<void> {
     }
   };
 
-  await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
+  const laneCount = Math.min(eng.cursors.length, queue.length);
+  await Promise.all(Array.from({ length: laneCount }, (_, i) => worker(i)));
 
   if (myToken !== eng.buildToken) {
     sections.finishHeroInstantly(eng);

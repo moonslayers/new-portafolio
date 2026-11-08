@@ -6,11 +6,11 @@
 
 ## Proyecto
 
-Portafolio personal bilingüe (ES/EN) de Jorge Marquez, publicado como GitHub Pages project page en `https://moonslayers.github.io/new-portafolio/`. Astro 6, output estático, sin backend ni CMS. Nombre público: **Jorge Marquez** (sin acento, sin “Luna”).
+Portafolio personal bilingüe (ES/EN) de Jorge Marquez, publicado como GitHub Pages project page en `https://moonslayers.github.io/new-portafolio/`. Astro 7.4.7, output estático, sin backend ni CMS. Nombre público: **Jorge Marquez** (sin acento, sin “Luna”).
 
 ## Convenciones
 
-- Node 22 (`.nvmrc`, `engines.node >=22`). Usar `npm ci` en CI, `npm install` local.
+- Node 22.23.4 (`.nvmrc`, `engines.node >=22.23.4`). Usar `npm ci` en CI, `npm install` local.
 - Indentación: 2 espacios (`.editorconfig`). Formato con Prettier + `prettier-plugin-astro`.
 - TypeScript estricto (`tsconfig.json`). Ejecutar `npm run check` antes de publicar.
 - Commits en español o inglés, estilo convencional (`chore:`, `feat:`, etc.).
@@ -28,7 +28,7 @@ Portafolio personal bilingüe (ES/EN) de Jorge Marquez, publicado como GitHub Pa
 
 - `src/data/types.ts` define `SiteContent` y todas las interfaces de sección.
 - `src/pages/index.astro` (ES) y `src/pages/en/index.astro` (EN) cargan su `site*.ts` y renderizan `LandingPage`.
-- `src/layouts/LandingPage.astro` compone secciones en orden fijo: Hero, About, Method, Stack, Projects, Experience, Writing, Contact. NavDots y Header derivan de `content`.
+- `src/layouts/LandingPage.astro` compone secciones en orden fijo: Hero, About, Method, Projects I (`work`), Projects II (`work-2`), Stack, Experience, Writing, Contact. NavDots 9; Header principales. NavDots y Header derivan de `content`.
 - Paridad obligatoria: cualquier cambio editorial se aplica en `site.es.ts` y `site.en.ts` simultáneamente.
 
 ## Secciones
@@ -37,21 +37,26 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
 
 ## Motor de animación
 
-- Código en `src/scripts/agents/` (`index.ts`, `motion.ts`, `typing.ts`, `sections.ts`, `intro.ts`, `review.ts`, `navigation.ts`, `fx.ts`, `context.ts`, `agents.ts`).
-- Se inicializa en el cliente vía `initAgents()` (importado desde `LandingPage`/layout). Solo corre en browser (`typeof window`).
-- Fallbacks que NO deben romperse:
-  - `prefers-reduced-motion: reduce` → revelado estático, oculta capa de agentes y fx.
-  - Mobile (`max-width: 768px`) → `instantReveal` por sección.
-  - Botón "Saltar intro" / tecla `Escape` → `finishHeroInstantly`.
-  - `sessionStorage.skipIntro === '1'` → salta intro.
+- Skill: `portfolio-animation-engine` (`.agents/skills/portfolio-animation-engine/SKILL.md`).
+- Invariantes: todo `[data-build]` visible tiene `data-type`; al completar `data-animated` es `text-3` o `image-2`; `fast`/`instant` = 0 en build normal de desktop (skip/Escape y rutas de error/fallback pueden producir `instant`; móvil `static-mobile`, reduced `static-reduced`); `window.__cursorBuilds` cuadra con los elementos.
+- Fallbacks que no deben romperse:
+  - `prefers-reduced-motion: reduce` → revelado estático (`static-reduced`), oculta capa de agentes y fx.
+  - Mobile (`max-width: 768px`) → hero y secciones con `static-mobile` (sin intro animada).
+  - Botón "Saltar intro" / tecla `Escape` → `finishHeroInstantly` solo durante la intro del hero; inerte después.
+  - `sessionStorage.skipIntro === '1'` → salta intro; en reload se limpia y la intro se replayea salvo `data-skip-intro` explícito que fuerza skip.
   - `visibilitychange` → pausa/reanuda.
-- Timings en `TIMING` (agents.ts) y `COPY_UPGRADES` (revisión automática de copy). No modificar sin validación visual.
-- Navegación por secciones: wheel/teclado/touch con scroll snap lógico; `base` path no afecta anchors (`#about`, etc.).
+- Navegación sin secuestro: cambiar de sección no incrementa `buildToken` ni cancela la construcción anterior; builds de sección serializados FIFO (dedup, sin cancelar el build en curso); solo skip/reduced/móvil/token-error abortan.
+- Refresh/reset y bfcache:
+  - `history.scrollRestoration='manual'` en `<head>`; boot reset antes de `initAgents()` fuerza scroll instantáneo al hero y sincroniza dot a índice 0.
+  - Reload limpia `sessionStorage.skipIntro` (replay de intro); `data-skip-intro` mantiene skip si está presente.
+  - `pagehide` persistido (bfcache) no hace `dispose`; unload real sí.
 
 ## Scroll snap y observer
 
-- Secciones de `100svh` con snap mandatory (desktop). Observer con threshold ~0.5 y rootMargin negativo para no construir antes de centrar.
-- Móvil: `instantReveal` por sección.
+- Secciones de `100svh` con snap mandatory (desktop): `scroll-margin: 0`, header `absolute`, `overflow-x: clip`.
+- Móvil/reduced: sin snap (`scroll-snap-type: none`).
+- Observer con threshold ~0.5 y rootMargin negativo para no construir antes de centrar.
+- Móvil: `static-mobile` por sección (hero y secciones sin intro animada).
 
 ## Revisión visual
 
@@ -68,7 +73,7 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
 - Stack: solo grupos y chips, sin párrafos.
 - Experience: 3 entradas, máximo 2 bullets cortos por entrada.
 - Writing: 1–2 frases. Contact: 1–2 frases + botones.
-- Orden y tags: 01 Sobre/About, 02 Método/Method, 03 Proyectos/Projects, 04 Stack, 05 Experiencia/Experience, 06 Writing, 07 Contacto/Contact.
+- Orden y tags: 01 About, 02 Method, 03 Projects (`work`), 04 More projects (`work-2`), 05 Stack, 06 Experience, 07 Writing, 08 Contact.
 - Paridad ES/EN en estructura y cantidad.
 
 ## Reglas para no romper
@@ -94,8 +99,22 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
 ### Fidelidad de animación
 
 - Conservar atributos `data-build`, `data-type`, clases `pre-build`/`pre-build-y`, `is-typing`, `editorial-img`.
-- No cambiar el orden de secciones ni los ids de sección (`hero`, `about`, `method`, `stack`, `work`, `experience`, `writing`, `contact`) sin actualizar `navSections` y `setupNavigation`.
+- No cambiar el orden de secciones ni los ids de sección (`hero`, `about`, `method`, `work`, `work-2`, `stack`, `experience`, `writing`, `contact`) sin actualizar `navSections` y `setupNavigation`.
+- Fidelidad: ids incluyen `work-2`; conservar `data-animated`; no `FAST_TYPES`, no cortes, no cancelación entre secciones.
 - No introducir frameworks de UI adicionales.
+
+## Comandos
+
+```bash
+npm ci
+npm run check
+npm run build
+npx prettier --check .
+npm audit --omit=dev
+npm run preview
+```
+
+Nota de QA visual: Selenium + Firefox; verificar `[data-build]`/`data-animated`, `window.__cursorBuilds`, `100svh` y snap.
 
 ## Checklist antes de publicar
 
@@ -109,3 +128,6 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
 8. Estado de GitHub Pages reportado (activado con `build_type: workflow`).
 9. No se expusieron tokens ni credenciales.
 10. Preview local (`npm run preview`) revisado.
+11. `npx prettier --check .` pasa.
+12. Cursor QA en build normal de desktop (sin skip): 0 `fast`/`instant`, todos `data-animated` (skip/Escape/error/fallback pueden dar `instant`; móvil `static-mobile`).
+13. Snap QA: top 0, bottom = viewport en 1440×900 y 1366×768.

@@ -19,6 +19,9 @@ function updateNavDots(idx: number): void {
 export function setupNavigation(eng: Engine): void {
   eng.sections = Array.from(document.querySelectorAll<HTMLElement>("section"));
 
+  eng.activeIdx = 0;
+  updateNavDots(0);
+
   document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
     a.addEventListener("click", () => {
       const href = a.getAttribute("href");
@@ -142,6 +145,7 @@ export function onKey(e: KeyboardEvent): void {
     return;
   if (e.key === "Escape") {
     const skipBtn = document.getElementById("skip-intro");
+    if (skipBtn && skipBtn.hidden) return;
     if (skipBtn) skipBtn.click();
   }
 }

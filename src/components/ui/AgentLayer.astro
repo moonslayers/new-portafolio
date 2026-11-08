@@ -43,6 +43,8 @@ const { skipLabel = "Saltar intro" } = Astro.props;
 </button>
 
 <script>
+  import { bootReset } from "../../scripts/agents/boot.ts";
   import { initAgents } from "../../scripts/agents/index.ts";
+  bootReset();
   initAgents();
 </script>

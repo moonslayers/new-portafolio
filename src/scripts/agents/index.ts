@@ -27,7 +27,8 @@ export class AgentEngine implements Engine {
   savedHTML = new WeakMap<HTMLElement, string>();
   queues = new Map<HTMLElement, HTMLElement[]>();
   builtSections = new WeakSet<HTMLElement>();
-  workerRotation = [0, 0, 0, 0];
+  cursorBusyCounts: number[] = [];
+  cursorWaiters: (() => void)[] = [];
   workerSpeeds = [
     randFn(0.9, 1.15),
     randFn(0.8, 1.1),
@@ -52,6 +53,10 @@ export class AgentEngine implements Engine {
   fastRevealing = false;
   skipIntro = false;
   frameTrackers = new Set<() => void>();
+  sectionBuildQueue: HTMLElement[] = [];
+  sectionBuildProcessing = false;
+  sectionBuildPending = new Map<HTMLElement, Promise<void>>();
+  sectionBuildResolvers = new Map<HTMLElement, (() => void)[]>();
 
   rand(min: number, max: number): number {
     return randFn(min, max);
@@ -126,6 +131,9 @@ export class AgentEngine implements Engine {
     navigation.setupNavigation(this);
   }
   onKey(e: KeyboardEvent): void {
+    if (this.heroDone) return;
+    const btn = document.getElementById("skip-intro");
+    if (btn && btn.hidden) return;
     navigation.onKey(e);
   }
   setupQueues(): void {
@@ -164,14 +172,17 @@ export class AgentEngine implements Engine {
   ): Promise<void> {
     return review.upgradeSpan(this, span, newText, token);
   }
-  heroBgClick(workerIdx: number): Promise<void> {
-    return intro.heroBgClick(this, workerIdx);
+  heroBgClick(workerIdx: number, token?: number): Promise<void> {
+    return intro.heroBgClick(this, workerIdx, token);
   }
   runIntro(): Promise<void> {
     return intro.runIntro(this);
   }
-  getWorkerCursors(workerIdx: number, count: number): Cursor[] {
-    return motion.getWorkerCursors(this, workerIdx, count);
+  acquireCursor(exclude?: Cursor[], token?: number): Promise<Cursor> {
+    return motion.acquireCursor(this, exclude, token);
+  }
+  releaseCursor(cursor: Cursor): void {
+    motion.releaseCursor(this, cursor);
   }
 }
 
@@ -242,10 +253,13 @@ export function initAgents(): void {
   let introTimer: ReturnType<typeof setTimeout> | null = null;
   const skipBtn = document.getElementById("skip-intro");
   const skipHandler = () => {
+    if (engine.heroDone) return;
+    if (skipBtn && skipBtn.hidden) return;
     engine.buildToken++;
     engine.reviewQueue = [];
     engine.isReviewing = false;
     motion.clearFrames(engine);
+    motion.stopAllFrameTrackers(engine);
     motion.clearFx();
     motion.cleanupFlags();
     sections.finishHeroInstantly(engine);
@@ -258,7 +272,9 @@ export function initAgents(): void {
     skipBtn.addEventListener("click", skipHandler);
   }
 
-  // Escape key handled in navigation.onKey already calls skip button click
+  // Escape key handled in navigation.onKey; register keydown listener
+  const keyHandler = (e: KeyboardEvent) => engine.onKey(e);
+  window.addEventListener("keydown", keyHandler);
 
   const onVisibility = () => {
     if (document.hidden) {
@@ -295,7 +311,33 @@ export function initAgents(): void {
   const hideSkip = () => {
     if (skipBtn) skipBtn.hidden = true;
   };
-  if (engine.skipIntro) {
+  if (engine.mobile) {
+    const heroEls = Array.from(
+      document.querySelectorAll<HTMLElement>("#hero [data-build]"),
+    );
+    heroEls.forEach((el) => {
+      motion.instantReveal(engine, el);
+      el.dataset.animated = "static-mobile";
+    });
+    if (window.__cursorBuilds) {
+      window.__cursorBuilds.static += heroEls.length;
+      window.__cursorBuilds.instant = Math.max(
+        0,
+        window.__cursorBuilds.instant - heroEls.length,
+      );
+    }
+    engine.titleRevealed = true;
+    engine.bgRevealed = true;
+    motion.syncHeroState(engine);
+    engine.heroDone = true;
+    engine.scatterCursors();
+    motion.clearFrames(engine);
+    motion.stopAllFrameTrackers(engine);
+    motion.clearFx();
+    motion.cleanupFlags();
+    motion.setAgentsIdle(engine, true);
+    hideSkip();
+  } else if (engine.skipIntro) {
     sections.finishHeroInstantly(engine);
     engine.heroDone = true;
     hideSkip();
@@ -327,6 +369,9 @@ export function initAgents(): void {
       skipBtn?.removeEventListener("click", skipHandler);
     } catch (e) {}
     try {
+      window.removeEventListener("keydown", keyHandler);
+    } catch (e) {}
+    try {
       document.removeEventListener("visibilitychange", onVisibility);
     } catch (e) {}
     try {
@@ -337,7 +382,11 @@ export function initAgents(): void {
     motion.clearFx();
     motion.cleanupFlags();
   };
-  window.addEventListener("pagehide", dispose);
+  const onPageHide = (e: PageTransitionEvent) => {
+    if (e.persisted) return;
+    dispose();
+  };
+  window.addEventListener("pagehide", onPageHide);
   window.addEventListener("beforeunload", dispose);
 
   // initial active section build for hero handled by intro; for current viewport maybe

@@ -17,6 +17,7 @@ export function initCursors(eng: Engine): void {
       getComputedStyle(el).getPropertyValue("--c").trim() || "#1C1B19";
     return { el, color };
   });
+  eng.cursorBusyCounts = eng.cursors.map(() => 0);
 }
 
 export async function flyTo(
@@ -67,18 +68,68 @@ export function scatterCursors(eng: Engine): void {
   });
 }
 
-export function getWorkerCursors(
+export async function acquireCursor(
   eng: Engine,
-  workerIdx: number,
-  count: number,
-): Cursor[] {
-  const base = (workerIdx % 4) * 3;
-  const rot = eng.workerRotation[workerIdx % 4] || 0;
-  const out: Cursor[] = [];
-  for (let i = 0; i < count; i++)
-    out.push(eng.cursors[(base + ((rot + i) % 3)) % eng.cursors.length]);
-  eng.workerRotation[workerIdx % 4] = (rot + count) % 3;
-  return out;
+  exclude: Cursor[] = [],
+  token?: number,
+): Promise<Cursor> {
+  if (
+    !eng.cursorBusyCounts ||
+    eng.cursorBusyCounts.length !== eng.cursors.length
+  ) {
+    eng.cursorBusyCounts = eng.cursors.map(() => 0);
+  }
+  if (!eng.cursorWaiters) eng.cursorWaiters = [];
+  const excluded = new Set(exclude);
+
+  while (true) {
+    if (token !== undefined && token !== eng.buildToken) {
+      throw new Error("aborted");
+    }
+
+    let idx = eng.cursors.findIndex(
+      (c, i) => !excluded.has(c) && (eng.cursorBusyCounts[i] || 0) === 0,
+    );
+    if (idx === -1) {
+      idx = eng.cursors.findIndex(
+        (_c, i) => (eng.cursorBusyCounts[i] || 0) === 0,
+      );
+    }
+    if (idx >= 0) {
+      eng.cursorBusyCounts[idx] = (eng.cursorBusyCounts[idx] || 0) + 1;
+      return eng.cursors[idx];
+    }
+
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        if (timer !== null) clearTimeout(timer);
+        const i = eng.cursorWaiters.indexOf(settle);
+        if (i >= 0) eng.cursorWaiters.splice(i, 1);
+        resolve();
+      };
+      eng.cursorWaiters.push(settle);
+      timer = setTimeout(settle, 16);
+    });
+  }
+}
+
+export function releaseCursor(eng: Engine, cursor: Cursor): void {
+  const idx = eng.cursors.indexOf(cursor);
+  if (idx >= 0 && eng.cursorBusyCounts[idx] > 0) {
+    eng.cursorBusyCounts[idx]--;
+  }
+  if (eng.cursorWaiters && eng.cursorWaiters.length) {
+    const w = eng.cursorWaiters.shift();
+    if (w) {
+      try {
+        w();
+      } catch (e) {}
+    }
+  }
 }
 
 export function stopAllFrameTrackers(eng: Engine): void {

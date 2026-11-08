@@ -35,19 +35,29 @@ export async function processReviewQueue(
     const upgrade = findUpgradeFor(eng, el);
     const willFlag = !!upgrade && Math.random() < 0.6;
 
-    const reviewCursor = Math.random() > 0.5 ? eng.cursors[4] : eng.cursors[11];
+    let reviewCursor: Cursor;
+    try {
+      reviewCursor = await eng.acquireCursor([], token);
+    } catch (e) {
+      eng.isReviewing = false;
+      return;
+    }
 
-    if (willFlag && upgrade) {
-      await flagAndFix(eng, el, upgrade, reviewCursor, token);
-    } else {
-      const rx = rect.left + rect.width * eng.rand(0.2, 0.8);
-      const ry = rect.top + rect.height * eng.rand(0.2, 0.8);
-      await motion.flyTo(eng, reviewCursor, rx, ry, eng.rand(0.2, 0.35));
-      if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) break;
-      await motion.click(eng, reviewCursor);
-      fx.reviewPulse(eng, rx, ry);
-      el.classList.add("reviewed");
-      setTimeout(() => el.classList.remove("reviewed"), 800);
+    try {
+      if (willFlag && upgrade) {
+        await flagAndFix(eng, el, upgrade, reviewCursor, token);
+      } else {
+        const rx = rect.left + rect.width * eng.rand(0.2, 0.8);
+        const ry = rect.top + rect.height * eng.rand(0.2, 0.8);
+        await motion.flyTo(eng, reviewCursor, rx, ry, eng.rand(0.2, 0.35));
+        if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) break;
+        await motion.click(eng, reviewCursor);
+        fx.reviewPulse(eng, rx, ry);
+        el.classList.add("reviewed");
+        setTimeout(() => el.classList.remove("reviewed"), 800);
+      }
+    } finally {
+      eng.releaseCursor(reviewCursor);
     }
 
     await eng.wait(eng.rand(60, 150));
@@ -156,29 +166,38 @@ export async function flagAndFix(
     return;
   }
 
-  const fixCursor = Math.random() > 0.5 ? eng.cursors[10] : eng.cursors[8];
-  const sr2 = span.getBoundingClientRect();
-  const fixX = sr2.left + sr2.width * 0.5;
-  const fixY = sr2.top + sr2.height * 0.5;
-
-  await motion.flyTo(eng, fixCursor, fixX, fixY, eng.rand(0.36, 0.52));
-  if (token !== eng.buildToken) {
-    span.textContent = upgrade.to;
-    span.classList.remove("flag-suggestion");
+  let fixCursor: Cursor;
+  try {
+    fixCursor = await eng.acquireCursor([flaggingCursor], token);
+  } catch (e) {
     return;
   }
-  await motion.click(eng, fixCursor);
+  try {
+    const sr2 = span.getBoundingClientRect();
+    const fixX = sr2.left + sr2.width * 0.5;
+    const fixY = sr2.top + sr2.height * 0.5;
 
-  await upgradeSpan(eng, span, upgrade.to, token);
+    await motion.flyTo(eng, fixCursor, fixX, fixY, eng.rand(0.36, 0.52));
+    if (token !== eng.buildToken) {
+      span.textContent = upgrade.to;
+      span.classList.remove("flag-suggestion");
+      return;
+    }
+    await motion.click(eng, fixCursor);
 
-  const sr3 = span.getBoundingClientRect();
-  fx.reviewPulse(eng, sr3.left + sr3.width * 0.5, sr3.top + sr3.height * 0.5);
-  el.classList.add("reviewed");
-  setTimeout(() => el.classList.remove("reviewed"), 800);
+    await upgradeSpan(eng, span, upgrade.to, token);
 
-  await eng.wait(150);
-  if (span.isConnected) {
-    span.classList.remove("flag-suggestion");
+    const sr3 = span.getBoundingClientRect();
+    fx.reviewPulse(eng, sr3.left + sr3.width * 0.5, sr3.top + sr3.height * 0.5);
+    el.classList.add("reviewed");
+    setTimeout(() => el.classList.remove("reviewed"), 800);
+
+    await eng.wait(150);
+    if (span.isConnected) {
+      span.classList.remove("flag-suggestion");
+    }
+  } finally {
+    eng.releaseCursor(fixCursor);
   }
 }
 

@@ -43,7 +43,7 @@ export function setupQueues(eng: Engine): void {
   });
 }
 
-export async function buildSection(
+export async function buildSectionBody(
   eng: Engine,
   section: HTMLElement | null,
 ): Promise<void> {
@@ -112,7 +112,8 @@ export async function buildSection(
     }
   };
 
-  await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
+  const laneCount = Math.min(eng.cursors.length, queue.length);
+  await Promise.all(Array.from({ length: laneCount }, (_, i) => worker(i)));
 
   if (myToken !== eng.buildToken) {
     queue.forEach((el) => motion.instantReveal(eng, el));
@@ -163,6 +164,16 @@ export function finishHeroInstantly(eng: Engine): void {
     el.style.minHeight = "";
     gsap.set(el, { opacity: 1, filter: "none", y: 0 });
     if (el.hasAttribute("data-build")) {
+      const cur = el.dataset.animated;
+      if (
+        cur === "text-3" ||
+        cur === "image-2" ||
+        cur === "instant" ||
+        cur === "static-mobile" ||
+        cur === "static-reduced"
+      ) {
+        return;
+      }
       el.dataset.animated = "instant";
       if (window.__cursorBuilds) window.__cursorBuilds.instant++;
     }
@@ -176,4 +187,56 @@ export function finishHeroInstantly(eng: Engine): void {
   motion.clearFx();
   motion.cleanupFlags();
   motion.setAgentsIdle(eng, true);
+}
+
+export async function buildSection(
+  eng: Engine,
+  section: HTMLElement | null,
+): Promise<void> {
+  if (!section) return;
+  if (eng.builtSections.has(section)) return Promise.resolve();
+
+  let pending = eng.sectionBuildPending.get(section);
+  if (pending) return pending;
+
+  let resolveFn!: () => void;
+  const p = new Promise<void>((resolve) => {
+    resolveFn = resolve;
+  });
+  eng.sectionBuildPending.set(section, p);
+  eng.sectionBuildQueue.push(section);
+  const list = eng.sectionBuildResolvers.get(section) || [];
+  list.push(resolveFn);
+  eng.sectionBuildResolvers.set(section, list);
+
+  if (!eng.sectionBuildProcessing) {
+    eng.sectionBuildProcessing = true;
+    (async () => {
+      try {
+        while (true) {
+          while (eng.sectionBuildQueue.length > 0) {
+            const next = eng.sectionBuildQueue.shift()!;
+            const resolvers = eng.sectionBuildResolvers.get(next) || [];
+            eng.sectionBuildResolvers.delete(next);
+            eng.sectionBuildPending.delete(next);
+            if (eng.builtSections.has(next)) {
+              resolvers.forEach((r) => r());
+              continue;
+            }
+            try {
+              await buildSectionBody(eng, next);
+            } catch (e) {}
+            resolvers.forEach((r) => r());
+          }
+          // allow newly enqueued items to be picked up
+          await new Promise((r) => setTimeout(r, 0));
+          if (eng.sectionBuildQueue.length === 0) break;
+        }
+      } finally {
+        eng.sectionBuildProcessing = false;
+      }
+    })();
+  }
+
+  return p;
 }
