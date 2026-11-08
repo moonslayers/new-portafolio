@@ -56,14 +56,15 @@ const ordered = [...items].sort(
 
 <section
   id={id}
-  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+  class={`relative min-h-[100svh] flex items-center py-6 md:py-7 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+  data-agent-section={id}
 >
-  <div class="max-w-6xl mx-auto w-full">
+  <div class="max-w-6xl mx-auto w-full py-2">
     <SectionHeader tag={tag} title={title} meta="CASES" />
 
     {intro && (
       <p
-        class="mt-2 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        class="mt-1 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif text-sm"
         data-build
         data-type="body"
       >
@@ -71,7 +72,7 @@ const ordered = [...items].sort(
       </p>
     )}
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
       {ordered.map((project, index) => (
         <ProjectCard project={project} locale={locale} index={index} />
       ))}

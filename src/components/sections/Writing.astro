@@ -58,12 +58,13 @@ const isExternal = /^https?:\/\//.test(href);
 
 <section
   id={id}
-  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+  data-agent-section={id}
+  class={`relative min-h-[100svh] flex items-center py-6 md:py-8 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
 >
-  <div class="max-w-4xl mx-auto w-full">
+  <div class="max-w-4xl mx-auto w-full py-2">
     <SectionHeader tag={tag} title={title} meta="ESSAY" />
 
-    <div class="mt-16 border border-[var(--ink-light)] p-8 md:p-10 rounded-sm bg-white/30">
+    <div class="mt-4 border border-[var(--ink-light)] p-5 md:p-6 rounded-sm bg-white/30">
       <h3
         class="font-serif text-2xl text-[var(--ink-primary)]"
         data-build
@@ -72,14 +73,14 @@ const isExternal = /^https?:\/\//.test(href);
         {name}
       </h3>
       <p
-        class="mt-4 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        class="mt-3 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
         data-build
         data-type="body"
         style="font-size: 1.05rem; line-height: 1.7;"
       >
         {description}
       </p>
-      <div class="mt-8">
+      <div class="mt-6">
         <a
           href={href}
           class="btn btn-primary"

@@ -40,14 +40,15 @@ const titleLines = title.split("\n");
 
 <section
   id="hero"
-  class={`hero relative min-h-screen flex items-center px-6 ${className}`.trim()}
+  data-agent-section="hero"
+  class={`hero relative min-h-[100svh] h-[100svh] flex items-center px-6 pt-[3.6rem] box-border ${className}`.trim()}
 >
   <div class="hero-bg pointer-events-none absolute inset-0 overflow-hidden">
     <div class="absolute inset-0 bg-grid"></div>
   </div>
 
-  <div class="relative w-full max-w-5xl mx-auto py-20 md:py-28">
-    <div class="flex justify-between items-baseline mb-12 border-b border-[var(--ink-light)] pb-4">
+  <div class="relative w-full max-w-5xl mx-auto py-8 md:py-10">
+    <div class="flex justify-between items-baseline mb-6 border-b border-[var(--ink-light)] pb-3">
       {kicker && (
         <div class="hero-kicker mono text-[10px] uppercase tracking-[.15em]">
           {kicker}
@@ -75,7 +76,7 @@ const titleLines = title.split("\n");
         id="hero-sub"
         data-build
         data-type="body"
-        class="mt-10 max-w-lg text-[15px] leading-relaxed text-[var(--ink-secondary)] pre-build-y font-serif"
+        class="mt-6 max-w-lg text-[15px] leading-relaxed text-[var(--ink-secondary)] pre-build-y font-serif"
         style="font-family: var(--font-serif); font-size: 1.1rem; line-height: 1.7;"
       >
         {subtitle}
@@ -83,7 +84,7 @@ const titleLines = title.split("\n");
     )}
 
     {(ctaPrimary || ctaSecondary) && (
-      <div id="hero-cta" class="mt-12 flex flex-wrap items-center gap-4">
+      <div id="hero-cta" class="mt-8 flex flex-wrap items-center gap-4">
         {ctaPrimary && (
           <Button href={ctaPrimary.href} class="pre-build-y">
             {ctaPrimary.label}
@@ -98,7 +99,7 @@ const titleLines = title.split("\n");
     )}
 
     {badges.length > 0 && (
-      <div id="hero-badges" class="mt-16 flex flex-wrap gap-2">
+      <div id="hero-badges" class="mt-10 flex flex-wrap gap-2">
         {badges.map((badge) => (
           <Chip type="badge" class="pre-build-y">
             {badge}

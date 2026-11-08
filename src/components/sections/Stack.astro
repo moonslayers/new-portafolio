@@ -32,26 +32,27 @@ const groups = rest.groups ?? source.groups ?? [];
 
 <section
   id="stack"
-  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+  data-agent-section="stack"
+  class={`relative min-h-[100svh] flex items-center py-6 md:py-8 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
 >
-  <div class="max-w-6xl mx-auto w-full">
+  <div class="max-w-6xl mx-auto w-full py-2">
     <SectionHeader tag={tag} title={title} />
 
     {intro && (
       <p
         data-build
         data-type="body"
-        class="mt-6 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
-        style="font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.7;"
+        class="mt-2 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        style="font-family: var(--font-serif); font-size: 0.98rem; line-height: 1.6;"
       >
         {intro}
       </p>
     )}
 
     {groups.length > 0 && (
-      <div class="grid md:grid-cols-2 gap-6 mt-16">
+      <div class="grid md:grid-cols-2 gap-3 mt-4">
         {groups.map((group) => (
-          <div class="border border-[var(--ink-light)] p-6 rounded-sm bg-white/30">
+          <div class="border border-[var(--ink-light)] p-3 rounded-sm bg-white/30">
             <div
               class="mono text-[10px] uppercase tracking-wider text-[var(--ink-secondary)]"
               data-build
@@ -59,7 +60,7 @@ const groups = rest.groups ?? source.groups ?? [];
             >
               {group.title}
             </div>
-            <div class="mt-6 flex flex-wrap gap-2">
+            <div class="mt-3 flex flex-wrap gap-1.5">
               {group.items.map((item) => (
                 <Chip class="pre-build-y">{item}</Chip>
               ))}

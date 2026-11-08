@@ -28,6 +28,15 @@ interface Props {
 const { content, locale } = Astro.props;
 const labels = getUi(locale);
 
+const projectsFirst = {
+  ...content.projects,
+  items: content.projects.items.slice(0, 3),
+};
+const projectsSecond = {
+  ...content.projects,
+  items: content.projects.items.slice(3),
+};
+
 const title = Astro.props.title ?? content.seo.title;
 const description = Astro.props.description ?? content.seo.description;
 
@@ -51,7 +60,7 @@ const sameAs = (content.contact?.links ?? [])
   .filter((h) => /^https?:\/\//.test(h));
 
 const [namePart, rolePart] = (content.seo.title ?? "").split(" — ");
-const personName = (namePart ?? "").trim() || "Jorge Márquez Luna";
+const personName = (namePart ?? "").trim() || "Jorge Marquez";
 const personRole = (rolePart ?? "").trim() || "AI-Native Tech Lead";
 
 const jsonLd = {
@@ -75,8 +84,9 @@ const navSections = [
   { id: "hero", label: labels.nav.home },
   { id: "about", label: labels.nav.about },
   { id: "method", label: labels.nav.method },
-  { id: "stack", label: labels.nav.stack },
   { id: "work", label: labels.nav.projects },
+  { id: "work-2", label: `${labels.nav.projects} (2)` },
+  { id: "stack", label: labels.nav.stack },
   { id: "experience", label: labels.nav.experience },
   { id: "writing", label: labels.nav.writing },
   { id: "contact", label: labels.nav.contact },
@@ -127,16 +137,20 @@ const navSections = [
     />
     <About about={content.about} />
     <Method method={content.method} />
+    <Projects content={projectsFirst} locale={locale} />
+    <Projects
+      content={projectsSecond}
+      locale={locale}
+      id="work-2"
+      tag={locale === "en" ? "04 — projects" : "04 — proyectos"}
+      title={locale === "en" ? "More projects" : "Más proyectos"}
+      intro=""
+    />
     <Stack stack={content.stack} />
-    <Projects content={content.projects} locale={locale} />
     <Experience content={content.experience} locale={locale} />
     <Writing content={content.writing} locale={locale} />
     <Contact content={content.contact} locale={locale} />
   </main>
 
-  <Footer
-    builtBy={content.footer.builtBy ?? content.footer.text}
-    copyright={content.footer.copyright}
-    text={content.footer.text}
-  />
+  <Footer text={content.footer.text} copyright={content.footer.copyright} />
 </BaseLayout>

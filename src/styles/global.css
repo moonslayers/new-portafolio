@@ -68,18 +68,47 @@
 html {
   scroll-behavior: smooth;
   overscroll-behavior: none;
-  scroll-snap-type: y proximity;
+  scroll-snap-type: none;
+  scroll-padding-top: 0;
 }
 
-section {
+section[id] {
   scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100svh;
+  min-height: 100svh;
+  scroll-margin-top: 0;
+  box-sizing: border-box;
+  overflow: clip;
+}
+
+@media (min-width: 1024px) and (min-height: 720px) and (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 0;
+  }
+  section[id] {
+    height: 100svh;
+    min-height: 100svh;
+    scroll-margin-top: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+@media (max-width: 1023px),
+  (max-height: 719px),
+  (prefers-reduced-motion: reduce) {
+  html {
+    scroll-snap-type: none;
+  }
 }
 
 body {
   background-color: var(--bg-paper);
   color: var(--ink-primary);
   font-family: var(--font-sans);
-  overflow-x: hidden;
+  overflow-x: clip;
   line-height: 1.6;
 }
 
@@ -182,7 +211,7 @@ body {
   border-radius: var(--radius-sm);
   border: 1px solid var(--ink-light);
   background: transparent;
-  padding: 1.6rem;
+  padding: 0.9rem;
   transition:
     border-color 0.3s ease,
     background-color 0.3s ease;
@@ -202,11 +231,11 @@ body {
 
 .section-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin-top: 1rem;
+  line-height: 1.05;
+  margin-top: 0.6rem;
   color: var(--ink-primary);
 }
 
@@ -274,6 +303,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+    scroll-snap-type: none;
   }
   *,
   *::before,

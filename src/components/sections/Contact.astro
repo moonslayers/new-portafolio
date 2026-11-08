@@ -52,23 +52,24 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 
 <section
   id={id}
-  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+  data-agent-section={id}
+  class={`relative min-h-[100svh] flex items-center py-6 md:py-8 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
 >
-  <div class="max-w-4xl mx-auto w-full text-left">
+  <div class="max-w-4xl mx-auto w-full text-left py-2">
     <SectionHeader tag={tag} title={title} meta="OUTRO" />
 
     {body && (
       <p
-        class="mt-8 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        class="mt-2 max-w-xl text-[var(--ink-secondary)] leading-relaxed font-serif"
         data-build
         data-type="body"
-        style="font-size: 1.05rem; line-height: 1.7;"
+        style="font-size: 0.98rem; line-height: 1.6;"
       >
         {body}
       </p>
     )}
 
-    <div class="mt-12 flex flex-wrap gap-4">
+    <div class="mt-6 flex flex-wrap gap-3">
       {links && links.length > 0
         ? links.map((link) => {
             const external = isExternal(link.href);

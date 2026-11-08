@@ -32,24 +32,25 @@ const items = rest.items ?? source.items ?? [];
 
 <section
   id="method"
-  class={`relative min-h-screen flex items-center py-20 md:py-28 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
+  data-agent-section="method"
+  class={`relative min-h-[100svh] flex items-center py-6 md:py-8 px-6 border-t border-[var(--ink-light)] ${className}`.trim()}
 >
-  <div class="max-w-6xl mx-auto w-full">
+  <div class="max-w-6xl mx-auto w-full py-2">
     <SectionHeader tag={tag} title={title} />
 
     {intro && (
       <p
         data-build
         data-type="body"
-        class="mt-6 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
-        style="font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.7;"
+        class="mt-2 max-w-2xl text-[var(--ink-secondary)] leading-relaxed font-serif"
+        style="font-family: var(--font-serif); font-size: 0.98rem; line-height: 1.6;"
       >
         {intro}
       </p>
     )}
 
     {items.length > 0 && (
-      <ul class="mt-16 grid md:grid-cols-2 gap-6 list-none p-0 m-0">
+      <ul class="mt-4 grid md:grid-cols-2 gap-3 list-none p-0 m-0">
         {items.map((item, index) => (
           <li>
             <Card class="h-full">
@@ -61,14 +62,14 @@ const items = rest.items ?? source.items ?? [];
                 {String(index + 1).padStart(2, "0")}
               </div>
               <h3
-                class="mt-3 font-serif text-xl text-[var(--ink-primary)]"
+                class="mt-2 font-serif text-lg text-[var(--ink-primary)]"
                 data-build
                 data-type="title"
               >
                 {item.title}
               </h3>
               <p
-                class="mt-3 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
+                class="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)] font-serif"
                 data-build
                 data-type="body"
               >
