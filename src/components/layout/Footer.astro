@@ -9,7 +9,6 @@ interface Props {
   right?: string;
   text?: string;
   copyright?: string;
-  builtBy?: string;
   links?: FooterLink[];
   items?: FooterLink[];
   class?: string;
@@ -20,13 +19,12 @@ const {
   right,
   text,
   copyright,
-  builtBy,
   links,
   items,
   class: className = "",
 } = Astro.props;
 const resolvedLinks = links ?? items ?? [];
-const resolvedLeft = left ?? builtBy ?? text;
+const resolvedLeft = left ?? text;
 const resolvedRight = right ?? copyright;
 ---
 

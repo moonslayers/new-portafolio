@@ -156,7 +156,6 @@ export interface Contact {
 export interface Footer {
   text?: string;
   copyright?: string;
-  builtBy?: string;
 }
 
 export interface SiteContent {
