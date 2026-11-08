@@ -1,5 +1,5 @@
 import type { Engine } from "./context";
-import gsap from "gsap";
+import { gsapRef as gsap } from "./context";
 import * as motion from "./motion";
 import * as typing from "./typing";
 import * as sections from "./sections";
@@ -10,16 +10,27 @@ export async function heroBgClick(
   workerIdx: number,
 ): Promise<void> {
   const cursor = motion.getWorkerCursors(eng, workerIdx, 1)[0];
-  const x = window.innerWidth * eng.rand(0.12, 0.24);
-  const y = window.innerHeight * eng.rand(0.14, 0.26);
-  await motion.flyTo(eng, cursor, x, y, eng.rand(0.3, 0.5));
+  const kicker = document.querySelector<HTMLElement>(".hero-kicker");
+  let x: number;
+  let y: number;
+  if (kicker) {
+    const r = kicker.getBoundingClientRect();
+    x = r.left + r.width / 2;
+    y = r.top + r.height / 2;
+  } else {
+    x = window.innerWidth * eng.rand(0.12, 0.24);
+    y = window.innerHeight * eng.rand(0.14, 0.26);
+  }
+  await motion.flyTo(eng, cursor, x, y, eng.rand(0.2, 0.35));
   await motion.click(eng, cursor);
   fx.pulse(eng, x, y, cursor.color);
   eng.bgRevealed = true;
+  motion.syncHeroState(eng);
 }
 
 export async function runIntro(eng: Engine): Promise<void> {
-  await eng.wait(250);
+  motion.setAgentsIdle(eng, false);
+  await eng.wait(150);
 
   eng.cursors.forEach((c, i) => {
     gsap.to(c.el, {
@@ -29,7 +40,7 @@ export async function runIntro(eng: Engine): Promise<void> {
     });
   });
 
-  await eng.wait(650);
+  await eng.wait(350);
 
   const btnWork = document.querySelector<HTMLAnchorElement>(
     '#hero-cta a[href="#work"]',
@@ -52,17 +63,24 @@ export async function runIntro(eng: Engine): Promise<void> {
 
   const myToken = ++eng.buildToken;
 
+  eng.sectionDeadline = Date.now() + 7500;
+  eng.sectionReviewLimit = 1;
+  eng.sectionReviewsDone = 0;
+
   const worker = async (workerIdx: number) => {
-    await eng.wait(workerIdx * 340 + eng.rand(50, 420));
+    await eng.wait(workerIdx * 180 + eng.rand(40, 200));
     if (myToken !== eng.buildToken) return;
+    if (Date.now() > eng.sectionDeadline) return;
 
     while (queue.length > 0) {
       if (myToken !== eng.buildToken) return;
+      if (Date.now() > eng.sectionDeadline) return;
       const item = queue.shift();
       if (!item) return;
 
-      await eng.wait(eng.rand(40, 240));
+      await eng.wait(eng.rand(20, 100));
       if (myToken !== eng.buildToken) return;
+      if (Date.now() > eng.sectionDeadline) return;
 
       try {
         if (item.kind === "bg") await heroBgClick(eng, workerIdx);
@@ -71,7 +89,8 @@ export async function runIntro(eng: Engine): Promise<void> {
       } catch (e) {}
       if (myToken !== eng.buildToken) return;
 
-      await eng.wait(eng.rand(180, 700));
+      if (Date.now() > eng.sectionDeadline) return;
+      await eng.wait(eng.rand(80, 300));
     }
   };
 
@@ -83,11 +102,17 @@ export async function runIntro(eng: Engine): Promise<void> {
   }
 
   eng.reviewQueue = [];
-  let waited = 0;
-  while (eng.isReviewing && waited < 3000) {
-    await eng.wait(100);
-    waited += 100;
+  eng.isReviewing = false;
+  motion.clearFx();
+  motion.cleanupFlags();
+
+  if (Date.now() > eng.sectionDeadline) {
+    sections.finishHeroInstantly(eng);
+    return;
   }
 
+  motion.clearFx();
+  motion.cleanupFlags();
+  motion.setAgentsIdle(eng, true);
   eng.heroDone = true;
 }

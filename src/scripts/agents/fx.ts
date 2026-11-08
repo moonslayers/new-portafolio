@@ -1,5 +1,5 @@
-import gsap from "gsap";
 import type { Engine } from "./context";
+import { gsapRef as gsap } from "./context";
 
 export function pulse(_eng: Engine, x: number, y: number, color: string): void {
   const fx = document.getElementById("fx-layer");

@@ -1,5 +1,5 @@
-import gsap from "gsap";
 import type { Engine } from "./context";
+import { gsapRef as gsap } from "./context";
 import * as motion from "./motion";
 import * as typing from "./typing";
 
@@ -51,29 +51,57 @@ export async function buildSection(
   if (eng.builtSections.has(section)) return;
   motion.clearFrames(eng);
   motion.stopAllFrameTrackers(eng);
+  motion.clearFx();
+  motion.setAgentsIdle(eng, false);
   eng.builtSections.add(section);
 
   const myToken = ++eng.buildToken;
   const queue = [...(eng.queues.get(section) || [])];
   if (!queue.length) return;
 
+  const budget = eng.mobile ? 2500 : 3500;
+  eng.sectionDeadline = Date.now() + budget;
+  eng.sectionReviewLimit = 2;
+  eng.sectionReviewsDone = 0;
+
   if (eng.mobile) {
     queue.forEach((el) => motion.instantReveal(eng, el));
     eng.scatterCursors();
+    motion.clearFrames(eng);
+    motion.stopAllFrameTrackers(eng);
+    motion.clearFx();
+    motion.cleanupFlags();
+    motion.setAgentsIdle(eng, true);
     return;
   }
 
+  const revealRemaining = () => {
+    while (queue.length > 0) {
+      const el = queue.shift();
+      if (el) motion.instantReveal(eng, el);
+    }
+  };
+
   const worker = async (workerIdx: number) => {
-    await eng.wait(workerIdx * 300 + eng.rand(60, 420));
+    await eng.wait(workerIdx * 150 + eng.rand(40, 200));
     if (myToken !== eng.buildToken) return;
 
     while (queue.length > 0) {
       if (myToken !== eng.buildToken) return;
+      if (Date.now() > eng.sectionDeadline) {
+        revealRemaining();
+        return;
+      }
       const el = queue.shift();
       if (!el) return;
 
-      await eng.wait(eng.rand(40, 240));
+      await eng.wait(eng.rand(20, 100));
       if (myToken !== eng.buildToken) return;
+      if (Date.now() > eng.sectionDeadline) {
+        motion.instantReveal(eng, el);
+        revealRemaining();
+        return;
+      }
 
       try {
         if (el.dataset.type === "image") {
@@ -84,7 +112,11 @@ export async function buildSection(
       } catch (e) {}
       if (myToken !== eng.buildToken) return;
 
-      await eng.wait(eng.rand(200, 700));
+      if (Date.now() > eng.sectionDeadline) {
+        revealRemaining();
+        return;
+      }
+      await eng.wait(eng.rand(80, 280));
     }
   };
 
@@ -92,15 +124,35 @@ export async function buildSection(
 
   if (myToken !== eng.buildToken) {
     queue.forEach((el) => motion.instantReveal(eng, el));
+    motion.clearFrames(eng);
+    motion.stopAllFrameTrackers(eng);
+    motion.clearFx();
+    motion.cleanupFlags();
+    motion.setAgentsIdle(eng, true);
     return;
   }
 
+  revealRemaining();
+
   eng.reviewQueue = [];
-  let waited = 0;
-  while (eng.isReviewing && waited < 3000) {
-    await eng.wait(100);
-    waited += 100;
-  }
+  eng.isReviewing = false;
+  motion.clearFrames(eng);
+  motion.stopAllFrameTrackers(eng);
+  motion.clearFx();
+  motion.cleanupFlags();
+  motion.setAgentsIdle(eng, true);
+
+  section.querySelectorAll<HTMLElement>("[data-build]").forEach((el) => {
+    const opacity = parseFloat(getComputedStyle(el).opacity || "0");
+    if (
+      el.classList.contains("pre-build") ||
+      el.classList.contains("pre-build-y") ||
+      el.classList.contains("is-typing") ||
+      opacity < 0.9
+    ) {
+      motion.instantReveal(eng, el);
+    }
+  });
 
   eng.scatterCursors();
 }
@@ -122,7 +174,11 @@ export function finishHeroInstantly(eng: Engine): void {
   });
   eng.titleRevealed = true;
   eng.bgRevealed = true;
+  motion.syncHeroState(eng);
   eng.heroDone = true;
   motion.clearFrames(eng);
+  motion.stopAllFrameTrackers(eng);
+  motion.clearFx();
   motion.cleanupFlags();
+  motion.setAgentsIdle(eng, true);
 }

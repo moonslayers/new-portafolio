@@ -1,9 +1,14 @@
 import type { AgentDef } from "./agents";
 import gsap from "gsap";
 
+export interface Cursor {
+  el: HTMLElement;
+  color: string;
+}
+
 export interface Engine {
   agents: AgentDef[];
-  cursors: { el: HTMLElement; color: string }[];
+  cursors: Cursor[];
   buildToken: number;
   savedHTML: WeakMap<HTMLElement, string>;
   queues: Map<HTMLElement, HTMLElement[]>;
@@ -22,18 +27,16 @@ export interface Engine {
   paused: boolean;
   mobile: boolean;
   reducedMotion: boolean;
+  sectionDeadline: number;
+  sectionReviewLimit: number;
+  sectionReviewsDone: number;
   skipIntro: boolean;
   frameTrackers: Set<() => void>;
 
   wait(ms: number): Promise<void>;
   rand(min: number, max: number): number;
-  flyTo(
-    cursor: { el: HTMLElement; color: string },
-    x: number,
-    y: number,
-    dur: number,
-  ): Promise<void>;
-  click(cursor: { el: HTMLElement; color: string }): Promise<void>;
+  flyTo(cursor: Cursor, x: number, y: number, dur: number): Promise<void>;
+  click(cursor: Cursor): Promise<void>;
   pulse(x: number, y: number, color: string): void;
   reviewPulse(x: number, y: number): void;
   flagPulse(x: number, y: number): void;
@@ -52,9 +55,7 @@ export interface Engine {
   goTo(idx: number): void;
   waitForScrollEnd(cb: () => void): void;
   setupNavigation(): void;
-  onWheel(e: WheelEvent): void;
   onKey(e: KeyboardEvent): void;
-  onTouchEnd(e: TouchEvent): void;
   setupQueues(): void;
   buildSection(section: HTMLElement | null): Promise<void>;
   buildText(el: HTMLElement, token: number, workerIdx: number): Promise<void>;
@@ -65,16 +66,13 @@ export interface Engine {
   flagAndFix(
     el: HTMLElement,
     upgrade: { find: string; to: string },
-    flaggingCursor: { el: HTMLElement; color: string },
+    flaggingCursor: Cursor,
     token: number,
   ): Promise<void>;
   upgradeSpan(span: HTMLElement, newText: string, token: number): Promise<void>;
   heroBgClick(workerIdx: number): Promise<void>;
   runIntro(): Promise<void>;
-  getWorkerCursors(
-    workerIdx: number,
-    count: number,
-  ): { el: HTMLElement; color: string }[];
+  getWorkerCursors(workerIdx: number, count: number): Cursor[];
   initCursors(): void;
 }
 

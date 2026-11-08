@@ -97,6 +97,15 @@
   border: 1px solid var(--c);
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+#agent-layer.agents-idle .agent-label {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
 }
 
 .click-pulse {
@@ -307,5 +316,11 @@ html.js .pre-build-y {
   #skip-intro {
     bottom: 1rem;
     left: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #skip-intro {
+    display: none !important;
   }
 }

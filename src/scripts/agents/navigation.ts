@@ -71,6 +71,7 @@ export function goTo(eng: Engine, idx: number): void {
   eng.reviewQueue = [];
   eng.isReviewing = false;
   motion.clearFrames(eng);
+  motion.clearFx();
   motion.cleanupFlags();
   if (oldIdx === 0 && idx !== 0 && !eng.heroDone)
     sections.finishHeroInstantly(eng);
@@ -131,10 +132,6 @@ export function cleanupNavigation(eng: Engine): void {
   void eng;
 }
 
-export function onWheel(_eng: Engine, _e: WheelEvent): void {
-  return;
-}
-
 export function onKey(e: KeyboardEvent): void {
   const target = e.target as HTMLElement | null;
   if (
@@ -148,8 +145,4 @@ export function onKey(e: KeyboardEvent): void {
     const skipBtn = document.getElementById("skip-intro");
     if (skipBtn) skipBtn.click();
   }
-}
-
-export function onTouchEnd(_eng: Engine, _e: TouchEvent): void {
-  return;
 }

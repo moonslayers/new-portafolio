@@ -1,5 +1,5 @@
 import { gsapRef as gsap } from "./context";
-import type { Engine } from "./context";
+import type { Engine, Cursor } from "./context";
 
 export function initCursors(eng: Engine): void {
   const els = Array.from(
@@ -21,7 +21,7 @@ export function initCursors(eng: Engine): void {
 
 export async function flyTo(
   _eng: Engine,
-  cursor: { el: HTMLElement; color: string },
+  cursor: Cursor,
   x: number,
   y: number,
   dur: number,
@@ -30,10 +30,7 @@ export async function flyTo(
   await gsap.to(cursor.el, { x, y, duration: dur, ease: "power3.inOut" });
 }
 
-export async function click(
-  _eng: Engine,
-  cursor: { el: HTMLElement; color: string },
-): Promise<void> {
+export async function click(_eng: Engine, cursor: Cursor): Promise<void> {
   await gsap.to(cursor.el, {
     scale: 0.72,
     duration: 0.08,
@@ -74,10 +71,10 @@ export function getWorkerCursors(
   eng: Engine,
   workerIdx: number,
   count: number,
-): { el: HTMLElement; color: string }[] {
+): Cursor[] {
   const base = (workerIdx % 4) * 3;
   const rot = eng.workerRotation[workerIdx % 4] || 0;
-  const out: { el: HTMLElement; color: string }[] = [];
+  const out: Cursor[] = [];
   for (let i = 0; i < count; i++)
     out.push(eng.cursors[(base + ((rot + i) % 3)) % eng.cursors.length]);
   eng.workerRotation[workerIdx % 4] = (rot + count) % 3;
@@ -145,6 +142,25 @@ export function pinFrameToElement(
   eng.frameTrackers.add(stopFn);
   requestAnimationFrame(tick);
   return stopFn;
+}
+
+export function setAgentsIdle(eng: Engine, idle: boolean): void {
+  const layer = document.getElementById("agent-layer");
+  if (!layer) return;
+  layer.classList.toggle("agents-idle", idle);
+  void eng;
+}
+
+export function clearFx(): void {
+  const fx = document.getElementById("fx-layer");
+  if (fx) fx.innerHTML = "";
+}
+
+export function syncHeroState(eng: Engine): void {
+  const hero = document.getElementById("hero");
+  if (!hero) return;
+  hero.classList.toggle("s1", !!eng.titleRevealed);
+  hero.classList.toggle("s2", !!eng.bgRevealed);
 }
 
 export function instantReveal(eng: Engine, el: HTMLElement): void {

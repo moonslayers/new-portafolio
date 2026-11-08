@@ -1,4 +1,4 @@
-import type { Engine } from "./context";
+import type { Engine, Cursor } from "./context";
 import { AGENTS, rand as randFn, wait as waitFn } from "./agents";
 import * as motion from "./motion";
 import * as fx from "./fx";
@@ -10,7 +10,7 @@ import * as intro from "./intro";
 
 export class AgentEngine implements Engine {
   agents = AGENTS;
-  cursors: { el: HTMLElement; color: string }[] = [];
+  cursors: Cursor[] = [];
   buildToken = 0;
   savedHTML = new WeakMap<HTMLElement, string>();
   queues = new Map<HTMLElement, HTMLElement[]>();
@@ -34,6 +34,9 @@ export class AgentEngine implements Engine {
   paused = false;
   mobile = false;
   reducedMotion = false;
+  sectionDeadline = 0;
+  sectionReviewLimit = 2;
+  sectionReviewsDone = 0;
   skipIntro = false;
   frameTrackers = new Set<() => void>();
 
@@ -56,10 +59,10 @@ export class AgentEngine implements Engine {
   initCursors(): void {
     motion.initCursors(this);
   }
-  flyTo(cursor: any, x: number, y: number, dur: number): Promise<void> {
+  flyTo(cursor: Cursor, x: number, y: number, dur: number): Promise<void> {
     return motion.flyTo(this, cursor, x, y, dur);
   }
-  click(cursor: any): Promise<void> {
+  click(cursor: Cursor): Promise<void> {
     return motion.click(this, cursor);
   }
   pulse(x: number, y: number, color: string): void {
@@ -106,14 +109,8 @@ export class AgentEngine implements Engine {
   setupNavigation(): void {
     navigation.setupNavigation(this);
   }
-  onWheel(e: WheelEvent): void {
-    navigation.onWheel(this, e);
-  }
   onKey(e: KeyboardEvent): void {
     navigation.onKey(e);
-  }
-  onTouchEnd(e: TouchEvent): void {
-    navigation.onTouchEnd(this, e);
   }
   setupQueues(): void {
     sections.setupQueues(this);
@@ -139,7 +136,7 @@ export class AgentEngine implements Engine {
   flagAndFix(
     el: HTMLElement,
     upgrade: { find: string; to: string },
-    flaggingCursor: any,
+    flaggingCursor: Cursor,
     token: number,
   ): Promise<void> {
     return review.flagAndFix(this, el, upgrade, flaggingCursor, token);
@@ -157,7 +154,7 @@ export class AgentEngine implements Engine {
   runIntro(): Promise<void> {
     return intro.runIntro(this);
   }
-  getWorkerCursors(workerIdx: number, count: number): any[] {
+  getWorkerCursors(workerIdx: number, count: number): Cursor[] {
     return motion.getWorkerCursors(this, workerIdx, count);
   }
 }
@@ -187,6 +184,10 @@ export function initAgents(): void {
       el.style.filter = "none";
       el.style.transform = "translateY(0)";
     });
+    engine.titleRevealed = true;
+    engine.bgRevealed = true;
+    motion.syncHeroState(engine);
+    engine.heroDone = true;
     // hide agent layer
     const layer = document.getElementById("agent-layer");
     if (layer) layer.style.display = "none";
@@ -217,12 +218,13 @@ export function initAgents(): void {
     engine.reviewQueue = [];
     engine.isReviewing = false;
     motion.clearFrames(engine);
+    motion.clearFx();
     motion.cleanupFlags();
     sections.finishHeroInstantly(engine);
     try {
       sessionStorage.setItem("skipIntro", "1");
     } catch (e) {}
-    if (skipBtn) skipBtn.style.display = "none";
+    if (skipBtn) skipBtn.hidden = true;
   };
   if (skipBtn) {
     skipBtn.addEventListener("click", skipHandler);
@@ -235,6 +237,8 @@ export function initAgents(): void {
       engine.paused = true;
       motion.stopAllFrameTrackers(engine);
       motion.clearFrames(engine);
+      motion.clearFx();
+      motion.cleanupFlags();
     } else {
       engine.paused = false;
     }
@@ -253,7 +257,7 @@ export function initAgents(): void {
           }
         });
       },
-      { threshold: 0.25 },
+      { threshold: 0.5, rootMargin: "-8% 0px -8% 0px" },
     );
     engine.sections.forEach((s) => {
       if (s.id !== "hero") sectionObserver!.observe(s);
@@ -261,13 +265,14 @@ export function initAgents(): void {
   }
 
   const hideSkip = () => {
-    if (skipBtn) skipBtn.style.display = "none";
+    if (skipBtn) skipBtn.hidden = true;
   };
   if (engine.skipIntro) {
     sections.finishHeroInstantly(engine);
     engine.heroDone = true;
     hideSkip();
   } else {
+    if (skipBtn) skipBtn.hidden = false;
     introTimer = setTimeout(() => {
       engine
         .runIntro()
@@ -301,6 +306,7 @@ export function initAgents(): void {
     } catch (e) {}
     motion.stopAllFrameTrackers(engine);
     motion.clearFrames(engine);
+    motion.clearFx();
     motion.cleanupFlags();
   };
   window.addEventListener("pagehide", dispose);

@@ -1,4 +1,4 @@
-import type { Engine } from "./context";
+import type { Engine, Cursor } from "./context";
 import * as motion from "./motion";
 import * as fx from "./fx";
 import { COPY_UPGRADES } from "./agents";
@@ -16,15 +16,15 @@ export async function processReviewQueue(
   eng.isReviewing = true;
 
   while (eng.reviewQueue.length > 0) {
-    if (token !== eng.buildToken) {
+    if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
       eng.reviewQueue = [];
       break;
     }
     const el = eng.reviewQueue.shift();
     if (!el || !el.isConnected) continue;
 
-    await eng.wait(eng.rand(250, 700));
-    if (token !== eng.buildToken) {
+    await eng.wait(eng.rand(100, 250));
+    if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
       eng.reviewQueue = [];
       break;
     }
@@ -32,30 +32,33 @@ export async function processReviewQueue(
     const rect = el.getBoundingClientRect();
     if (rect.bottom < 0 || rect.top > window.innerHeight) continue;
 
-    const hasUpgrades = (COPY_UPGRADES[lang()] || []).length > 0;
-    const upgrade = hasUpgrades ? findUpgradeFor(eng, el) : null;
-    const willFlag = hasUpgrades && !!upgrade && Math.random() < 0.6;
+    const upgrade = findUpgradeFor(eng, el);
+    const willFlag = !!upgrade && Math.random() < 0.6;
 
     const reviewCursor = Math.random() > 0.5 ? eng.cursors[4] : eng.cursors[11];
 
-    if (hasUpgrades && willFlag && upgrade) {
+    if (willFlag && upgrade) {
       await flagAndFix(eng, el, upgrade, reviewCursor, token);
     } else {
       const rx = rect.left + rect.width * eng.rand(0.2, 0.8);
       const ry = rect.top + rect.height * eng.rand(0.2, 0.8);
-      await motion.flyTo(eng, reviewCursor, rx, ry, eng.rand(0.3, 0.5));
-      if (token !== eng.buildToken) break;
+      await motion.flyTo(eng, reviewCursor, rx, ry, eng.rand(0.2, 0.35));
+      if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) break;
       await motion.click(eng, reviewCursor);
       fx.reviewPulse(eng, rx, ry);
       el.classList.add("reviewed");
       setTimeout(() => el.classList.remove("reviewed"), 800);
     }
 
-    await eng.wait(eng.rand(180, 400));
+    await eng.wait(eng.rand(60, 150));
   }
   eng.isReviewing = false;
 
-  if (eng.reviewQueue.length > 0 && token === eng.buildToken) {
+  if (
+    eng.reviewQueue.length > 0 &&
+    token === eng.buildToken &&
+    Date.now() < eng.sectionDeadline
+  ) {
     processReviewQueue(eng, token).catch(() => {});
   }
 }
@@ -78,7 +81,17 @@ export function findUpgradeFor(
       }
     }
   }
-  return null;
+
+  // Fallback seguro: usa una frase existente en el DOM y retipea el mismo texto.
+  const text = (el.innerText || "").replace(/\s+/g, " ").trim();
+  if (text.length < 8) return null;
+  const words = text.split(" ");
+  const phrase =
+    words.length >= 3 ? words.slice(0, 3).join(" ") : text.slice(0, 40);
+  if (phrase.length < 4) return null;
+  // Evita repetir la misma frase ya revisada.
+  if (eng.usedUpgrades.has(phrase)) return null;
+  return { find: phrase, to: phrase };
 }
 
 export function highlightPhrase(
@@ -111,7 +124,7 @@ export async function flagAndFix(
   eng: Engine,
   el: HTMLElement,
   upgrade: { find: string; to: string },
-  flaggingCursor: { el: HTMLElement; color: string },
+  flaggingCursor: Cursor,
   token: number,
 ): Promise<void> {
   const span = highlightPhrase(el, upgrade.find);
@@ -121,7 +134,7 @@ export async function flagAndFix(
     return;
   }
 
-  eng.usedUpgrades.add(upgrade.find);
+  if (upgrade.find !== upgrade.to) eng.usedUpgrades.add(upgrade.find);
 
   const sr = span.getBoundingClientRect();
   const flagX = sr.left + sr.width * 0.5;
@@ -136,7 +149,7 @@ export async function flagAndFix(
   await motion.click(eng, flaggingCursor);
   fx.flagPulse(eng, flagX, flagY);
 
-  await eng.wait(eng.rand(550, 850));
+  await eng.wait(eng.rand(200, 300));
   if (token !== eng.buildToken) {
     span.textContent = upgrade.to;
     span.classList.remove("flag-suggestion");
@@ -163,7 +176,7 @@ export async function flagAndFix(
   el.classList.add("reviewed");
   setTimeout(() => el.classList.remove("reviewed"), 800);
 
-  await eng.wait(500);
+  await eng.wait(150);
   if (span.isConnected) {
     span.classList.remove("flag-suggestion");
   }
@@ -180,7 +193,7 @@ export async function upgradeSpan(
   span.style.color = "#D9A05B";
   span.style.opacity = "0.7";
 
-  await eng.wait(320);
+  await eng.wait(120);
 
   span.textContent = "";
   span.style.textDecoration = "none";
@@ -195,11 +208,11 @@ export async function upgradeSpan(
       return;
     }
     span.textContent = newText.slice(0, i + 1);
-    await eng.wait(eng.rand(18, 34));
+    await eng.wait(eng.rand(2, 4));
   }
 
   span.style.transition = "color 0.6s ease";
   span.style.color = "";
-  await eng.wait(600);
+  await eng.wait(150);
   span.style.transition = "";
 }
