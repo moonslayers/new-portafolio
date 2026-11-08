@@ -3,9 +3,9 @@ import type { SiteContent } from "./types";
 export const siteEs: SiteContent = {
   locale: "es",
   seo: {
-    title: "Jorge Márquez Luna — AI-Native Tech Lead",
+    title: "Jorge Marquez — AI-Native Tech Lead",
     description:
-      "Portafolio de Jorge Márquez Luna, AI-Native Tech Lead. Sistemas de agentes con orquestación multi-modelo, skills auditables y gates humanos. Angular 16–22, Laravel 10–13, MCP.",
+      "Portafolio de Jorge Marquez, AI-Native Tech Lead. Sistemas de agentes con orquestación multi-modelo, skills auditables y gates humanos. Angular 16–22, Laravel 10–13, MCP.",
     keywords: [
       "AI-Native Tech Lead",
       "agentes",
@@ -22,8 +22,8 @@ export const siteEs: SiteContent = {
     items: [
       { label: "Sobre mí", href: "#about" },
       { label: "Método", href: "#method" },
-      { label: "Stack", href: "#stack" },
       { label: "Proyectos", href: "#work" },
+      { label: "Stack", href: "#stack" },
       { label: "Experiencia", href: "#experience" },
       { label: "Writing", href: "#writing" },
       { label: "Contacto", href: "#contact" },
@@ -34,36 +34,18 @@ export const siteEs: SiteContent = {
     kicker: "// ai-native tech lead",
     title: "AI-Native\nTech Lead",
     subtitle:
-      "Convierto requerimientos de negocio en sistemas de IA que operan en producción, con reglas claras: orquestación multi-modelo, skills auditables y revisión humana en cada decisión crítica.",
+      "Sistemas de agentes que llegan a producción: orquestación multi-modelo, skills auditables y gates humanos.",
     ctaPrimary: { label: "Ver proyectos →", href: "#work" },
     ctaSecondary: { label: "Hablemos", href: "#contact" },
-    badges: [
-      "MCP",
-      "Skills",
-      "Subagentes",
-      "GitHub Actions",
-      "Angular",
-      "Laravel",
-      "TypeScript",
-    ],
+    badges: ["MCP", "Skills", "Subagentes", "Angular", "Laravel"],
     scrollLabel: "Scroll",
   },
   about: {
     tag: "01 — sobre mí",
     title: "Del prompt al producto.",
-    body: `Convierto requerimientos de negocio en sistemas de IA que operan en producción, con reglas claras: orquestación multi-modelo, skills auditables y revisión humana en cada decisión crítica.
+    body: `Líder de proyecto en Integranet (2023–presente): 10+ plataformas de gobierno y privado con equipos de hasta 5. De requisitos a soporte.
 
-Soy líder de proyecto en Integranet. Durante 3 años he entregado 10+ plataformas para gobierno del estado de Baja California y sector privado: créditos, trámites ambientales, estímulos fiscales, helpdesk, compras, almacenes y una app móvil. Lideré equipos de hasta 5 desarrolladores y cubrí el ciclo completo: levantamiento con stakeholders, arquitectura, implementación, QA, despliegue y soporte. Opero como player-coach: delego, reviso y entro a resolver bugs o incidentes urgentes; presento avances, solicitudes y reportes de soporte a clientes y dirección.
-
-Mi especialidad hoy es la ingeniería asistida por agentes. Diseñé un método sobre opencode que versiona el contexto en el repositorio (AGENTS.md), divide el desarrollo en comandos (/context-gather → /plan → /execute → /validate), instala skills con lockfile y hash, y asigna subagentes con alcance y salida definidos. Timbria mantiene decenas de skills versionadas; la plataforma de Medio Ambiente, decenas de skills de dominio.
-
-También construyo las piezas que faltan: un servidor MCP propio de 10 herramientas para controlar WhatsApp Desktop vía CDP, con rate limiting y tests; doc2issue, un pipeline de 3 agentes que convierte PDF, Word, PPT y Excel en issues de GitHub; e issue-scout-agent, un agente con tool use dentro de GitHub Actions.
-
-Mi criterio: los modelos económicos hacen el trabajo pesado, los premium revisan, analizan requerimientos y resuelven percepción difícil; el humano aprueba. Usé bases vectoriales para memoria de agentes y las descarté como caja negra: para conocimiento operativo prefiero skills versionables y auditables. Sé cuándo un problema pide RAG sobre un corpus grande y cuándo no.
-
-Escribo Beyond the Hype, una newsletter donde pruebo la tecnología antes de recomendarla.
-
-Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, en equipos que ya lleven agentes a producción y necesiten arquitectura, estándares, evaluación y entrega.`,
+Especialidad en ingeniería asistida por agentes con opencode: contexto versionado, skills con lockfile y subagentes. MCP propio, doc2issue y agentes en CI.`,
     kpis: [
       { value: "3", label: "Años entregando plataformas" },
       { value: "10+", label: "Plataformas de gobierno y sector privado" },
@@ -73,50 +55,32 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
   method: {
     tag: "02 — método",
     title: "Cómo trabajo.",
-    intro:
-      "Un método de ingeniería asistida por agentes sobre opencode: contexto versionado, comandos para el ciclo, skills con lockfile, subagentes acotados, MCP y gates humanos.",
+    intro: "Ingeniería asistida por agentes sobre opencode.",
     items: [
       {
         title: "Contexto versionado (AGENTS.md)",
-        description:
-          "El conocimiento del proyecto vive en el repositorio, no en la cabeza de una persona.",
+        description: "El repo es la fuente de verdad.",
       },
       {
         title: "Comandos del ciclo",
         description: "/context-gather → /plan → /execute → /validate.",
       },
       {
-        title: "Skills con lockfile",
+        title: "Skills y subagentes",
         description:
-          "Skills versionadas con hash; cambios auditables y reproducibles.",
+          "Skills con lockfile; subagentes con rol y salida definidos.",
       },
       {
-        title: "Subagentes acotados",
+        title: "MCP y gates humanos",
         description:
-          "Roles con alcance y salida definidos; no agentes sueltos.",
-      },
-      {
-        title: "MCP",
-        description:
-          "Laravel Boost, Nx, shadcn, Spartan UI y un MCP propio para WhatsApp (10 tools).",
-      },
-      {
-        title: "Gates humanos",
-        description:
-          "El humano aprueba; lint, tests y build como condición de merge.",
-      },
-      {
-        title: "Calidad en cada PR",
-        description:
-          "Revisión manual de cada PR, con gates de lint, tests y build.",
+          "MCPs a medida y aprobación humana con lint, tests y build.",
       },
     ],
   },
   projects: {
     tag: "03 — proyectos",
     title: "Cosas que construí.",
-    intro:
-      "Seis proyectos que representan producto, open source, gobierno y liderazgo técnico.",
+    intro: "Producto, open source, gobierno y liderazgo técnico.",
     items: [
       {
         id: "timbria",
@@ -125,12 +89,11 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         category: "Producto propio",
         role: "Cofundador técnico",
         period: "2026–presente",
-        problem:
-          "Negocios en México emiten facturas CFDI 4.0 desde portales lentos; se busca facturar desde WhatsApp escaneando un QR y fotografiando el ticket.",
+        problem: "Facturar CFDI 4.0 desde WhatsApp sin portales lentos.",
         decision:
-          "Arquitectura Laravel 13 + Next.js 16 + PostgreSQL, paquetes compartidos de CFDI y tipos, monorepo Turbo, generación de CFDI y cliente PAC.",
+          "Laravel 13 + Next.js 16 + PostgreSQL, monorepo Turbo y paquetes CFDI compartidos.",
         result:
-          "Producto en desarrollo con arquitectura definida, base técnica operativa y decenas de skills versionadas; separación clara entre negocio y tecnología.",
+          "En desarrollo: arquitectura definida y base técnica operativa.",
         stack: [
           "Laravel 13",
           "PHP 8.3+",
@@ -152,12 +115,10 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         category: "Open source",
         role: "Autor",
         period: "2026",
-        problem:
-          "Los agentes necesitan operar WhatsApp Desktop sin APIs no oficiales ni cuentas paralelas.",
+        problem: "Agentes operan WhatsApp Desktop sin APIs no oficiales.",
         decision:
-          "Servidor MCP en TypeScript sobre CDP, arquitectura por capas, rate limiter desacoplado, 10 tools con errores estructurados.",
-        result:
-          "10 tools MCP, rate limiting anti-ban, typing simulado y tests del rate limiter.",
+          "Servidor MCP en TS sobre CDP, rate limiter y 10 tools con errores estructurados.",
+        result: "10 tools, anti-ban y typing simulado con tests.",
         stack: ["Node.js ≥23", "TypeScript", "JSON-RPC", "CDP", "WebSocket"],
         links: [
           {
@@ -174,12 +135,10 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         category: "Open source",
         role: "Autor",
         period: "2026",
-        problem:
-          "Convertir documentos de requerimientos (PDF, Word, PPT, Excel) en issues estructurados de GitHub Projects.",
+        problem: "Convertir PDF/Word/PPT/Excel en issues de GitHub.",
         decision:
-          "Pipeline de 3 agentes (analyzer, vision, creator) con skills por formato y JSON intermedio revisable.",
-        result:
-          "Conversión automatizada de documentos a issues, con artefacto intermedio auditable.",
+          "Pipeline de 3 agentes (analyzer, vision, creator) con skills por formato y JSON auditable.",
+        result: "Conversión automatizada con artefacto intermedio revisable.",
         stack: [
           "Python",
           "uv",
@@ -203,12 +162,10 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         category: "Open source",
         role: "Autor",
         period: "2026",
-        problem:
-          "Investigar issues y generar planes técnicos dentro de CI, sin acoplarse a un solo modelo.",
+        problem: "Investigar issues y generar planes técnicos en CI.",
         decision:
-          "GitHub Action multi-proveedor con tool use (listDir, readFile, searchCode, getFileTree, gitDiff), activación opt-in con /scout.",
-        result:
-          "Agente que propone planes accionables; el humano aprueba. Distribuido como Action versionada.",
+          "GitHub Action multi-proveedor con tool use; activación con /scout.",
+        result: "Planes accionables; humano aprueba. Action versionada.",
         stack: [
           "TypeScript",
           "Vercel AI SDK (cliente multi-proveedor)",
@@ -231,12 +188,10 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         category: "Gobierno",
         role: "Frontend → Líder de proyecto",
         period: "2024–presente",
-        problem:
-          "Migrar un sistema legacy de proveedor externo a una plataforma propia de créditos.",
+        problem: "Migrar sistema legacy de créditos a plataforma propia.",
         decision:
-          "Liderazgo de hasta 5 devs, Angular 17→22, Laravel 12, MySQL, WhatsApp Cloud API, pruebas feature/unit.",
-        result:
-          "Migración legacy completada; soporte activo; evolución de frontend a líder de proyecto.",
+          "Liderazgo de hasta 5 devs; Angular 17→22, Laravel 12, MySQL y WhatsApp Cloud API.",
+        result: "Migración completada y soporte activo.",
         stack: [
           "Angular 17→22",
           "Laravel 12",
@@ -255,12 +210,10 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         category: "Open source",
         role: "Autor",
         period: "2026",
-        problem:
-          "Visualizar en tiempo real sesiones de agentes de cuatro herramientas como un reino pixel-art.",
+        problem: "Visualizar sesiones de agentes en tiempo real.",
         decision:
-          "Lectura local de transcripts, traducción de eventos a estado de juego, servidor local en 127.0.0.1.",
-        result:
-          "Paquete publicado en npm; soporte de múltiples proyectos como ciudades.",
+          "Lectura local de transcripts, eventos a estado de juego y servidor local.",
+        result: "Paquete npm publicado; múltiples proyectos como ciudades.",
         stack: ["Node.js ≥22", "TypeScript", "PixiJS v8", "WebSocket", "Vite"],
         links: [
           { label: "npm", href: "https://www.npmjs.com/package/age-of-agents" },
@@ -274,7 +227,7 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
     ],
   },
   stack: {
-    tag: "04 — stack",
+    tag: "05 — stack",
     title: "Las piezas del sistema.",
     groups: [
       { title: "Frontend", items: ["Angular 16–22", "TypeScript"] },
@@ -288,7 +241,7 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
     ],
   },
   experience: {
-    tag: "05 — trayectoria",
+    tag: "06 — experiencia",
     title: "Cómo llegué acá.",
     items: [
       {
@@ -296,12 +249,9 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         location: "Ensenada, B.C., México",
         period: "2023–presente",
         role: "Consultor y Líder de Proyecto",
-        description: "Sector gobierno y privado; proyectos simultáneos.",
         highlights: [
-          "Liderazgo de hasta 5 desarrolladores en proyectos simultáneos.",
-          "Ownership del ciclo completo: requisitos, diseño, implementación, revisión, despliegue y soporte.",
-          "Gates de calidad (lint, tests, build, e2e) y revisión manual de cada PR.",
-          "Migraciones mayores en producción: Angular 16→18, 17→22; Laravel 10→13.",
+          "Hasta 5 devs en proyectos simultáneos; ciclo completo de requisitos a soporte.",
+          "10+ plataformas de gobierno y privado entregadas y en soporte.",
         ],
       },
       {
@@ -309,11 +259,9 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         location: "Remoto",
         period: "2026–presente",
         role: "Cofundador técnico",
-        description: "Startup de facturación CFDI 4.0 por WhatsApp.",
         highlights: [
-          "Arquitectura, backend, generación de CFDI y cliente PAC.",
-          "Modelo de datos PostgreSQL y paquetes compartidos.",
-          "Portal administrativo en Next.js 16 y app móvil en React Native/Expo.",
+          "Arquitectura, backend, generación CFDI y cliente PAC.",
+          "Portal Next.js 16 y app móvil React Native/Expo.",
         ],
       },
       {
@@ -321,40 +269,26 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
         location: "Ensenada, B.C., México",
         period: "2019–2023",
         role: "Licenciatura en Ciencias de la Computación",
-        description:
-          "Prácticas profesionales en dos periodos (2022 y 2023) y proyectos de modalidad.",
         highlights: [
-          "Aplicación móvil de apoyo psicológico para estudiantes: autenticación, roles y almacenamiento seguro.",
-          "Stack: Flutter, Dart, Firebase Auth, Firestore y Storage.",
-        ],
-      },
-    ],
-    education: [
-      {
-        institution: "Universidad Autónoma de Baja California (UABC)",
-        location: "Ensenada, B.C., México",
-        period: "2019–2023",
-        degree: "Licenciatura en Ciencias de la Computación",
-        details: [
-          "Facultad de Ciencias",
-          "Prácticas profesionales en dos periodos (2022 y 2023)",
+          "Prácticas en 2022 y 2023.",
+          "App móvil de apoyo psicológico: auth, roles y almacenamiento seguro.",
         ],
       },
     ],
   },
   writing: {
-    tag: "06 — writing",
+    tag: "07 — writing",
     title: "Beyond the Hype.",
     name: "Beyond the Hype",
     description:
-      "Newsletter donde pruebo la tecnología antes de recomendarla: agentes, MCP, orquestación multi-modelo y decisiones de arquitectura con sus trade-offs. Sin hype.",
+      "Newsletter donde pruebo tecnología antes de recomendarla: agentes, MCP y arquitectura sin hype.",
     href: "https://substack.com/@jrmarquez",
     cta: "Leer en Substack",
   },
   contact: {
-    tag: "07 — contacto",
+    tag: "08 — contacto",
     title: "Construyamos algo.",
-    body: "Si estás pensando cómo meter agentes en tu equipo sin que se te caiga el mundo, hablemos.",
+    body: "¿Quieres sumar agentes a tu equipo sin romper producción? Hablemos.",
     email: "jorge.marquez.luna@uabc.edu.mx",
     links: [
       { label: "Email", href: "mailto:jorge.marquez.luna@uabc.edu.mx" },
@@ -368,7 +302,7 @@ Mi siguiente paso es un rol como AI-Native Tech Lead o AI Solutions Architect, e
   },
   footer: {
     text: "construido por agentes (y por mí)",
-    copyright: "© 2026 Jorge Márquez Luna",
+    copyright: "© 2026 Jorge Marquez",
   },
 };
 
