@@ -175,3 +175,20 @@ export function instantReveal(eng: Engine, el: HTMLElement): void {
   el.style.filter = "none";
   el.style.transform = "translateY(0)";
 }
+
+export function fastReveal(eng: Engine, el: HTMLElement): void {
+  const saved = eng.savedHTML.get(el);
+  if (saved != null) {
+    el.innerHTML = saved;
+    eng.savedHTML.delete(el);
+  }
+  el.classList.remove("is-typing", "pre-build", "pre-build-y", "no-transition");
+  el.style.minHeight = "";
+  gsap.to(el, {
+    opacity: 1,
+    y: 0,
+    filter: "none",
+    duration: eng.rand(0.15, 0.25),
+    ease: "power2.out",
+  });
+}

@@ -57,12 +57,16 @@ export async function buildSection(
 
   const myToken = ++eng.buildToken;
   const queue = [...(eng.queues.get(section) || [])];
-  if (!queue.length) return;
+  if (!queue.length) {
+    motion.setAgentsIdle(eng, true);
+    return;
+  }
 
-  const budget = eng.mobile ? 2500 : 3500;
+  const budget = eng.mobile ? 3000 : 4500;
   eng.sectionDeadline = Date.now() + budget;
   eng.sectionReviewLimit = 2;
   eng.sectionReviewsDone = 0;
+  eng.fastRevealing = false;
 
   if (eng.mobile) {
     queue.forEach((el) => motion.instantReveal(eng, el));
@@ -75,31 +79,39 @@ export async function buildSection(
     return;
   }
 
-  const revealRemaining = () => {
-    while (queue.length > 0) {
-      const el = queue.shift();
-      if (el) motion.instantReveal(eng, el);
-    }
+  const revealRemainingFast = () => {
+    if (eng.fastRevealing) return;
+    eng.fastRevealing = true;
+    const els = queue.splice(0);
+    els.forEach((el, i) => {
+      setTimeout(
+        () => {
+          if (myToken !== eng.buildToken) return;
+          motion.fastReveal(eng, el);
+        },
+        i * Math.round(eng.rand(40, 80)),
+      );
+    });
   };
 
   const worker = async (workerIdx: number) => {
-    await eng.wait(workerIdx * 150 + eng.rand(40, 200));
+    await eng.wait(workerIdx * 15 + eng.rand(2, 8));
     if (myToken !== eng.buildToken) return;
 
     while (queue.length > 0) {
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline) {
-        revealRemaining();
+      if (Date.now() > eng.sectionDeadline - 200) {
+        revealRemainingFast();
         return;
       }
       const el = queue.shift();
       if (!el) return;
 
-      await eng.wait(eng.rand(20, 100));
+      await eng.wait(eng.rand(5, 15));
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline) {
-        motion.instantReveal(eng, el);
-        revealRemaining();
+      if (Date.now() > eng.sectionDeadline - 200) {
+        motion.fastReveal(eng, el);
+        revealRemainingFast();
         return;
       }
 
@@ -112,15 +124,24 @@ export async function buildSection(
       } catch (e) {}
       if (myToken !== eng.buildToken) return;
 
-      if (Date.now() > eng.sectionDeadline) {
-        revealRemaining();
+      if (Date.now() > eng.sectionDeadline - 200) {
+        revealRemainingFast();
         return;
       }
-      await eng.wait(eng.rand(80, 280));
+      await eng.wait(eng.rand(10, 30));
     }
   };
 
-  await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
+  await Promise.all([
+    worker(0),
+    worker(1),
+    worker(2),
+    worker(3),
+    worker(4),
+    worker(5),
+    worker(6),
+    worker(7),
+  ]);
 
   if (myToken !== eng.buildToken) {
     queue.forEach((el) => motion.instantReveal(eng, el));
@@ -132,7 +153,10 @@ export async function buildSection(
     return;
   }
 
-  revealRemaining();
+  if (queue.length > 0) {
+    revealRemainingFast();
+    await eng.wait(300);
+  }
 
   eng.reviewQueue = [];
   eng.isReviewing = false;
@@ -150,9 +174,10 @@ export async function buildSection(
       el.classList.contains("is-typing") ||
       opacity < 0.9
     ) {
-      motion.instantReveal(eng, el);
+      motion.fastReveal(eng, el);
     }
   });
+  await eng.wait(300);
 
   eng.scatterCursors();
 }

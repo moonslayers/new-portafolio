@@ -4,13 +4,22 @@ import * as motion from "./motion";
 import * as fx from "./fx";
 import { TIMING } from "./agents";
 
+const FAST_TYPES = new Set([
+  "chip",
+  "badge",
+  "button",
+  "tag",
+  "kpi-num",
+  "kpi-label",
+]);
+
 export async function buildImage(
   eng: Engine,
   el: HTMLElement,
   token: number,
   workerIdx: number,
 ): Promise<void> {
-  if (Date.now() > eng.sectionDeadline) {
+  if (token !== eng.buildToken) {
     motion.instantReveal(eng, el);
     return;
   }
@@ -20,8 +29,10 @@ export async function buildImage(
   let tx = rect.left + rect.width * 0.5;
   let ty = rect.top + rect.height * 0.5;
 
-  await motion.flyTo(eng, openC, tx, ty, eng.rand(0.25, 0.4));
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
+  const rush = () => Date.now() > eng.sectionDeadline;
+
+  await motion.flyTo(eng, openC, tx, ty, rush() ? 0.12 : eng.rand(0.25, 0.4));
+  if (token !== eng.buildToken) {
     motion.instantReveal(eng, el);
     return;
   }
@@ -34,9 +45,9 @@ export async function buildImage(
     confirmC,
     tx + eng.rand(-20, 20),
     ty + eng.rand(-20, 20),
-    eng.rand(0.2, 0.35),
+    rush() ? 0.1 : eng.rand(0.2, 0.35),
   );
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
+  if (token !== eng.buildToken) {
     motion.instantReveal(eng, el);
     return;
   }
@@ -53,11 +64,16 @@ export async function buildImage(
     gsap.fromTo(
       img,
       { opacity: 0, scale: 1.05 },
-      { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: rush() ? 0.2 : 0.5,
+        ease: "power2.out",
+      },
     );
   }
 
-  await eng.wait(eng.rand(80, 200));
+  await eng.wait(rush() ? 20 : eng.rand(80, 200));
 }
 
 export async function buildText(
@@ -66,12 +82,42 @@ export async function buildText(
   token: number,
   workerIdx: number,
 ): Promise<void> {
-  if (Date.now() > eng.sectionDeadline) {
+  if (token !== eng.buildToken) {
     motion.instantReveal(eng, el);
     return;
   }
-  const speed = eng.workerSpeeds[workerIdx % 4];
+
   const type = el.dataset.type || "body";
+
+  if (Date.now() > eng.sectionDeadline) {
+    motion.fastReveal(eng, el);
+    return;
+  }
+
+  if (FAST_TYPES.has(type)) {
+    await eng.wait(eng.rand(10, 40));
+    if (token !== eng.buildToken) {
+      motion.instantReveal(eng, el);
+      return;
+    }
+    if (Date.now() > eng.sectionDeadline) {
+      motion.fastReveal(eng, el);
+      return;
+    }
+    motion.fastReveal(eng, el);
+    await eng.wait(eng.rand(20, 40));
+    if (
+      eng.sectionReviewsDone < eng.sectionReviewLimit &&
+      Date.now() < eng.sectionDeadline
+    ) {
+      eng.sectionReviewsDone++;
+      eng.reviewQueue.push(el);
+      eng.processReviewQueue(token).catch(() => {});
+    }
+    return;
+  }
+
+  const speed = eng.workerSpeeds[workerIdx % 4];
   const profile = TIMING[type] || TIMING.body;
 
   const frameHold = eng.rand(profile.hold[0], profile.hold[1]) * speed;
@@ -103,7 +149,18 @@ export async function buildText(
 
   let frame: HTMLElement | null = null;
   let stopTrack: () => void = () => {};
-  const abort = () => {
+  const rushComplete = () => {
+    stopTrack();
+    try {
+      if (frame) frame.remove();
+    } catch (e) {}
+    el.classList.remove("is-typing");
+    el.style.minHeight = "";
+    el.innerHTML = originalHTML;
+    eng.savedHTML.delete(el);
+    motion.fastReveal(eng, el);
+  };
+  const abortToken = () => {
     stopTrack();
     try {
       if (frame) frame.remove();
@@ -112,8 +169,12 @@ export async function buildText(
   };
 
   await motion.flyTo(eng, openC, tx, ty, flyOpen);
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
-    motion.instantReveal(eng, el);
+  if (token !== eng.buildToken) {
+    abortToken();
+    return;
+  }
+  if (Date.now() > eng.sectionDeadline) {
+    rushComplete();
     return;
   }
   await motion.click(eng, openC);
@@ -172,9 +233,13 @@ export async function buildText(
 
   stopTrack = motion.pinFrameToElement(eng, frame!, el, offsetX, offsetY);
 
-  await eng.wait(frameHold);
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
-    abort();
+  await eng.wait(Math.max(20, frameHold * 0.7));
+  if (token !== eng.buildToken) {
+    abortToken();
+    return;
+  }
+  if (Date.now() > eng.sectionDeadline) {
+    rushComplete();
     return;
   }
 
@@ -185,34 +250,89 @@ export async function buildText(
     ty + eng.rand(-8, 18),
     flyType,
   );
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
-    abort();
+  if (token !== eng.buildToken) {
+    abortToken();
     return;
   }
-  await eng.wait(eng.rand(20, 60));
+  if (Date.now() > eng.sectionDeadline) {
+    rushComplete();
+    return;
+  }
+  await eng.wait(eng.rand(5, 20));
 
-  let breathIn = Math.floor(eng.rand(7, 14));
-  let charCounter = 0;
   for (let i = 0; i < fullText.length; i++) {
-    if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
-      abort();
+    if (token !== eng.buildToken) {
+      abortToken();
+      return;
+    }
+    if (Date.now() > eng.sectionDeadline) {
+      // accelerate remaining: finish typing at minimal delay
+      const remainingChars = fullText.length - i;
+      const remainingTime = Math.max(0, eng.sectionDeadline - Date.now());
+      const minDelay =
+        remainingChars > 0
+          ? Math.max(1, Math.floor(remainingTime / remainingChars))
+          : 1;
+      for (let j = i; j < fullText.length; j++) {
+        if (token !== eng.buildToken) {
+          abortToken();
+          return;
+        }
+        txtSpan.textContent = fullText.slice(0, j + 1);
+        await eng.wait(Math.min(minDelay, 3));
+      }
+      // finish
+      await eng.wait(eng.rand(20, 40));
+      if (token !== eng.buildToken) {
+        abortToken();
+        return;
+      }
+      el.classList.remove("is-typing");
+      el.style.minHeight = "";
+      el.innerHTML = originalHTML;
+      eng.savedHTML.delete(el);
+
+      if (el.id === "hero-title") {
+        eng.titleRevealed = true;
+        motion.syncHeroState(eng);
+      }
+
+      if (
+        eng.sectionReviewsDone < eng.sectionReviewLimit &&
+        Date.now() < eng.sectionDeadline
+      ) {
+        eng.sectionReviewsDone++;
+        eng.reviewQueue.push(el);
+        eng.processReviewQueue(token).catch(() => {});
+      }
+
+      await eng.wait(eng.rand(40, 80));
+      stopTrack();
+      if (frame && frame.isConnected) {
+        if (frame && frame.isConnected) frame.remove();
+      } else if (frame) {
+        frame.remove();
+      }
+      await eng.wait(eng.rand(30, 60));
       return;
     }
     txtSpan.textContent = fullText.slice(0, i + 1);
-    const delay = i < 25 ? earlySpeed : lateSpeed;
-    await eng.wait(delay + eng.rand(0, 3));
-
-    charCounter++;
-    if (charCounter >= breathIn) {
-      await eng.wait(eng.rand(15, 60));
-      charCounter = 0;
-      breathIn = Math.floor(eng.rand(7, 14));
+    const remaining = eng.sectionDeadline - Date.now();
+    const charsLeft = fullText.length - i;
+    let delay = i < 25 ? earlySpeed : lateSpeed;
+    if (remaining < charsLeft * delay + 150) {
+      delay = Math.max(1, Math.floor(remaining / Math.max(1, charsLeft)));
     }
+    await eng.wait(delay + (remaining > 300 ? eng.rand(0, 3) : 0));
   }
 
-  await eng.wait(preConfirm);
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
-    abort();
+  await eng.wait(Math.max(20, preConfirm * 0.7));
+  if (token !== eng.buildToken) {
+    abortToken();
+    return;
+  }
+  if (Date.now() > eng.sectionDeadline) {
+    rushComplete();
     return;
   }
 
@@ -220,8 +340,12 @@ export async function buildText(
   const cx = rect2.left + rect2.width * eng.rand(0.4, 0.6);
   const cy = rect2.top + rect2.height * eng.rand(0.4, 0.6);
   await motion.flyTo(eng, confirmC, cx, cy, flyConfirm);
-  if (token !== eng.buildToken || Date.now() > eng.sectionDeadline) {
-    abort();
+  if (token !== eng.buildToken) {
+    abortToken();
+    return;
+  }
+  if (Date.now() > eng.sectionDeadline) {
+    rushComplete();
     return;
   }
   await motion.click(eng, confirmC);
@@ -246,18 +370,12 @@ export async function buildText(
     eng.processReviewQueue(token).catch(() => {});
   }
 
-  await eng.wait(eng.rand(80, 160));
+  await eng.wait(eng.rand(40, 80));
   stopTrack();
   if (frame && frame.isConnected) {
-    gsap.to(frame, {
-      opacity: 0,
-      scale: 1.03,
-      duration: 0.2,
-      ease: "power2.in",
-      onComplete: () => frame && frame.remove(),
-    });
+    frame.remove();
   } else if (frame) {
     frame.remove();
   }
-  await eng.wait(eng.rand(60, 120));
+  await eng.wait(eng.rand(30, 60));
 }

@@ -37,6 +37,7 @@ export class AgentEngine implements Engine {
   sectionDeadline = 0;
   sectionReviewLimit = 2;
   sectionReviewsDone = 0;
+  fastRevealing = false;
   skipIntro = false;
   frameTrackers = new Set<() => void>();
 
@@ -96,6 +97,9 @@ export class AgentEngine implements Engine {
   }
   instantReveal(el: HTMLElement): void {
     motion.instantReveal(this, el);
+  }
+  fastReveal(el: HTMLElement): void {
+    motion.fastReveal(this, el);
   }
   finishHeroInstantly(): void {
     sections.finishHeroInstantly(this);

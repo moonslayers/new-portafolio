@@ -33,25 +33,25 @@ export interface TimingProfile {
 }
 
 export const TIMING: Record<string, TimingProfile> = {
-  title: { hold: [140, 260], pre: [120, 230], early: [12, 20], late: [1, 2] },
-  body: { hold: [100, 190], pre: [100, 190], early: [10, 18], late: [1, 2] },
-  tag: { hold: [80, 150], pre: [70, 130], early: [9, 14], late: [1, 2] },
-  chip: { hold: [50, 110], pre: [45, 100], early: [7, 12], late: [1, 2] },
-  badge: { hold: [50, 110], pre: [45, 100], early: [7, 12], late: [1, 2] },
+  title: { hold: [70, 130], pre: [60, 110], early: [6, 10], late: [1, 2] },
+  body: { hold: [40, 70], pre: [40, 70], early: [2, 4], late: [1, 1] },
+  tag: { hold: [50, 100], pre: [45, 90], early: [6, 10], late: [1, 2] },
+  chip: { hold: [40, 80], pre: [35, 75], early: [5, 9], late: [1, 2] },
+  badge: { hold: [40, 80], pre: [35, 75], early: [5, 9], late: [1, 2] },
   "kpi-num": {
-    hold: [80, 160],
-    pre: [70, 140],
-    early: [9, 15],
+    hold: [50, 100],
+    pre: [45, 90],
+    early: [6, 10],
     late: [1, 2],
   },
   "kpi-label": {
-    hold: [80, 160],
-    pre: [70, 140],
-    early: [9, 15],
+    hold: [50, 100],
+    pre: [45, 90],
+    early: [6, 10],
     late: [1, 2],
   },
-  button: { hold: [90, 170], pre: [80, 150], early: [10, 16], late: [1, 2] },
-  image: { hold: [150, 250], pre: [50, 100], early: [5, 10], late: [1, 2] },
+  button: { hold: [60, 110], pre: [55, 100], early: [7, 11], late: [1, 2] },
+  image: { hold: [100, 170], pre: [35, 70], early: [4, 8], late: [1, 2] },
 };
 
 export interface CopyUpgrade {

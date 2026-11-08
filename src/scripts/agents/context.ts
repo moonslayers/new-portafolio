@@ -30,6 +30,7 @@ export interface Engine {
   sectionDeadline: number;
   sectionReviewLimit: number;
   sectionReviewsDone: number;
+  fastRevealing: boolean;
   skipIntro: boolean;
   frameTrackers: Set<() => void>;
 
@@ -51,6 +52,7 @@ export interface Engine {
     offsetY: number,
   ): () => void;
   instantReveal(el: HTMLElement): void;
+  fastReveal(el: HTMLElement): void;
   finishHeroInstantly(): void;
   goTo(idx: number): void;
   waitForScrollEnd(cb: () => void): void;

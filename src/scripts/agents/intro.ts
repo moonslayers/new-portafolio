@@ -63,24 +63,60 @@ export async function runIntro(eng: Engine): Promise<void> {
 
   const myToken = ++eng.buildToken;
 
-  eng.sectionDeadline = Date.now() + 7500;
+  eng.sectionDeadline = Date.now() + 6500;
   eng.sectionReviewLimit = 1;
   eng.sectionReviewsDone = 0;
+  eng.fastRevealing = false;
+
+  const revealRemainingFast = () => {
+    if (eng.fastRevealing) return;
+    eng.fastRevealing = true;
+    const items = queue.splice(0);
+    items.forEach((item, i) => {
+      setTimeout(
+        () => {
+          if (myToken !== eng.buildToken) return;
+          if (item.kind === "bg") {
+            eng.bgRevealed = true;
+            motion.syncHeroState(eng);
+          } else if (item.el) {
+            motion.fastReveal(eng, item.el);
+          }
+        },
+        i * Math.round(eng.rand(40, 80)),
+      );
+    });
+  };
 
   const worker = async (workerIdx: number) => {
-    await eng.wait(workerIdx * 180 + eng.rand(40, 200));
+    await eng.wait(workerIdx * 120 + eng.rand(20, 100));
     if (myToken !== eng.buildToken) return;
-    if (Date.now() > eng.sectionDeadline) return;
+    if (Date.now() > eng.sectionDeadline) {
+      revealRemainingFast();
+      return;
+    }
 
     while (queue.length > 0) {
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline) return;
+      if (Date.now() > eng.sectionDeadline - 200) {
+        revealRemainingFast();
+        return;
+      }
       const item = queue.shift();
       if (!item) return;
 
-      await eng.wait(eng.rand(20, 100));
+      await eng.wait(eng.rand(20, 80));
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline) return;
+      if (Date.now() > eng.sectionDeadline - 200) {
+        if (item.kind === "bg") {
+          eng.bgRevealed = true;
+          motion.syncHeroState(eng);
+        } else if (item.el) {
+          motion.fastReveal(eng, item.el);
+        }
+        revealRemainingFast();
+        return;
+      }
 
       try {
         if (item.kind === "bg") await heroBgClick(eng, workerIdx);
@@ -89,8 +125,11 @@ export async function runIntro(eng: Engine): Promise<void> {
       } catch (e) {}
       if (myToken !== eng.buildToken) return;
 
-      if (Date.now() > eng.sectionDeadline) return;
-      await eng.wait(eng.rand(80, 300));
+      if (Date.now() > eng.sectionDeadline - 200) {
+        revealRemainingFast();
+        return;
+      }
+      await eng.wait(eng.rand(60, 180));
     }
   };
 
@@ -101,18 +140,27 @@ export async function runIntro(eng: Engine): Promise<void> {
     return;
   }
 
+  if (queue.length > 0) {
+    revealRemainingFast();
+    await eng.wait(300);
+  }
+
   eng.reviewQueue = [];
   eng.isReviewing = false;
   motion.clearFx();
   motion.cleanupFlags();
 
-  if (Date.now() > eng.sectionDeadline) {
-    sections.finishHeroInstantly(eng);
-    return;
-  }
+  document
+    .querySelectorAll<HTMLElement>("#hero [data-build], #hero [data-type]")
+    .forEach((el) => {
+      const opacity = parseFloat(getComputedStyle(el).opacity || "0");
+      if (opacity < 0.9) motion.fastReveal(eng, el);
+    });
+  await eng.wait(300);
 
-  motion.clearFx();
-  motion.cleanupFlags();
+  eng.titleRevealed = true;
+  eng.bgRevealed = true;
+  motion.syncHeroState(eng);
   motion.setAgentsIdle(eng, true);
   eng.heroDone = true;
 }
