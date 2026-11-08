@@ -174,6 +174,8 @@ export function instantReveal(eng: Engine, el: HTMLElement): void {
   el.style.opacity = "1";
   el.style.filter = "none";
   el.style.transform = "translateY(0)";
+  el.dataset.animated = "instant";
+  if (window.__cursorBuilds) window.__cursorBuilds.instant++;
 }
 
 export function fastReveal(eng: Engine, el: HTMLElement): void {
@@ -184,6 +186,8 @@ export function fastReveal(eng: Engine, el: HTMLElement): void {
   }
   el.classList.remove("is-typing", "pre-build", "pre-build-y", "no-transition");
   el.style.minHeight = "";
+  el.dataset.animated = "fast";
+  if (window.__cursorBuilds) window.__cursorBuilds.fast++;
   gsap.to(el, {
     opacity: 1,
     y: 0,

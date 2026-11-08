@@ -72,7 +72,9 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
       class="editorial-img w-full h-full object-cover"
       loading="lazy"
     />
-    <span class="project-card__cover-label mono">{project.id}</span>
+    <span class="project-card__cover-label mono" data-build data-type="tag">
+      {project.id}
+    </span>
   </div>
 
   <div class="project-card__meta">
@@ -82,7 +84,9 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
       </span>
     )}
     {project.category && (
-      <span class="project-card__category mono">{project.category}</span>
+      <span class="project-card__category mono" data-build data-type="tag">
+        {project.category}
+      </span>
     )}
   </div>
 
@@ -91,7 +95,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
   </h3>
 
   {project.role && (
-    <p class="project-card__role mono">
+    <p class="project-card__role mono" data-build data-type="body">
       {project.role}
       {project.period ? ` · ${project.period}` : ""}
     </p>
@@ -99,19 +103,25 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 
   <dl class="project-card__fields">
     <div>
-      <dt class="project-card__field-label mono">{fieldLabels.problem}</dt>
+      <dt class="project-card__field-label mono" data-build data-type="tag">
+        {fieldLabels.problem}
+      </dt>
       <dd data-build data-type="body">
         {project.problem}
       </dd>
     </div>
     <div>
-      <dt class="project-card__field-label mono">{fieldLabels.decision}</dt>
+      <dt class="project-card__field-label mono" data-build data-type="tag">
+        {fieldLabels.decision}
+      </dt>
       <dd data-build data-type="body">
         {project.decision}
       </dd>
     </div>
     <div>
-      <dt class="project-card__field-label mono">{fieldLabels.result}</dt>
+      <dt class="project-card__field-label mono" data-build data-type="tag">
+        {fieldLabels.result}
+      </dt>
       <dd data-build data-type="body">
         {project.result}
       </dd>
@@ -128,7 +138,9 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 
   <div class="project-card__links">
     {isPrivate ? (
-      <span class="project-card__private mono">{privateText}</span>
+      <span class="project-card__private mono" data-build data-type="tag">
+        {privateText}
+      </span>
     ) : (
       project.links!.map((link) => (
         <a

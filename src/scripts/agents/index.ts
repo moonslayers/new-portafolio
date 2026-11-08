@@ -8,6 +8,18 @@ import * as sections from "./sections";
 import * as navigation from "./navigation";
 import * as intro from "./intro";
 
+declare global {
+  interface Window {
+    __cursorBuilds?: {
+      text3: number;
+      image2: number;
+      fast: number;
+      instant: number;
+      static: number;
+    };
+  }
+}
+
 export class AgentEngine implements Engine {
   agents = AGENTS;
   cursors: Cursor[] = [];
@@ -179,6 +191,13 @@ export function initAgents(): void {
   engine.reducedMotion = reduced;
   engine.mobile = mobile;
   engineInstance = engine;
+  window.__cursorBuilds = {
+    text3: 0,
+    image2: 0,
+    fast: 0,
+    instant: 0,
+    static: 0,
+  };
 
   if (reduced) {
     // reveal all content statically
@@ -187,7 +206,12 @@ export function initAgents(): void {
       el.style.opacity = "1";
       el.style.filter = "none";
       el.style.transform = "translateY(0)";
+      el.dataset.animated = "static-reduced";
     });
+    if (window.__cursorBuilds) {
+      window.__cursorBuilds.static +=
+        document.querySelectorAll<HTMLElement>("[data-build]").length;
+    }
     engine.titleRevealed = true;
     engine.bgRevealed = true;
     motion.syncHeroState(engine);

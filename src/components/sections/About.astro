@@ -80,7 +80,11 @@ const portraitCaption =
           <img src={portraitSrc} class="editorial-img" alt={portraitAlt} />
         </div>
         {portraitCaption && (
-          <div class="mt-2 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider">
+          <div
+            class="mt-2 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider"
+            data-build
+            data-type="tag"
+          >
             {portraitCaption}
           </div>
         )}

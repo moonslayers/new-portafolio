@@ -150,7 +150,11 @@ const eduHeading = locale === "en" ? "Education" : "Educación";
               >
                 {e.degree}
               </div>
-              <div class="mt-1 text-sm text-[var(--ink-secondary)] mono">
+              <div
+                class="mt-1 text-sm text-[var(--ink-secondary)] mono"
+                data-build
+                data-type="body"
+              >
                 {e.institution}
                 {e.location ? ` · ${e.location}` : ""}
               </div>

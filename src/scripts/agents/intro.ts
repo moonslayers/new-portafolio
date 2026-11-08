@@ -54,81 +54,50 @@ export async function runIntro(eng: Engine): Promise<void> {
 
   const queue: { kind: string; el: HTMLElement | null }[] = [
     { kind: "bg", el: null },
+    { kind: "text", el: document.querySelector<HTMLElement>(".hero-kicker") },
     { kind: "text", el: document.querySelector<HTMLElement>("#hero-title") },
     { kind: "text", el: document.querySelector<HTMLElement>("#hero-sub") },
     { kind: "text", el: btnWork },
     { kind: "text", el: btnContact },
     ...badges.map((el) => ({ kind: "text", el })),
+    {
+      kind: "text",
+      el: document.querySelector<HTMLElement>("#hero-scroll [data-build]"),
+    },
   ];
 
   const myToken = ++eng.buildToken;
 
-  eng.sectionDeadline = Date.now() + 6500;
+  eng.sectionDeadline = Date.now() + 120000;
   eng.sectionReviewLimit = 1;
   eng.sectionReviewsDone = 0;
   eng.fastRevealing = false;
 
-  const revealRemainingFast = () => {
-    if (eng.fastRevealing) return;
-    eng.fastRevealing = true;
-    const items = queue.splice(0);
-    items.forEach((item, i) => {
-      setTimeout(
-        () => {
-          if (myToken !== eng.buildToken) return;
-          if (item.kind === "bg") {
-            eng.bgRevealed = true;
-            motion.syncHeroState(eng);
-          } else if (item.el) {
-            motion.fastReveal(eng, item.el);
-          }
-        },
-        i * Math.round(eng.rand(40, 80)),
-      );
-    });
-  };
-
   const worker = async (workerIdx: number) => {
     await eng.wait(workerIdx * 120 + eng.rand(20, 100));
     if (myToken !== eng.buildToken) return;
-    if (Date.now() > eng.sectionDeadline) {
-      revealRemainingFast();
-      return;
-    }
 
     while (queue.length > 0) {
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline - 200) {
-        revealRemainingFast();
-        return;
-      }
       const item = queue.shift();
       if (!item) return;
 
       await eng.wait(eng.rand(20, 80));
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline - 200) {
-        if (item.kind === "bg") {
-          eng.bgRevealed = true;
-          motion.syncHeroState(eng);
-        } else if (item.el) {
-          motion.fastReveal(eng, item.el);
-        }
-        revealRemainingFast();
-        return;
-      }
 
       try {
         if (item.kind === "bg") await heroBgClick(eng, workerIdx);
         else if (item.el)
           await typing.buildText(eng, item.el, myToken, workerIdx);
-      } catch (e) {}
+      } catch (e) {
+        if (item.el) motion.instantReveal(eng, item.el);
+        if (item.kind === "bg") {
+          eng.bgRevealed = true;
+          motion.syncHeroState(eng);
+        }
+      }
       if (myToken !== eng.buildToken) return;
 
-      if (Date.now() > eng.sectionDeadline - 200) {
-        revealRemainingFast();
-        return;
-      }
       await eng.wait(eng.rand(60, 180));
     }
   };
@@ -140,11 +109,6 @@ export async function runIntro(eng: Engine): Promise<void> {
     return;
   }
 
-  if (queue.length > 0) {
-    revealRemainingFast();
-    await eng.wait(300);
-  }
-
   eng.reviewQueue = [];
   eng.isReviewing = false;
   motion.clearFx();
@@ -154,7 +118,7 @@ export async function runIntro(eng: Engine): Promise<void> {
     .querySelectorAll<HTMLElement>("#hero [data-build], #hero [data-type]")
     .forEach((el) => {
       const opacity = parseFloat(getComputedStyle(el).opacity || "0");
-      if (opacity < 0.9) motion.fastReveal(eng, el);
+      if (opacity < 0.9) motion.instantReveal(eng, el);
     });
   await eng.wait(300);
 

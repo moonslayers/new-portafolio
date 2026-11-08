@@ -50,7 +50,11 @@ const titleLines = title.split("\n");
   <div class="relative w-full max-w-5xl mx-auto py-8 md:py-10">
     <div class="flex justify-between items-baseline mb-6 border-b border-[var(--ink-light)] pb-3">
       {kicker && (
-        <div class="hero-kicker mono text-[10px] uppercase tracking-[.15em]">
+        <div
+          class="hero-kicker mono text-[10px] uppercase tracking-[.15em]"
+          data-build
+          data-type="tag"
+        >
           {kicker}
         </div>
       )}
@@ -115,7 +119,11 @@ const titleLines = title.split("\n");
       href="#about"
       class="hero-bg absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-transparent border-0 cursor-pointer group"
     >
-      <span class="mono text-[9px] uppercase tracking-[.2em] text-[var(--ink-secondary)] group-hover:text-[var(--ink-primary)] transition-colors">
+      <span
+        class="mono text-[9px] uppercase tracking-[.2em] text-[var(--ink-secondary)] group-hover:text-[var(--ink-primary)] transition-colors"
+        data-build
+        data-type="tag"
+      >
         {scrollLabel}
       </span>
       <div class="w-[1px] h-8 bg-[var(--ink-light)] group-hover:bg-[var(--ink-secondary)] transition-colors"></div>

@@ -16,7 +16,11 @@ const { tag, title, meta, class: className = "" } = Astro.props;
         {tag}
       </span>
     )}
-    {meta && <span class="section-header__meta mono">{meta}</span>}
+    {meta && (
+      <span class="section-header__meta mono" data-build data-type="tag">
+        {meta}
+      </span>
+    )}
   </div>
   {title && (
     <h2 class="section-title" data-build data-type="title">

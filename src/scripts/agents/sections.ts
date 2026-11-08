@@ -49,27 +49,33 @@ export async function buildSection(
 ): Promise<void> {
   if (!section) return;
   if (eng.builtSections.has(section)) return;
-  motion.clearFrames(eng);
-  motion.stopAllFrameTrackers(eng);
-  motion.clearFx();
-  motion.setAgentsIdle(eng, false);
   eng.builtSections.add(section);
 
-  const myToken = ++eng.buildToken;
+  const myToken = eng.buildToken;
   const queue = [...(eng.queues.get(section) || [])];
   if (!queue.length) {
     motion.setAgentsIdle(eng, true);
     return;
   }
 
-  const budget = eng.mobile ? 3000 : 4500;
-  eng.sectionDeadline = Date.now() + budget;
+  eng.sectionDeadline = Date.now() + 120000;
   eng.sectionReviewLimit = 2;
   eng.sectionReviewsDone = 0;
   eng.fastRevealing = false;
 
   if (eng.mobile) {
-    queue.forEach((el) => motion.instantReveal(eng, el));
+    queue.forEach((el) => {
+      motion.instantReveal(eng, el);
+      el.dataset.animated = "static-mobile";
+    });
+    if (window.__cursorBuilds) {
+      window.__cursorBuilds.static += queue.length;
+      // adjust: instantReveal incremented instant; revert
+      window.__cursorBuilds.instant = Math.max(
+        0,
+        window.__cursorBuilds.instant - queue.length,
+      );
+    }
     eng.scatterCursors();
     motion.clearFrames(eng);
     motion.stopAllFrameTrackers(eng);
@@ -79,41 +85,17 @@ export async function buildSection(
     return;
   }
 
-  const revealRemainingFast = () => {
-    if (eng.fastRevealing) return;
-    eng.fastRevealing = true;
-    const els = queue.splice(0);
-    els.forEach((el, i) => {
-      setTimeout(
-        () => {
-          if (myToken !== eng.buildToken) return;
-          motion.fastReveal(eng, el);
-        },
-        i * Math.round(eng.rand(40, 80)),
-      );
-    });
-  };
-
   const worker = async (workerIdx: number) => {
     await eng.wait(workerIdx * 15 + eng.rand(2, 8));
     if (myToken !== eng.buildToken) return;
 
     while (queue.length > 0) {
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline - 200) {
-        revealRemainingFast();
-        return;
-      }
       const el = queue.shift();
       if (!el) return;
 
       await eng.wait(eng.rand(5, 15));
       if (myToken !== eng.buildToken) return;
-      if (Date.now() > eng.sectionDeadline - 200) {
-        motion.fastReveal(eng, el);
-        revealRemainingFast();
-        return;
-      }
 
       try {
         if (el.dataset.type === "image") {
@@ -121,27 +103,16 @@ export async function buildSection(
         } else {
           await typing.buildText(eng, el, myToken, workerIdx);
         }
-      } catch (e) {}
+      } catch (e) {
+        motion.instantReveal(eng, el);
+      }
       if (myToken !== eng.buildToken) return;
 
-      if (Date.now() > eng.sectionDeadline - 200) {
-        revealRemainingFast();
-        return;
-      }
       await eng.wait(eng.rand(10, 30));
     }
   };
 
-  await Promise.all([
-    worker(0),
-    worker(1),
-    worker(2),
-    worker(3),
-    worker(4),
-    worker(5),
-    worker(6),
-    worker(7),
-  ]);
+  await Promise.all([worker(0), worker(1), worker(2), worker(3)]);
 
   if (myToken !== eng.buildToken) {
     queue.forEach((el) => motion.instantReveal(eng, el));
@@ -151,11 +122,6 @@ export async function buildSection(
     motion.cleanupFlags();
     motion.setAgentsIdle(eng, true);
     return;
-  }
-
-  if (queue.length > 0) {
-    revealRemainingFast();
-    await eng.wait(300);
   }
 
   eng.reviewQueue = [];
@@ -174,7 +140,7 @@ export async function buildSection(
       el.classList.contains("is-typing") ||
       opacity < 0.9
     ) {
-      motion.fastReveal(eng, el);
+      motion.instantReveal(eng, el);
     }
   });
   await eng.wait(300);
@@ -196,6 +162,10 @@ export function finishHeroInstantly(eng: Engine): void {
     el.classList.remove("is-typing", "pre-build", "pre-build-y");
     el.style.minHeight = "";
     gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+    if (el.hasAttribute("data-build")) {
+      el.dataset.animated = "instant";
+      if (window.__cursorBuilds) window.__cursorBuilds.instant++;
+    }
   });
   eng.titleRevealed = true;
   eng.bgRevealed = true;

@@ -67,7 +67,6 @@ export function goTo(eng: Engine, idx: number): void {
   eng.isNavigating = true;
   eng.activeIdx = idx;
   updateNavDots(idx);
-  eng.buildToken++;
   eng.reviewQueue = [];
   eng.isReviewing = false;
   motion.clearFrames(eng);
