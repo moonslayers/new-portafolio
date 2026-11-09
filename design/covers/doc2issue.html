@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1600, height=900" />
+    <title>doc2issue — cover 1600×900</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg-paper: #f7f5f0;
+        --ink-primary: #1c1b19;
+        --ink-secondary: #6b6862;
+        --ink-light: #e5e3db;
+        --accent-terracotta: #c75b39;
+        --font-serif: "Fraunces", ui-serif, Georgia, serif;
+        --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+        --font-sans:
+          "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+      }
+      body {
+        background: var(--bg-paper);
+        color: var(--ink-primary);
+        font-family: var(--font-sans);
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(
+            to right,
+            rgba(28, 27, 25, 0.035) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(28, 27, 25, 0.035) 1px,
+            transparent 1px
+          );
+        background-size: 80px 80px;
+        mask-image: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.9) 0%,
+          rgba(0, 0, 0, 0) 92%
+        );
+        pointer-events: none;
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        width: 1600px;
+        height: 900px;
+        display: flex;
+        flex-direction: column;
+        padding: 38px 48px 34px 48px;
+      }
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .kicker::before {
+        content: "";
+        width: 28px;
+        height: 1.5px;
+        background: var(--accent-terracotta);
+        display: block;
+      }
+      .stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+      }
+      .card {
+        width: 380px;
+        height: 248px;
+        background: #ffffff;
+        border: 1.5px solid var(--ink-light);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        box-shadow:
+          0 1px 2px rgba(28, 27, 25, 0.05),
+          0 8px 22px rgba(28, 27, 25, 0.06);
+        padding: 18px 14px;
+      }
+      .card--mid {
+        border-color: rgba(199, 91, 57, 0.22);
+        box-shadow:
+          0 1px 2px rgba(28, 27, 25, 0.05),
+          0 10px 28px rgba(199, 91, 57, 0.08);
+      }
+      .card-dot {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent-terracotta);
+      }
+      .card-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+      .card-icon--doc {
+        background: var(--ink-primary);
+        color: var(--bg-paper);
+      }
+      .card-icon--json {
+        background: var(--accent-terracotta);
+        color: white;
+      }
+      .card-icon--gh {
+        background: #ffffff;
+        border: 1.5px solid var(--ink-light);
+        color: var(--ink-primary);
+      }
+      .card-title {
+        font-family: var(--font-mono);
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        color: var(--ink-primary);
+      }
+      .card-sub {
+        margin-top: 10px;
+        font-family: var(--font-mono);
+        font-size: 32px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        color: var(--ink-secondary);
+        line-height: 1;
+      }
+      .card-sub--formats {
+        font-size: 22px;
+        letter-spacing: 0.02em;
+        line-height: 1.25;
+        white-space: normal;
+      }
+      .arrow {
+        width: 96px;
+        height: 2px;
+        background: var(--accent-terracotta);
+        position: relative;
+        flex-shrink: 0;
+        margin: 0 8px;
+      }
+      .arrow::after {
+        content: "";
+        position: absolute;
+        right: -1px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 10px solid var(--accent-terracotta);
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+      }
+      .arrow-label {
+        position: absolute;
+        top: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent-terracotta);
+        white-space: nowrap;
+      }
+      .badge-row {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 2px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 22px;
+        border: 1px solid var(--ink-light);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+        font-family: var(--font-mono);
+        font-size: 17px;
+        letter-spacing: 0.03em;
+        color: var(--ink-secondary);
+      }
+      .badge strong {
+        color: var(--ink-primary);
+        font-weight: 700;
+      }
+      .badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent-terracotta);
+        display: inline-block;
+      }
+      .badge-sep {
+        width: 1px;
+        height: 14px;
+        background: var(--ink-light);
+        display: inline-block;
+      }
+      .watermark {
+        position: absolute;
+        bottom: 18px;
+        left: 22px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        opacity: 0.38;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="kicker">Pipeline · Document to Issue</div>
+
+      <div class="stage">
+        <!-- Document -->
+        <div class="card">
+          <span class="card-dot"></span>
+          <div class="card-icon card-icon--doc">≡</div>
+          <div class="card-title">Document</div>
+          <div class="card-sub card-sub--formats">
+            PDF · DOCX · PPTX<br />XLSX
+          </div>
+        </div>
+
+        <div class="arrow" aria-hidden="true">
+          <span class="arrow-label">parse</span>
+        </div>
+
+        <!-- JSON -->
+        <div class="card card--mid">
+          <span class="card-dot"></span>
+          <div class="card-icon card-icon--json">{ }</div>
+          <div class="card-title">JSON</div>
+          <div class="card-sub">reviewable</div>
+        </div>
+
+        <div class="arrow" aria-hidden="true">
+          <span class="arrow-label">create</span>
+        </div>
+
+        <!-- GitHub issue -->
+        <div class="card">
+          <span class="card-dot"></span>
+          <div class="card-icon card-icon--gh">◉</div>
+          <div class="card-title" style="font-size: 38px">GitHub issue</div>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span><strong>3 agents</strong></span>
+          <span class="badge-sep"></span>
+          <span>analyzer</span>
+          <span style="opacity: 0.4">/</span>
+          <span>vision</span>
+          <span style="opacity: 0.4">/</span>
+          <span>creator</span>
+        </div>
+      </div>
+      <div class="watermark">pdf · text · vision · github</div>
+    </div>
+  </body>
+</html>

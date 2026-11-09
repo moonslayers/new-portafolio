@@ -2,6 +2,7 @@
 import type { About as AboutContent, AboutImage, Kpi } from "../../data/types";
 import SectionHeader from "../ui/SectionHeader.astro";
 import portraitAsset from "../../assets/placeholders/portrait.svg";
+import { resolveAssetUrl } from "../../lib/assetUrl";
 
 interface Props {
   tag?: string;
@@ -31,12 +32,11 @@ const body = rest.body ?? source.body ?? "";
 const image = rest.image ?? source.image;
 const kpis = rest.kpis ?? source.kpis ?? [];
 
-const portraitSrc =
-  typeof image?.src === "string" && image.src.length > 0
-    ? image.src
-    : typeof portraitAsset === "string"
-      ? portraitAsset
-      : (portraitAsset as { src: string }).src;
+const fallbackPortraitSrc =
+  typeof portraitAsset === "string"
+    ? portraitAsset
+    : (portraitAsset as { src: string }).src;
+const portraitSrc = resolveAssetUrl(image?.src, fallbackPortraitSrc);
 const resolvedLocale = (Astro.currentLocale as "es" | "en") ?? "es";
 const portraitAlt =
   image?.alt ??
@@ -72,16 +72,25 @@ const portraitCaption =
 
       <div class="hidden md:block">
         <div
-          class="w-full aspect-[4/3] overflow-hidden rounded-sm border border-[var(--ink-light)]"
+          class="w-full aspect-[3/4] overflow-hidden rounded-sm border border-[var(--ink-light)]"
           data-build
           data-type="image"
           style="background-color: var(--ink-light);"
         >
-          <img src={portraitSrc} class="editorial-img" alt={portraitAlt} />
+          <img
+            src={portraitSrc}
+            width="600"
+            height="800"
+            loading="lazy"
+            decoding="async"
+            class="editorial-img"
+            style="object-position: 50% 0%;"
+            alt={portraitAlt}
+          />
         </div>
         {portraitCaption && (
           <div
-            class="mt-2 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider"
+            class="mt-4 mono text-[9px] text-[var(--ink-secondary)] uppercase tracking-wider border-t border-[var(--ink-light)] pt-1"
             data-build
             data-type="tag"
           >

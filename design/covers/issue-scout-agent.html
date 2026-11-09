@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1600, height=900" />
+    <title>issue-scout-agent — cover 1600×900</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg-paper: #f7f5f0;
+        --ink-primary: #1c1b19;
+        --ink-secondary: #6b6862;
+        --ink-light: #e5e3db;
+        --accent-terracotta: #c75b39;
+        --font-serif: "Fraunces", ui-serif, Georgia, serif;
+        --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+        --font-sans:
+          "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+      }
+      body {
+        background: var(--bg-paper);
+        color: var(--ink-primary);
+        font-family: var(--font-sans);
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(
+            to right,
+            rgba(28, 27, 25, 0.035) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(28, 27, 25, 0.035) 1px,
+            transparent 1px
+          );
+        background-size: 80px 80px;
+        mask-image: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.85) 0%,
+          rgba(0, 0, 0, 0) 92%
+        );
+        pointer-events: none;
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        width: 1600px;
+        height: 900px;
+        display: flex;
+        flex-direction: column;
+        padding: 38px 48px 34px 48px;
+      }
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .kicker::before {
+        content: "";
+        width: 28px;
+        height: 1.5px;
+        background: var(--accent-terracotta);
+        display: block;
+      }
+      .stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 48px;
+      }
+      /* left: title block */
+      .left {
+        width: 520px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent-terracotta);
+        font-weight: 700;
+      }
+      .big-title {
+        font-family: var(--font-serif);
+        font-size: 62px;
+        font-weight: 700;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        color: var(--ink-primary);
+      }
+      .big-title em {
+        font-weight: 400;
+        font-style: italic;
+        color: var(--ink-secondary);
+      }
+      .desc {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        line-height: 1.45;
+        color: var(--ink-secondary);
+        max-width: 460px;
+      }
+      /* right: artifact card */
+      .artifact {
+        width: 720px;
+        height: 420px;
+        background: #ffffff;
+        border: 1.5px solid var(--ink-light);
+        border-radius: 16px;
+        box-shadow:
+          0 1px 2px rgba(28, 27, 25, 0.05),
+          0 12px 32px rgba(28, 27, 25, 0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .artifact-header {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 22px;
+        border-bottom: 1px solid var(--ink-light);
+        background: rgba(247, 245, 240, 0.65);
+      }
+      .gh-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .gh-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        display: block;
+      }
+      .gh-dots span:nth-child(1) {
+        background: #e5e3db;
+      }
+      .gh-dots span:nth-child(2) {
+        background: #e5e3db;
+      }
+      .gh-dots span:nth-child(3) {
+        background: #e5e3db;
+      }
+      .gh-repo {
+        font-family: var(--font-mono);
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink-primary);
+        letter-spacing: -0.01em;
+        margin-left: 8px;
+      }
+      .gh-repo span {
+        color: var(--ink-secondary);
+        font-weight: 500;
+      }
+      .gh-issue {
+        margin-left: auto;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        color: var(--ink-secondary);
+        border: 1px solid var(--ink-light);
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: white;
+      }
+      .artifact-body {
+        flex: 1;
+        padding: 28px 28px 22px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .comment-title {
+        font-family: var(--font-mono);
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--ink-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .comment-title::before {
+        content: "";
+        width: 4px;
+        height: 28px;
+        background: var(--accent-terracotta);
+        border-radius: 999px;
+        display: block;
+      }
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 4px;
+      }
+      .bar {
+        height: 14px;
+        background: var(--ink-light);
+        border-radius: 999px;
+      }
+      .bar--1 {
+        width: 92%;
+      }
+      .bar--2 {
+        width: 84%;
+      }
+      .bar--3 {
+        width: 88%;
+      }
+      .bar--4 {
+        width: 62%;
+      }
+      .bar--terracotta {
+        background: var(--accent-terracotta);
+        opacity: 0.18;
+      }
+      .artifact-footer {
+        height: 56px;
+        border-top: 1px solid var(--ink-light);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 22px;
+        background: rgba(247, 245, 240, 0.38);
+      }
+      .footer-badge {
+        font-family: var(--font-mono);
+        font-size: 15px;
+        letter-spacing: 0.03em;
+        color: var(--ink-secondary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .footer-badge strong {
+        color: var(--ink-primary);
+      }
+      .footer-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .footer-actions span {
+        width: 72px;
+        height: 26px;
+        border-radius: 999px;
+        background: white;
+        border: 1px solid var(--ink-light);
+        display: block;
+      }
+      .footer-actions span:last-child {
+        background: var(--ink-primary);
+        border-color: var(--ink-primary);
+      }
+      /* badge row bottom */
+      .badge-row {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 2px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 22px;
+        border: 1px solid var(--ink-light);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.84);
+        font-family: var(--font-mono);
+        font-size: 20px;
+        letter-spacing: 0.03em;
+        color: var(--ink-secondary);
+      }
+      .badge strong {
+        color: var(--ink-primary);
+        font-weight: 700;
+      }
+      .badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent-terracotta);
+        display: inline-block;
+      }
+      .badge-sep {
+        width: 1px;
+        height: 14px;
+        background: var(--ink-light);
+        display: inline-block;
+      }
+      .watermark {
+        position: absolute;
+        bottom: 18px;
+        left: 22px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        opacity: 0.38;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="kicker">Agent · GitHub Issue Scout</div>
+
+      <div class="stage">
+        <div class="left">
+          <div class="eyebrow">On-demand technical plan</div>
+          <div class="big-title">Issue<br /><em>scout</em> agent</div>
+          <div class="desc">
+            Slash command that researches the repo and posts a structured plan
+            as a comment.
+          </div>
+        </div>
+
+        <div
+          class="artifact"
+          role="img"
+          aria-label="Stylized GitHub issue comment mockup"
+        >
+          <div class="artifact-header">
+            <div class="gh-dots"><span></span><span></span><span></span></div>
+            <div class="gh-repo">acme/api <span>· #42</span></div>
+            <div class="gh-issue">#42</div>
+          </div>
+          <div class="artifact-body">
+            <div class="comment-title">Technical plan</div>
+            <div class="bars">
+              <div class="bar bar--1"></div>
+              <div class="bar bar--2"></div>
+              <div class="bar bar--3"></div>
+              <div class="bar bar--4 bar--terracotta"></div>
+            </div>
+          </div>
+          <div class="artifact-footer">
+            <div class="footer-badge">
+              <span
+                style="
+                  width: 28px;
+                  height: 28px;
+                  border-radius: 999px;
+                  background: var(--accent-terracotta);
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  font-size: 12px;
+                  font-weight: 700;
+                "
+                >S</span
+              >
+              <span>scout</span>
+            </div>
+            <div class="footer-actions"><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span><strong>/scout</strong></span>
+          <span class="badge-sep"></span>
+          <span>tool use</span>
+          <span class="badge-sep"></span>
+          <span>multi-provider</span>
+        </div>
+      </div>
+      <div class="watermark">/scout · research · plan</div>
+    </div>
+  </body>
+</html>

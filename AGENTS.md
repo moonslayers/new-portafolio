@@ -69,7 +69,7 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
 - Hero: subtítulo 1–2 líneas (~160 caracteres), 5 chips.
 - About: máximo 2 párrafos (~300–400 caracteres) + 3 KPIs; sin repetir el hero.
 - Method: 4 pasos, una línea por paso; sin duplicar “gates humanos”.
-- Projects: 6 tarjetas; cada una problema/decisión/resultado en frases cortas (~200–240 caracteres por tarjeta). Mantener los 6 proyectos y enlaces/estado privado.
+- Projects: 6 tarjetas; cada una problema/decisión/resultado en frases cortas (~200–240 caracteres por tarjeta: la suma de los tres campos, no por campo). Mantener los 6 proyectos y enlaces/estado privado.
 - Stack: solo grupos y chips, sin párrafos.
 - Experience: 3 entradas, máximo 2 bullets cortos por entrada.
 - Writing: 1–2 frases. Contact: 1–2 frases + botones.
@@ -123,7 +123,7 @@ Nota de QA visual: Selenium + Firefox; verificar `[data-build]`/`data-animated`,
 3. `npm run format` aplicado (o diff revisado).
 4. Paridad ES/EN verificada (contenido y UI labels).
 5. `base: '/new-portafolio'` intacto.
-6. Assets (retrato, portadas, og-image) actualizados si aplica.
+6. Assets (retrato, portadas, og-image) actualizados si aplica. Todo lo que esté en `public/` se publica: los originales pesados van a `assets-src/` (ignorado por git).
 7. Workflow `.github/workflows/deploy.yml` válido.
 8. Estado de GitHub Pages reportado (activado con `build_type: workflow`).
 9. No se expusieron tokens ni credenciales.

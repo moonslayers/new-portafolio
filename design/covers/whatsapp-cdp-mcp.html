@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1600, height=900" />
+    <title>whatsapp-cdp-mcp — cover 1600×900</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg-paper: #f7f5f0;
+        --ink-primary: #1c1b19;
+        --ink-secondary: #6b6862;
+        --ink-light: #e5e3db;
+        --accent-terracotta: #c75b39;
+        --font-serif: "Fraunces", ui-serif, Georgia, serif;
+        --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+        --font-sans:
+          "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+      }
+      body {
+        background: var(--bg-paper);
+        color: var(--ink-primary);
+        font-family: var(--font-sans);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      /* subtle grid */
+      body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(
+            to right,
+            rgba(28, 27, 25, 0.035) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(28, 27, 25, 0.035) 1px,
+            transparent 1px
+          );
+        background-size: 80px 80px;
+        mask-image: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.9) 0%,
+          rgba(0, 0, 0, 0) 92%
+        );
+        pointer-events: none;
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        width: 1600px;
+        height: 900px;
+        display: flex;
+        flex-direction: column;
+        padding: 38px 48px 34px 48px;
+      }
+      /* top kicker */
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .kicker::before {
+        content: "";
+        width: 28px;
+        height: 1.5px;
+        background: var(--accent-terracotta);
+        display: block;
+      }
+      /* center chain */
+      .stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        padding-top: 6px;
+      }
+      .node {
+        width: 322px;
+        height: 228px;
+        background: #ffffff;
+        border: 1.5px solid var(--ink-light);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        box-shadow:
+          0 1px 2px rgba(28, 27, 25, 0.05),
+          0 8px 22px rgba(28, 27, 25, 0.06);
+        padding: 16px 10px;
+      }
+      .node--accent {
+        border-color: rgba(199, 91, 57, 0.22);
+        box-shadow:
+          0 1px 2px rgba(28, 27, 25, 0.05),
+          0 10px 28px rgba(199, 91, 57, 0.1);
+      }
+      .node-dot {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent-terracotta);
+        opacity: 0.95;
+      }
+      .node-title {
+        font-family: var(--font-mono);
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        color: var(--ink-primary);
+      }
+      .node-title--small {
+        font-size: 40px;
+      }
+      .node-sub {
+        margin-top: 10px;
+        font-family: var(--font-mono);
+        font-size: 32px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: var(--ink-secondary);
+        line-height: 1;
+        white-space: nowrap;
+      }
+      /* arrow */
+      .arrow {
+        width: 64px;
+        height: 2px;
+        background: var(--accent-terracotta);
+        position: relative;
+        flex-shrink: 0;
+        margin: 0 4px;
+        opacity: 0.95;
+      }
+      .arrow::after {
+        content: "";
+        position: absolute;
+        right: -1px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 10px solid var(--accent-terracotta);
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+      }
+      .arrow--ghost {
+        background: var(--ink-light);
+      }
+      .arrow--ghost::after {
+        border-left-color: var(--ink-light);
+      }
+      /* badge */
+      .badge-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 2px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 22px;
+        border: 1px solid var(--ink-light);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+        font-family: var(--font-mono);
+        font-size: 18px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        backdrop-filter: blur(4px);
+      }
+      .badge strong {
+        color: var(--ink-primary);
+        font-weight: 700;
+      }
+      .badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent-terracotta);
+        display: inline-block;
+      }
+      .badge-sep {
+        width: 1px;
+        height: 14px;
+        background: var(--ink-light);
+        display: inline-block;
+      }
+      /* bottom left watermark mono */
+      .watermark {
+        position: absolute;
+        bottom: 18px;
+        left: 22px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-secondary);
+        opacity: 0.42;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="kicker">Architecture · WhatsApp CDP MCP</div>
+
+      <div class="stage">
+        <div class="node">
+          <span class="node-dot"></span>
+          <div class="node-title">MCP client</div>
+        </div>
+
+        <div class="arrow" aria-hidden="true"></div>
+
+        <div class="node">
+          <span class="node-dot"></span>
+          <div class="node-title" style="font-size: 39px">MCP server</div>
+          <div
+            class="node-sub"
+            style="
+              font-size: 26px;
+              margin-top: 11px;
+              letter-spacing: 0.02em;
+              line-height: 1;
+            "
+          >
+            JSON-RPC · stdio
+          </div>
+        </div>
+
+        <div class="arrow" aria-hidden="true"></div>
+
+        <div class="node">
+          <span class="node-dot"></span>
+          <div class="node-title">CDP</div>
+          <div class="node-sub" style="font-size: 32px">WebSocket</div>
+        </div>
+
+        <div class="arrow" aria-hidden="true"></div>
+
+        <div class="node node--accent">
+          <span class="node-dot"></span>
+          <div class="node-title" style="font-size: 36px; line-height: 0.95">
+            WhatsApp<br />Desktop
+          </div>
+          <div class="node-sub" style="font-size: 32px">Electron · DOM</div>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span><strong>10 tools</strong></span>
+          <span class="badge-sep"></span>
+          <span>rate limit</span>
+          <span class="badge-sep"></span>
+          <span>typing</span>
+        </div>
+      </div>
+      <div class="watermark">stdio · websocket · dom</div>
+    </div>
+  </body>
+</html>

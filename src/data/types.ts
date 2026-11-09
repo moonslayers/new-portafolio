@@ -4,7 +4,6 @@ export interface Seo {
   title: string;
   description: string;
   keywords?: string[];
-  ogImage?: string;
   canonical?: string;
   twitterCard?: "summary" | "summary_large_image";
 }

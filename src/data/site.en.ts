@@ -46,6 +46,10 @@ export const siteEn: SiteContent = {
     body: `Project lead at Integranet (2023–present): 10+ government and private platforms with teams of up to 5. From requirements to support.
 
 Specialized in agent-assisted engineering with opencode: versioned context, lockfile-backed skills and subagents. Custom MCP and CI agents.`,
+    image: {
+      src: "me.webp",
+      alt: "Studio portrait on black backdrop, seated on wooden stool",
+    },
     kpis: [
       { value: "3", label: "Years delivering platforms" },
       { value: "10+", label: "Government and private platforms" },
@@ -106,6 +110,10 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
         ],
         links: [],
         featured: true,
+        image: {
+          src: "projects/timbria.webp",
+          alt: "Timbria landing: receipt turned into CFDI 4.0 invoice",
+        },
       },
       {
         id: "whatsapp-cdp-mcp",
@@ -126,6 +134,10 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
           },
         ],
         featured: true,
+        image: {
+          src: "projects/whatsapp-cdp-mcp.webp",
+          alt: "Architecture diagram of MCP server driving WhatsApp via CDP",
+        },
       },
       {
         id: "doc2issue",
@@ -153,6 +165,10 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
           { label: "GitHub", href: "https://github.com/moonslayers/doc2issue" },
         ],
         featured: true,
+        image: {
+          src: "projects/doc2issue.webp",
+          alt: "3-agent pipeline: PDF · DOCX · PPTX · XLSX to issues",
+        },
       },
       {
         id: "issue-scout-agent",
@@ -179,6 +195,10 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
           },
         ],
         featured: true,
+        image: {
+          src: "projects/issue-scout-agent.webp",
+          alt: "Mock agent comment with technical plan on acme/api #42",
+        },
       },
       {
         id: "creditos-fondosbc",
@@ -201,27 +221,38 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
         ],
         links: [],
         featured: true,
+        image: {
+          src: "projects/creditos-fondosbc.webp",
+          alt: "Analytics dashboard of FondosBC credit applications",
+        },
       },
       {
-        id: "age-of-agents",
-        title: "age-of-agents",
-        tag: "Open source · npm",
-        category: "Open source",
-        role: "Author",
+        id: "cuadra",
+        title: "Cuadra",
+        tag: "Own product · PWA",
+        category: "Own product",
+        role: "Owner",
         period: "2026",
-        problem: "Visualize agent sessions in real time.",
+        problem: "In Ensenada water and power status by colonia lost in chats.",
         decision:
-          "Local transcript reading, event-to-game-state and local server.",
-        result: "Published npm package; multiple projects as cities.",
-        stack: ["Node.js ≥22", "TypeScript", "PixiJS v8", "WebSocket", "Vite"],
-        links: [
-          { label: "npm", href: "https://www.npmjs.com/package/age-of-agents" },
-          {
-            label: "Site",
-            href: "https://agentsmill.github.io/age-of-agents/",
-          },
+          "Offline PWA with Laravel 13 + Vue 3/Inertia + PostgreSQL 18: neighbor reports and upvotes.",
+        result: "Public log visible and state clear without delay.",
+        stack: [
+          "Laravel 13",
+          "PHP 8.5",
+          "PostgreSQL 18",
+          "Vue 3/Inertia",
+          "Tailwind 4",
+          "Pinia",
+          "Pest 5",
+          "PWA offline",
         ],
+        links: [],
         featured: true,
+        image: {
+          src: "projects/cuadra.webp",
+          alt: "El pulso de tu cuadra panel with Water and Power status",
+        },
       },
     ],
   },
@@ -277,11 +308,11 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
   },
   writing: {
     tag: "07 — writing",
-    title: "Beyond the Hype.",
-    name: "Beyond the Hype",
+    title: "I write about agents and architecture.",
+    name: "Jorge Marquez · Substack",
     description:
       "Newsletter where I test tech before recommending it: agents, MCP and architecture, no hype.",
-    href: "https://substack.com/@jrmarquez",
+    href: "https://jrmarquez.substack.com/",
     cta: "Read on Substack",
   },
   contact: {
@@ -296,7 +327,7 @@ Specialized in agent-assisted engineering with opencode: versioned context, lock
         href: "https://www.linkedin.com/in/jorge-marquez-luna/",
       },
       { label: "GitHub", href: "https://github.com/moonslayers/" },
-      { label: "Substack", href: "https://substack.com/@jrmarquez" },
+      { label: "Substack", href: "https://jrmarquez.substack.com/" },
     ],
   },
   footer: {
