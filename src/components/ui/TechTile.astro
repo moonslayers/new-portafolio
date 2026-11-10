@@ -1,0 +1,37 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  name: string;
+  icon?: string;
+  class?: string;
+}
+
+const { name, icon, class: className = "" } = Astro.props;
+
+function getMonogram(raw: string): string {
+  const parts = raw.split(/[^A-Za-z0-9]+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0].slice(0, 1).toUpperCase();
+}
+
+const monogram = getMonogram(name);
+---
+
+<li
+  data-build
+  data-type="chip"
+  class={`tech-tile pre-build-y flex flex-col items-center gap-1 py-1 text-center ${className}`.trim()}
+>
+  <span class="tech-tile__icon grid place-items-center" aria-hidden="true">
+    {icon ? (
+      <Icon name={icon} width={22} height={22} aria-hidden="true" />
+    ) : (
+      <span class="tech-tile__fallback" aria-hidden="true">
+        {monogram}
+      </span>
+    )}
+  </span>
+  <span class="tech-tile__label mono text-center">{name}</span>
+</li>

@@ -4,6 +4,12 @@ import * as motion from "./motion";
 import * as fx from "./fx";
 import { TIMING } from "./agents";
 
+function isAbandoned(eng: Engine, el: HTMLElement): boolean {
+  if (eng.mobile || eng.reducedMotion) return false;
+  const sec = el.closest("section") as HTMLElement | null;
+  return !!sec && eng.abandonedSections.has(sec);
+}
+
 export async function buildImage(
   eng: Engine,
   el: HTMLElement,
@@ -12,6 +18,27 @@ export async function buildImage(
 ): Promise<void> {
   if (token !== eng.buildToken) {
     motion.instantReveal(eng, el);
+    return;
+  }
+  if (isAbandoned(eng, el)) {
+    el.classList.remove("pre-build", "pre-build-y");
+    el.style.opacity = "1";
+    el.style.filter = "none";
+    const img0 = el.querySelector("img");
+    if (img0) {
+      gsap.fromTo(
+        img0,
+        { opacity: 0, scale: 1.05 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+      );
+    }
+    await eng.wait(1);
+    if (token !== eng.buildToken) {
+      motion.instantReveal(eng, el);
+      return;
+    }
+    el.dataset.animated = "image-2";
+    if (window.__cursorBuilds) window.__cursorBuilds.image2++;
     return;
   }
   let openC: Cursor | null = null;
@@ -35,6 +62,29 @@ export async function buildImage(
       motion.instantReveal(eng, el);
       return;
     }
+    if (isAbandoned(eng, el)) {
+      if (openC) eng.releaseCursor(openC);
+      held = null;
+      el.classList.remove("pre-build", "pre-build-y");
+      el.style.opacity = "1";
+      el.style.filter = "none";
+      const img1 = el.querySelector("img");
+      if (img1) {
+        gsap.fromTo(
+          img1,
+          { opacity: 0, scale: 1.05 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+        );
+      }
+      await eng.wait(1);
+      if (token !== eng.buildToken) {
+        motion.instantReveal(eng, el);
+        return;
+      }
+      el.dataset.animated = "image-2";
+      if (window.__cursorBuilds) window.__cursorBuilds.image2++;
+      return;
+    }
     held = openC;
     let rect = el.getBoundingClientRect();
     let tx = rect.left + rect.width * 0.5;
@@ -52,6 +102,27 @@ export async function buildImage(
       motion.instantReveal(eng, el);
       return;
     }
+    if (isAbandoned(eng, el)) {
+      el.classList.remove("pre-build", "pre-build-y");
+      el.style.opacity = "1";
+      el.style.filter = "none";
+      const img2 = el.querySelector("img");
+      if (img2) {
+        gsap.fromTo(
+          img2,
+          { opacity: 0, scale: 1.05 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+        );
+      }
+      await eng.wait(1);
+      if (token !== eng.buildToken) {
+        motion.instantReveal(eng, el);
+        return;
+      }
+      el.dataset.animated = "image-2";
+      if (window.__cursorBuilds) window.__cursorBuilds.image2++;
+      return;
+    }
     try {
       confirmC = await eng.acquireCursor(openC ? [openC] : [], token);
     } catch {
@@ -61,6 +132,28 @@ export async function buildImage(
     if (token !== eng.buildToken) {
       if (confirmC) eng.releaseCursor(confirmC);
       motion.instantReveal(eng, el);
+      return;
+    }
+    if (isAbandoned(eng, el)) {
+      if (confirmC) eng.releaseCursor(confirmC);
+      el.classList.remove("pre-build", "pre-build-y");
+      el.style.opacity = "1";
+      el.style.filter = "none";
+      const img3 = el.querySelector("img");
+      if (img3) {
+        gsap.fromTo(
+          img3,
+          { opacity: 0, scale: 1.05 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+        );
+      }
+      await eng.wait(1);
+      if (token !== eng.buildToken) {
+        motion.instantReveal(eng, el);
+        return;
+      }
+      el.dataset.animated = "image-2";
+      if (window.__cursorBuilds) window.__cursorBuilds.image2++;
       return;
     }
     held = confirmC;
@@ -91,15 +184,10 @@ export async function buildImage(
       gsap.fromTo(
         img,
         { opacity: 0, scale: 1.05 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          ease: "power2.out",
-        },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
       );
     }
-    await eng.wait(eng.rand(80, 200));
+    await eng.wait(isAbandoned(eng, el) ? 1 : eng.rand(80, 200));
     if (token !== eng.buildToken) {
       motion.instantReveal(eng, el);
       return;
@@ -164,7 +252,60 @@ export async function buildText(
     cleanupFrame();
     motion.instantReveal(eng, el);
   };
+  const finalizeText = async () => {
+    el.classList.remove("is-typing");
+    el.style.minHeight = "";
+    el.innerHTML = originalHTML;
+    eng.savedHTML.delete(el);
+    if (el.id === "hero-title") {
+      eng.titleRevealed = true;
+      motion.syncHeroState(eng);
+    }
+    if (
+      !isAbandoned(eng, el) &&
+      eng.sectionReviewsDone < eng.sectionReviewLimit
+    ) {
+      eng.sectionReviewsDone++;
+      eng.reviewQueue.push(el);
+      eng.processReviewQueue(token).catch(() => {});
+    }
+    await eng.wait(isAbandoned(eng, el) ? 1 : eng.rand(40, 80));
+    try {
+      stopTrack();
+    } catch {}
+    if (frame && frame.isConnected) {
+      frame.remove();
+    } else if (frame) {
+      try {
+        frame.remove();
+      } catch {}
+    }
+    await eng.wait(isAbandoned(eng, el) ? 1 : eng.rand(30, 60));
+    el.dataset.animated = "text-3";
+    if (window.__cursorBuilds) window.__cursorBuilds.text3++;
+  };
   try {
+    if (isAbandoned(eng, el)) {
+      cleanupFrame();
+      el.classList.remove(
+        "pre-build",
+        "pre-build-y",
+        "is-typing",
+        "no-transition",
+      );
+      el.style.minHeight = "";
+      gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+      el.innerHTML = originalHTML;
+      eng.savedHTML.delete(el);
+      if (el.id === "hero-title") {
+        eng.titleRevealed = true;
+        motion.syncHeroState(eng);
+      }
+      await eng.wait(1);
+      el.dataset.animated = "text-3";
+      if (window.__cursorBuilds) window.__cursorBuilds.text3++;
+      return;
+    }
     try {
       openC = await eng.acquireCursor([], token);
     } catch {
@@ -174,6 +315,29 @@ export async function buildText(
     if (token !== eng.buildToken) {
       if (openC) eng.releaseCursor(openC);
       motion.instantReveal(eng, el);
+      return;
+    }
+    if (isAbandoned(eng, el)) {
+      if (openC) eng.releaseCursor(openC);
+      held = null;
+      cleanupFrame();
+      el.classList.remove(
+        "pre-build",
+        "pre-build-y",
+        "is-typing",
+        "no-transition",
+      );
+      el.style.minHeight = "";
+      gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+      el.innerHTML = originalHTML;
+      eng.savedHTML.delete(el);
+      if (el.id === "hero-title") {
+        eng.titleRevealed = true;
+        motion.syncHeroState(eng);
+      }
+      await eng.wait(1);
+      el.dataset.animated = "text-3";
+      if (window.__cursorBuilds) window.__cursorBuilds.text3++;
       return;
     }
     held = openC;
@@ -192,11 +356,50 @@ export async function buildText(
       abortWithReveal();
       return;
     }
+    if (isAbandoned(eng, el)) {
+      releaseHeld();
+      el.classList.remove("pre-build", "pre-build-y");
+      gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+      const origH0 = el.offsetHeight;
+      el.style.minHeight = origH0 + "px";
+      el.classList.add("is-typing");
+      el.innerHTML = "";
+      const txtSpan0 = document.createElement("span");
+      const caret0 = document.createElement("span");
+      caret0.className = "type-caret";
+      el.appendChild(txtSpan0);
+      el.appendChild(caret0);
+      txtSpan0.textContent = fullText;
+      await eng.wait(1);
+      await finalizeText();
+      return;
+    }
     await motion.click(eng, held);
     fx.pulse(eng, tx, ty, held.color);
     releaseHeld();
     if (token !== eng.buildToken) {
       abortWithReveal();
+      return;
+    }
+    if (isAbandoned(eng, el)) {
+      cleanupFrame();
+      el.classList.remove(
+        "pre-build",
+        "pre-build-y",
+        "is-typing",
+        "no-transition",
+      );
+      el.style.minHeight = "";
+      gsap.set(el, { opacity: 1, filter: "none", y: 0 });
+      el.innerHTML = originalHTML;
+      eng.savedHTML.delete(el);
+      if (el.id === "hero-title") {
+        eng.titleRevealed = true;
+        motion.syncHeroState(eng);
+      }
+      await eng.wait(1);
+      el.dataset.animated = "text-3";
+      if (window.__cursorBuilds) window.__cursorBuilds.text3++;
       return;
     }
     el.classList.remove("pre-build", "pre-build-y");
@@ -244,9 +447,14 @@ export async function buildText(
       );
     }
     stopTrack = motion.pinFrameToElement(eng, frame!, el, offsetX, offsetY);
-    await eng.wait(Math.max(20, frameHold * 0.7));
+    await eng.wait(isAbandoned(eng, el) ? 1 : Math.max(20, frameHold * 0.7));
     if (token !== eng.buildToken) {
       abortWithReveal();
+      return;
+    }
+    if (isAbandoned(eng, el)) {
+      txtSpan.textContent = fullText;
+      await finalizeText();
       return;
     }
     try {
@@ -258,6 +466,12 @@ export async function buildText(
     if (token !== eng.buildToken) {
       if (typeC) eng.releaseCursor(typeC);
       abortWithReveal();
+      return;
+    }
+    if (isAbandoned(eng, el)) {
+      if (typeC) eng.releaseCursor(typeC);
+      txtSpan.textContent = fullText;
+      await finalizeText();
       return;
     }
     held = typeC;
@@ -273,18 +487,34 @@ export async function buildText(
       abortWithReveal();
       return;
     }
-    await eng.wait(eng.rand(5, 20));
+    if (isAbandoned(eng, el)) {
+      txtSpan.textContent = fullText;
+      releaseHeld();
+      await finalizeText();
+      return;
+    }
+    await eng.wait(isAbandoned(eng, el) ? 1 : eng.rand(5, 20));
     for (let i = 0; i < fullText.length; i++) {
       if (token !== eng.buildToken) {
         releaseHeld();
         abortWithReveal();
         return;
       }
+      if (isAbandoned(eng, el)) {
+        const nextSpace = fullText.indexOf(" ", i);
+        const wordEnd = nextSpace === -1 ? fullText.length : nextSpace;
+        for (let k = i; k < wordEnd; k++) {
+          txtSpan.textContent = fullText.slice(0, k + 1);
+          await eng.wait(1);
+        }
+        txtSpan.textContent = fullText;
+        break;
+      }
       txtSpan.textContent = fullText.slice(0, i + 1);
       const delay = i < 25 ? earlySpeed : lateSpeed;
       await eng.wait(delay + eng.rand(0, 3));
     }
-    await eng.wait(Math.max(20, preConfirm * 0.7));
+    await eng.wait(isAbandoned(eng, el) ? 1 : Math.max(20, preConfirm * 0.7));
     if (token !== eng.buildToken) {
       releaseHeld();
       abortWithReveal();
@@ -293,6 +523,10 @@ export async function buildText(
     releaseHeld();
     if (token !== eng.buildToken) {
       abortWithReveal();
+      return;
+    }
+    if (isAbandoned(eng, el)) {
+      await finalizeText();
       return;
     }
     const excludeForConfirm: Cursor[] = [];
@@ -309,6 +543,11 @@ export async function buildText(
       abortWithReveal();
       return;
     }
+    if (isAbandoned(eng, el)) {
+      if (confirmC) eng.releaseCursor(confirmC);
+      await finalizeText();
+      return;
+    }
     held = confirmC;
     const rect2 = el.getBoundingClientRect();
     const cx = rect2.left + rect2.width * eng.rand(0.4, 0.6);
@@ -319,6 +558,11 @@ export async function buildText(
       abortWithReveal();
       return;
     }
+    if (isAbandoned(eng, el)) {
+      releaseHeld();
+      await finalizeText();
+      return;
+    }
     await motion.click(eng, held);
     fx.pulse(eng, cx, cy, held.color);
     releaseHeld();
@@ -326,33 +570,7 @@ export async function buildText(
       abortWithReveal();
       return;
     }
-    el.classList.remove("is-typing");
-    el.style.minHeight = "";
-    el.innerHTML = originalHTML;
-    eng.savedHTML.delete(el);
-    if (el.id === "hero-title") {
-      eng.titleRevealed = true;
-      motion.syncHeroState(eng);
-    }
-    if (eng.sectionReviewsDone < eng.sectionReviewLimit) {
-      eng.sectionReviewsDone++;
-      eng.reviewQueue.push(el);
-      eng.processReviewQueue(token).catch(() => {});
-    }
-    await eng.wait(eng.rand(40, 80));
-    try {
-      stopTrack();
-    } catch {}
-    if (frame && frame.isConnected) {
-      frame.remove();
-    } else if (frame) {
-      try {
-        frame.remove();
-      } catch {}
-    }
-    await eng.wait(eng.rand(30, 60));
-    el.dataset.animated = "text-3";
-    if (window.__cursorBuilds) window.__cursorBuilds.text3++;
+    await finalizeText();
   } catch {
     releaseHeld();
     abortWithReveal();

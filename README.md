@@ -76,7 +76,7 @@ El motor revisa el copy recién construido: cursor viaja, marca una frase (flag)
 - About: máximo 2 párrafos (~300–400 caracteres) + 3 KPIs; sin repetir el hero.
 - Method: 4 pasos, una línea por paso; sin duplicar “gates humanos”.
 - Projects: 6 tarjetas; cada una problema/decisión/resultado en frases cortas (~200–240 caracteres por tarjeta).
-- Stack: solo grupos y chips, sin párrafos.
+- Stack: solo grupos y tecnologías (logo + nombre); sin párrafos.
 - Experience: 3 entradas, máximo 2 bullets cortos por entrada.
 - Writing: 1–2 frases. Contact: 1–2 frases + botones.
 - Orden y tags: 01 Sobre/About, 02 Método/Method, 03 Proyectos/Projects, 04 Stack, 05 Experiencia/Experience, 06 Writing, 07 Contacto/Contact.

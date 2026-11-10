@@ -120,8 +120,6 @@ export async function runIntro(eng: Engine): Promise<void> {
     return;
   }
 
-  eng.reviewQueue = [];
-  eng.isReviewing = false;
   motion.clearFx();
   motion.cleanupFlags();
 

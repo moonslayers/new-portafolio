@@ -38,6 +38,10 @@ export interface Engine {
   sectionBuildProcessing: boolean;
   sectionBuildPending: Map<HTMLElement, Promise<void>>;
   sectionBuildResolvers: Map<HTMLElement, (() => void)[]>;
+  abandonedSections: WeakSet<HTMLElement>;
+  buildingSection: HTMLElement | null;
+  navigationSeq: number;
+  reviewGen: number;
 
   wait(ms: number): Promise<void>;
   rand(min: number, max: number): number;
@@ -61,6 +65,7 @@ export interface Engine {
   finishHeroInstantly(): void;
   goTo(idx: number): void;
   waitForScrollEnd(cb: () => void): void;
+  prioritizeSection(section: HTMLElement | null): void;
   setupNavigation(): void;
   onKey(e: KeyboardEvent): void;
   setupQueues(): void;
@@ -79,7 +84,11 @@ export interface Engine {
   upgradeSpan(span: HTMLElement, newText: string, token: number): Promise<void>;
   heroBgClick(workerIdx: number, token?: number): Promise<void>;
   runIntro(): Promise<void>;
-  acquireCursor(exclude?: Cursor[], token?: number): Promise<Cursor>;
+  acquireCursor(
+    exclude?: Cursor[],
+    token?: number,
+    reviewGen?: number,
+  ): Promise<Cursor>;
   releaseCursor(cursor: Cursor): void;
   initCursors(): void;
 }

@@ -16,6 +16,7 @@ declare global {
       fast: number;
       instant: number;
       static: number;
+      preempted: number;
     };
   }
 }
@@ -57,6 +58,10 @@ export class AgentEngine implements Engine {
   sectionBuildProcessing = false;
   sectionBuildPending = new Map<HTMLElement, Promise<void>>();
   sectionBuildResolvers = new Map<HTMLElement, (() => void)[]>();
+  abandonedSections: WeakSet<HTMLElement> = new WeakSet();
+  buildingSection: HTMLElement | null = null;
+  navigationSeq = 0;
+  reviewGen = 0;
 
   rand(min: number, max: number): number {
     return randFn(min, max);
@@ -142,6 +147,9 @@ export class AgentEngine implements Engine {
   buildSection(section: HTMLElement | null): Promise<void> {
     return sections.buildSection(this, section);
   }
+  prioritizeSection(section: HTMLElement | null): void {
+    sections.prioritizeSection(this, section);
+  }
   buildText(el: HTMLElement, token: number, workerIdx: number): Promise<void> {
     return typing.buildText(this, el, token, workerIdx);
   }
@@ -178,8 +186,12 @@ export class AgentEngine implements Engine {
   runIntro(): Promise<void> {
     return intro.runIntro(this);
   }
-  acquireCursor(exclude?: Cursor[], token?: number): Promise<Cursor> {
-    return motion.acquireCursor(this, exclude, token);
+  acquireCursor(
+    exclude?: Cursor[],
+    token?: number,
+    reviewGen?: number,
+  ): Promise<Cursor> {
+    return motion.acquireCursor(this, exclude, token, reviewGen);
   }
   releaseCursor(cursor: Cursor): void {
     motion.releaseCursor(this, cursor);
@@ -208,6 +220,7 @@ export function initAgents(): void {
     fast: 0,
     instant: 0,
     static: 0,
+    preempted: 0,
   };
 
   if (reduced) {
@@ -256,8 +269,7 @@ export function initAgents(): void {
     if (engine.heroDone) return;
     if (skipBtn && skipBtn.hidden) return;
     engine.buildToken++;
-    engine.reviewQueue = [];
-    engine.isReviewing = false;
+    review.cancelReview(engine);
     motion.clearFrames(engine);
     motion.stopAllFrameTrackers(engine);
     motion.clearFx();
@@ -294,11 +306,15 @@ export function initAgents(): void {
     sectionObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const section = entry.target as HTMLElement;
-            if (section.id === "hero") return;
-            engine.buildSection(section).catch(() => {});
-          }
+          if (!entry.isIntersecting) return;
+          const section = entry.target as HTMLElement;
+          if (section.id === "hero") return;
+          if (engine.isNavigating) return;
+          if (navigation.isScrollSettling()) return;
+          const closest = navigation.getClosestSectionIndex(engine);
+          if (closest === null) return;
+          if (engine.sections[closest] !== section) return;
+          engine.buildSection(section).catch(() => {});
         });
       },
       { threshold: 0.5, rootMargin: "-8% 0px -8% 0px" },

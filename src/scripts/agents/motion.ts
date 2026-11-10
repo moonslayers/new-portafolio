@@ -72,6 +72,7 @@ export async function acquireCursor(
   eng: Engine,
   exclude: Cursor[] = [],
   token?: number,
+  reviewGen?: number,
 ): Promise<Cursor> {
   if (
     !eng.cursorBusyCounts ||
@@ -85,6 +86,9 @@ export async function acquireCursor(
   while (true) {
     if (token !== undefined && token !== eng.buildToken) {
       throw new Error("aborted");
+    }
+    if (reviewGen !== undefined && reviewGen !== eng.reviewGen) {
+      throw new Error("review-cancelled");
     }
 
     let idx = eng.cursors.findIndex(
@@ -214,7 +218,7 @@ export function syncHeroState(eng: Engine): void {
   hero.classList.toggle("s2", !!eng.bgRevealed);
 }
 
-export function instantReveal(eng: Engine, el: HTMLElement): void {
+function baseReveal(eng: Engine, el: HTMLElement): void {
   const saved = eng.savedHTML.get(el);
   if (saved != null) {
     el.innerHTML = saved;
@@ -225,8 +229,18 @@ export function instantReveal(eng: Engine, el: HTMLElement): void {
   el.style.opacity = "1";
   el.style.filter = "none";
   el.style.transform = "translateY(0)";
+}
+
+export function instantReveal(eng: Engine, el: HTMLElement): void {
+  baseReveal(eng, el);
   el.dataset.animated = "instant";
   if (window.__cursorBuilds) window.__cursorBuilds.instant++;
+}
+
+export function preemptedReveal(eng: Engine, el: HTMLElement): void {
+  baseReveal(eng, el);
+  el.dataset.animated = "preempted";
+  if (window.__cursorBuilds) window.__cursorBuilds.preempted++;
 }
 
 export function fastReveal(eng: Engine, el: HTMLElement): void {

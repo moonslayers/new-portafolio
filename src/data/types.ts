@@ -100,7 +100,6 @@ export interface StackGroup {
 export interface Stack {
   tag?: string;
   title: string;
-  intro?: string;
   groups: StackGroup[];
 }
 
