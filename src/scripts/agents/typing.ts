@@ -10,6 +10,20 @@ function isAbandoned(eng: Engine, el: HTMLElement): boolean {
   return !!sec && eng.abandonedSections.has(sec);
 }
 
+function clampIdleTarget(
+  rect: DOMRect,
+  offsetX = 0,
+  offsetY = 0,
+): { tx: number; ty: number } {
+  return {
+    tx: Math.max(
+      28,
+      Math.min(rect.right + 4 + offsetX, window.innerWidth - 28),
+    ),
+    ty: Math.max(40, Math.min(rect.top + 6 + offsetY, window.innerHeight - 40)),
+  };
+}
+
 export async function buildImage(
   eng: Engine,
   el: HTMLElement,
@@ -86,9 +100,8 @@ export async function buildImage(
       return;
     }
     held = openC;
-    let rect = el.getBoundingClientRect();
-    let tx = rect.left + rect.width * 0.5;
-    let ty = rect.top + rect.height * 0.5;
+    const rect = el.getBoundingClientRect();
+    const { tx, ty } = clampIdleTarget(rect);
     await motion.flyTo(eng, held, tx, ty, eng.rand(0.25, 0.4));
     if (token !== eng.buildToken) {
       releaseHeld();
@@ -157,13 +170,15 @@ export async function buildImage(
       return;
     }
     held = confirmC;
-    await motion.flyTo(
-      eng,
-      held,
-      tx + eng.rand(-20, 20),
-      ty + eng.rand(-20, 20),
-      eng.rand(0.2, 0.35),
+    const imgTx = Math.max(
+      28,
+      Math.min(tx + eng.rand(0, 16), window.innerWidth - 28),
     );
+    const imgTy = Math.max(
+      40,
+      Math.min(ty + eng.rand(-8, 8), window.innerHeight - 40),
+    );
+    await motion.flyTo(eng, held, imgTx, imgTy, eng.rand(0.2, 0.35));
     if (token !== eng.buildToken) {
       releaseHeld();
       motion.instantReveal(eng, el);
@@ -341,15 +356,8 @@ export async function buildText(
       return;
     }
     held = openC;
-    let rect = el.getBoundingClientRect();
-    let tx = rect.left + rect.width * 0.5;
-    let ty = rect.top + rect.height * 0.5;
-    if (rect.height > window.innerHeight * 0.5)
-      ty = rect.top + Math.min(rect.height * 0.3, 120);
-    if (rect.width > window.innerWidth * 0.85)
-      tx = rect.left + Math.min(rect.width * 0.35, window.innerWidth * 0.4);
-    tx = Math.max(28, Math.min(tx, window.innerWidth - 28));
-    ty = Math.max(40, Math.min(ty, window.innerHeight - 40));
+    const rect = el.getBoundingClientRect();
+    const { tx, ty } = clampIdleTarget(rect);
     await motion.flyTo(eng, held, tx, ty, flyOpen);
     if (token !== eng.buildToken) {
       releaseHeld();
@@ -475,13 +483,15 @@ export async function buildText(
       return;
     }
     held = typeC;
-    await motion.flyTo(
-      eng,
-      held,
-      tx + eng.rand(20, 60),
-      ty + eng.rand(-8, 18),
-      flyType,
+    const typeTx = Math.max(
+      28,
+      Math.min(tx + eng.rand(20, 60), window.innerWidth - 28),
     );
+    const typeTy = Math.max(
+      40,
+      Math.min(ty + eng.rand(-8, 18), window.innerHeight - 40),
+    );
+    await motion.flyTo(eng, held, typeTx, typeTy, flyType);
     if (token !== eng.buildToken) {
       releaseHeld();
       abortWithReveal();
@@ -550,8 +560,11 @@ export async function buildText(
     }
     held = confirmC;
     const rect2 = el.getBoundingClientRect();
-    const cx = rect2.left + rect2.width * eng.rand(0.4, 0.6);
-    const cy = rect2.top + rect2.height * eng.rand(0.4, 0.6);
+    const { tx: cx, ty: cy } = clampIdleTarget(
+      rect2,
+      eng.rand(0, 12),
+      eng.rand(0, 12),
+    );
     await motion.flyTo(eng, held, cx, cy, flyConfirm);
     if (token !== eng.buildToken) {
       releaseHeld();

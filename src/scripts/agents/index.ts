@@ -7,7 +7,7 @@ import * as review from "./review";
 import * as sections from "./sections";
 import * as navigation from "./navigation";
 import * as intro from "./intro";
-
+import * as evasion from "./evasion";
 declare global {
   interface Window {
     __cursorBuilds?: {
@@ -262,7 +262,7 @@ export function initAgents(): void {
   engine.initCursors();
   engine.setupQueues();
   engine.setupNavigation();
-
+  evasion.setupEvasion(engine);
   let introTimer: ReturnType<typeof setTimeout> | null = null;
   const skipBtn = document.getElementById("skip-intro");
   const skipHandler = () => {
@@ -295,8 +295,10 @@ export function initAgents(): void {
       motion.clearFrames(engine);
       motion.clearFx();
       motion.cleanupFlags();
+      evasion.pauseEvasion();
     } else {
       engine.paused = false;
+      evasion.resumeEvasion();
     }
   };
   document.addEventListener("visibilitychange", onVisibility);
@@ -392,6 +394,9 @@ export function initAgents(): void {
     } catch (e) {}
     try {
       navigation.cleanupNavigation(engine);
+    } catch (e) {}
+    try {
+      evasion.cleanupEvasion();
     } catch (e) {}
     motion.stopAllFrameTrackers(engine);
     motion.clearFrames(engine);
