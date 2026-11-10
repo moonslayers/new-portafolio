@@ -102,6 +102,11 @@ section[id] {
   html {
     scroll-snap-type: none;
   }
+  section[id] {
+    height: auto;
+    min-height: 100svh;
+    overflow: clip;
+  }
 }
 
 body {

@@ -67,7 +67,7 @@ Componentes en `src/components/sections/`. Cada uno recibe `content` (o props de
 ## Densidad de contenido
 
 - Cada sección debe caber en un viewport (100svh): copy breve y escaneable.
-- `section[id]` fija `height: 100svh` con `overflow: clip`: lo que excede el viewport se recorta, no genera scroll. Al añadir contenido, mide el alto natural a 360×640 y 390×844.
+- `section[id]`: desktop (>=1024×720) mantiene `height: 100svh` + snap mandatory; en <=1023px, altura corta o `prefers-reduced-motion` usa `height: auto` + `min-height: 100svh` + `overflow-x: clip` para no recortar cards. Al añadir contenido, mide el alto natural a 360×640 y 390×844.
 - Hero: subtítulo 1–2 líneas (~160 caracteres), 5 chips.
 - About: máximo 2 párrafos (~300–400 caracteres) + 3 KPIs; sin repetir el hero.
 - Method: 4 pasos, una línea por paso; sin duplicar “gates humanos”.
