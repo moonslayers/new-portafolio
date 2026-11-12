@@ -310,11 +310,11 @@ Especialidad en ingeniería asistida por agentes con opencode: contexto versiona
   writing: {
     tag: "07 — writing",
     title: "Escribo sobre agentes y arquitectura.",
-    name: "Jorge Marquez · Substack",
+    name: "Jorge Marquez · Espacio Latente",
     description:
-      "Newsletter donde pruebo tecnología antes de recomendarla: agentes, MCP y arquitectura sin hype.",
-    href: "https://jrmarquez.substack.com/",
-    cta: "Leer en Substack",
+      "Blog donde pruebo tecnología antes de recomendarla: agentes, MCP y arquitectura sin hype.",
+    href: "https://moonslayers.github.io/blog/",
+    cta: "Leer el blog",
   },
   contact: {
     tag: "08 — contacto",
@@ -328,7 +328,7 @@ Especialidad en ingeniería asistida por agentes con opencode: contexto versiona
         href: "https://www.linkedin.com/in/jorge-marquez-luna/",
       },
       { label: "GitHub", href: "https://github.com/moonslayers/" },
-      { label: "Substack", href: "https://jrmarquez.substack.com/" },
+      { label: "Blog", href: "https://moonslayers.github.io/blog/" },
     ],
   },
   footer: {
